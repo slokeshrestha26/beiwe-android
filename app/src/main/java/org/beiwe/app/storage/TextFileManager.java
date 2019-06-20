@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.GyroscopeListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -22,6 +23,7 @@ import org.beiwe.app.survey.AudioRecorderActivity;
 import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
 import org.beiwe.app.survey.SurveyAnswersRecorder;
 import org.beiwe.app.survey.SurveyTimingsRecorder;
+import org.w3c.dom.Text;
 
 import android.content.Context;
 import android.util.Log;
@@ -35,7 +37,7 @@ import android.widget.Toast;
  * The Reason for this construction is to construct a file write system where there is only ever a
  * single pointer to each file type, and that these files are never overwritten, written to asynchronously,
  * or left accidentally empty.
- * The files handled here are the GPSFile, accelFile, powerStateLog, audioSurveyInfo, callLog, textsLog, surveyTimings,
+ * The files handled here are the GPSFile, accelFile, gyroFile, powerStateLog, audioSurveyInfo, callLog, textsLog, surveyTimings,
  * currentDailyQuestions, currentWeeklyQuestions, deviceData, and debugLogFile.
  * On construction you provide a boolean flag ("persistent").  Persistent files do not get overwritten on application start.
  * To access a file use the following construction: TextFileManager.getXXXFile()
@@ -48,6 +50,7 @@ public class TextFileManager {
 	//Static instances of the individual FileManager objects.
 	private static TextFileManager GPSFile;
 	private static TextFileManager accelFile;
+	private static TextFileManager gyroFile;
 	private static TextFileManager powerStateLog;
 	private static TextFileManager callLog;
 	private static TextFileManager textsLog;
@@ -72,6 +75,7 @@ public class TextFileManager {
 	// These are all simple and nearly identical, so they are squished into one-liners.
 	// checkAvailableWithTimeout throws an error and the app restarts if the TextFile is unavailable.
 	public static TextFileManager getAccelFile() { checkAvailableWithTimeout("accelFile"); return accelFile; }
+	public static TextFileManager getGyroFile()	 { checkAvailableWithTimeout("gyroFile"); return gyroFile; }
 	public static TextFileManager getGPSFile() { checkAvailableWithTimeout("GPSFile"); return GPSFile; }
 	public static TextFileManager getPowerStateFile() { checkAvailableWithTimeout("powerStateLog"); return powerStateLog; }
 	public static TextFileManager getCallLogFile() { checkAvailableWithTimeout("callLog"); return callLog; }
@@ -88,6 +92,7 @@ public class TextFileManager {
 	private static Boolean checkTextFileAvailable(String thing) {
 		//the check for availability is whether the appropriate variable is allocated
 		if (thing.equals("accelFile") ) { return (accelFile != null); }
+		if (thing.equals("gyroFile") )	{ return (gyroFile != null); }
 		if (thing.equals("GPSFile") ) { return (GPSFile != null); }
 		if (thing.equals("powerStateLog") ) { return (powerStateLog != null); }
 		if (thing.equals("callLog") ) { return (callLog != null); }
@@ -152,6 +157,7 @@ public class TextFileManager {
 		// Regularly/periodically-created files
 		GPSFile = new TextFileManager(appContext, "gps", GPSListener.header, false, false, true, !PersistentData.getGpsEnabled());
 		accelFile = new TextFileManager(appContext, "accel", AccelerometerListener.header, false, false, true, !PersistentData.getAccelerometerEnabled());
+		gyroFile = new TextFileManager(appContext, "gyro", GyroscopeListener.header, false, false, true, !PersistentData.getGyroscopeEnabled());
 		textsLog = new TextFileManager(appContext, "textsLog", SmsSentLogger.header, false, false, true, !PersistentData.getTextsEnabled());
 		callLog = new TextFileManager(appContext, "callLog", CallLogger.header, false, false, true, !PersistentData.getCallsEnabled());
 		powerStateLog = new TextFileManager(appContext, "powerState", PowerStateListener.header, false, false, true, !PersistentData.getPowerStateEnabled());
@@ -378,6 +384,7 @@ public class TextFileManager {
 //		Log.d("TextFileManager.java", "makeNewFilesForEverything() called");
 		GPSFile.newFile();
 		accelFile.newFile();
+		gyroFile.newFile();
 		powerStateLog.newFile();
 		callLog.newFile();
 		textsLog.newFile();
@@ -405,6 +412,7 @@ public class TextFileManager {
 		// These files are currently being written to, so they shouldn't be uploaded now
 		files.remove(TextFileManager.getGPSFile().fileName);
 		files.remove(TextFileManager.getAccelFile().fileName);
+		files.remove(TextFileManager.getGyroFile().fileName);
 		files.remove(TextFileManager.getPowerStateFile().fileName);
 		files.remove(TextFileManager.getCallLogFile().fileName);
 		files.remove(TextFileManager.getTextsLogFile().fileName);

@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.GyroscopeListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -47,6 +48,7 @@ public class BackgroundService extends Service {
 	public GPSListener gpsListener;
 	public PowerStateListener powerStateListener;
 	public AccelerometerListener accelerometerListener;
+	public GyroscopeListener gyroscopeListener;
 	public BluetoothListener bluetoothListener;
 	public static Timer timer;
 	
@@ -85,6 +87,7 @@ public class BackgroundService extends Service {
 		gpsListener = new GPSListener(appContext); // Permissions are checked in the broadcast receiver
 		WifiListener.initialize( appContext );
 		if ( PersistentData.getAccelerometerEnabled() ) { accelerometerListener = new AccelerometerListener( appContext ); }
+		if ( PersistentData.getGyroscopeEnabled() ) { gyroscopeListener = new GyroscopeListener( appContext ); }
 		//Bluetooth, wifi, gps, calls, and texts need permissions
 		if ( PermissionHandler.confirmBluetooth(appContext)) { startBluetooth(); }
 //		if ( PermissionHandler.confirmWifi(appContext) ) { WifiListener.initialize( appContext ); }
@@ -175,7 +178,9 @@ public class BackgroundService extends Service {
 		localHandle.timer = new Timer(localHandle);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction( appContext.getString( R.string.turn_accelerometer_off ) );
+		filter.addAction(appContext.getString( R.string.turn_gyroscope_off ));
 		filter.addAction( appContext.getString( R.string.turn_accelerometer_on ) );
+		filter.addAction( appContext.getString( R.string.turn_gyroscope_on ) );
 		filter.addAction( appContext.getString( R.string.turn_bluetooth_off ) );
 		filter.addAction( appContext.getString( R.string.turn_bluetooth_on ) );
 		filter.addAction( appContext.getString( R.string.turn_gps_off ) );
@@ -212,6 +217,17 @@ public class BackgroundService extends Service {
 			else if(timer.alarmIsSet(Timer.accelerometerOffIntent)
 					&& PersistentData.getMostRecentAlarmTime(getString( R.string.turn_accelerometer_on )) - PersistentData.getAccelerometerOffDurationMilliseconds() + 1000 > now ) {
 				accelerometerListener.turn_on();
+			}
+		}
+		if (PersistentData.getGyroscopeEnabled()) {  //if gyroscope data recording is enabled and...
+			if(PersistentData.getMostRecentAlarmTime( getString(R.string.turn_gyroscope_on )) < now || //the most recent gyroscope alarm time is in the past, or...
+					!timer.alarmIsSet(Timer.gyroscopeOnIntent) ) { //there is no scheduled gyroscope-on timer.
+				sendBroadcast(Timer.gyroscopeOnIntent); // start gyroscope timers (immediately runs gyroscope recording session).
+				//note: when there is no gyroscope-off timer that means we are in-between scans.  This state is fine, so we don't check for it.
+			}
+			else if(timer.alarmIsSet(Timer.gyroscopeOffIntent)
+					&& PersistentData.getMostRecentAlarmTime(getString( R.string.turn_gyroscope_on )) - PersistentData.getGyroscopeOffDurationMilliseconds() + 1000 > now ) {
+				gyroscopeListener.turn_on();
 			}
 		}
 		if ( PersistentData.getMostRecentAlarmTime(getString( R.string.turn_gps_on )) < now || !timer.alarmIsSet(Timer.gpsOnIntent) ) {
@@ -292,6 +308,9 @@ public class BackgroundService extends Service {
 			if (broadcastAction.equals( appContext.getString(R.string.turn_accelerometer_off) ) ) {
 				accelerometerListener.turn_off();
 				return; }
+			if (broadcastAction.equals( appContext.getString(R.string.turn_gyroscope_off) ) ) {
+				gyroscopeListener.turn_off();
+				return; }
 			if (broadcastAction.equals( appContext.getString(R.string.turn_gps_off) ) ) {
 				if ( PermissionHandler.checkGpsPermissions(appContext) ) { gpsListener.turn_off(); }
 				return; }
@@ -307,6 +326,17 @@ public class BackgroundService extends Service {
 				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash. 
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_accelerometer_on), alarmTime );
 				return; }
+			//Gyroscope. Almost identical logic to accelerometer above.
+			if (broadcastAction.equals( appContext.getString(R.string.turn_gyroscope_on) ) ) {
+				if ( !PersistentData.getGyroscopeEnabled() || !gyroscopeListener.exists ) { Log.e("BackgroundService Listener", "invalid Gyroscope on received"); return; }
+				gyroscopeListener.turn_on();
+				//start both the sensor-off-action timer, and the next sensor-on-timer.
+				timer.setupExactSingleAlarm(PersistentData.getGyroscopeOnDurationMilliseconds(), Timer.gyroscopeOffIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGyroscopeOffDurationMilliseconds() + PersistentData.getGyroscopeOnDurationMilliseconds(), Timer.gyroscopeOnIntent);
+				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash.
+				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gyroscope_on), alarmTime );
+				return;
+			}
 			//GPS. Almost identical logic to accelerometer above.
 			if (broadcastAction.equals( appContext.getString(R.string.turn_gps_on) ) ) {
 				if ( !PersistentData.getGpsEnabled() ) { Log.e("BackgroundService Listener", "invalid GPS on received"); return; }
@@ -421,7 +451,7 @@ public class BackgroundService extends Service {
 	##############################################################################*/
 	
 	/** The BackgroundService is meant to be all the time, so we return START_STICKY */
-	@Override public int onStartCommand(Intent intent, int flags, int startId){ //Log.d("BackroundService onStartCommand", "started with flag " + flags );
+	@Override public int onStartCommand(Intent intent, int flags, int startId){ //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
 		return START_STICKY;
 		//we are testing out this restarting behavior for the service.  It is entirely unclear that this will have any observable effect.

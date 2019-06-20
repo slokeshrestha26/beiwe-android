@@ -40,6 +40,7 @@ public class PersistentData {
 	private static final String PASSWORD_RESET_NUMBER_KEY = "reset_number";
 
 	private static final String ACCELEROMETER = "accelerometer";
+	private static final String GYROSCOPE = "gyroscope";
 	private static final String GPS = "gps";
 	private static final String CALLS = "calls";
 	private static final String TEXTS = "texts";
@@ -50,6 +51,8 @@ public class PersistentData {
 
 	private static final String ACCELEROMETER_OFF_DURATION_SECONDS = "accelerometer_off_duration_seconds";
 	private static final String ACCELEROMETER_ON_DURATION_SECONDS = "accelerometer_on_duration_seconds";
+	private static final String GYROSCOPE_ON_DURATION_SECONDS = "gyroscope_on_duration_seconds";
+	private static final String GYROSCOPE_OFF_DURATION_SECONDS = "gyroscope_off_duration_seconds";
 	private static final String BLUETOOTH_ON_DURATION_SECONDS = "bluetooth_on_duration_seconds";
 	private static final String BLUETOOTH_TOTAL_DURATION_SECONDS = "bluetooth_total_duration_seconds";
 	private static final String BLUETOOTH_GLOBAL_OFFSET_SECONDS = "bluetooth_global_offset_seconds";
@@ -149,6 +152,7 @@ public class PersistentData {
 	#####################################################################################*/
 
 	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER, false); }
+	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE, false); }
 	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS, false); }
 	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS, false); }
 	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS, false); }
@@ -159,6 +163,9 @@ public class PersistentData {
 	
 	public static void setAccelerometerEnabled(boolean enabled) {
 		editor.putBoolean(ACCELEROMETER, enabled);
+		editor.commit(); }
+	public static void setGyroscopeEnabled(boolean enabled) {
+		editor.putBoolean(GYROSCOPE, enabled);
 		editor.commit(); }
 	public static void setGpsEnabled(boolean enabled) {
 		editor.putBoolean(GPS, enabled);
@@ -189,6 +196,8 @@ public class PersistentData {
 	// Default timings (only used if app doesn't download custom timings)
 	private static final long DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION = 10;
 	private static final long DEFAULT_ACCELEROMETER_ON_DURATION = 10 * 60;
+	private static final long DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION = 10;
+	private static final long DEFAULT_GYROSCOPE_ON_DURATION = 10 * 60;
 	private static final long DEFAULT_BLUETOOTH_ON_DURATION = 1 * 60;
 	private static final long DEFAULT_BLUETOOTH_TOTAL_DURATION = 5 * 60;
 	private static final long DEFAULT_BLUETOOTH_GLOBAL_OFFSET = 0 * 60;
@@ -201,6 +210,8 @@ public class PersistentData {
 	private static final long DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH = 4 * 60;
 	private static final long DEFAULT_WIFI_LOG_FREQUENCY = 5 * 60;
 	
+	public static long getGyroscopeOffDurationMilliseconds() { return 1000L * pref.getLong(GYROSCOPE_OFF_DURATION_SECONDS, DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION); }
+	public static long getGyroscopeOnDurationMilliseconds() { return 1000L * pref.getLong(GYROSCOPE_ON_DURATION_SECONDS, DEFAULT_GYROSCOPE_ON_DURATION); }
 	public static long getAccelerometerOffDurationMilliseconds() { return 1000L * pref.getLong(ACCELEROMETER_OFF_DURATION_SECONDS, DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION); }
 	public static long getAccelerometerOnDurationMilliseconds() { return 1000L * pref.getLong(ACCELEROMETER_ON_DURATION_SECONDS, DEFAULT_ACCELEROMETER_ON_DURATION); }
 	public static long getBluetoothOnDurationMilliseconds() { return 1000L * pref.getLong(BLUETOOTH_ON_DURATION_SECONDS, DEFAULT_BLUETOOTH_ON_DURATION); }
@@ -220,6 +231,12 @@ public class PersistentData {
 		editor.commit(); }
 	public static void setAccelerometerOnDurationSeconds(long seconds) {
 		editor.putLong(ACCELEROMETER_ON_DURATION_SECONDS, seconds);
+		editor.commit(); }
+	public static void setGyroscopeOffDurationSeconds(long seconds) {
+		editor.putLong(GYROSCOPE_OFF_DURATION_SECONDS, seconds);
+		editor.commit(); }
+	public static void setGyroscopeOnDurationSeconds(long seconds) {
+		editor.putLong(GYROSCOPE_ON_DURATION_SECONDS, seconds);
 		editor.commit(); }
 	public static void setBluetoothOnDurationSeconds(long seconds) {
 		editor.putLong(BLUETOOTH_ON_DURATION_SECONDS, seconds);
@@ -256,7 +273,7 @@ public class PersistentData {
 		editor.commit(); }
 
 	
-	//accelerometer, bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
+	//accelerometer, gyroscope bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
 	public static void setMostRecentAlarmTime(String identifier, long time) {
 		editor.putLong(identifier + "-prior_alarm", time);
 		editor.commit(); }

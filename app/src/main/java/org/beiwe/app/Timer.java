@@ -25,6 +25,8 @@ public class Timer {
 	// Control Message Intents
 	public static Intent accelerometerOffIntent;
 	public static Intent accelerometerOnIntent;
+	public static Intent gyroscopeOffIntent;
+	public static Intent gyroscopeOnIntent;
 	public static Intent bluetoothOffIntent;
 	public static Intent bluetoothOnIntent;
 	public static Intent dailySurveyIntent;
@@ -64,6 +66,8 @@ public class Timer {
 		// double alarm intents
 		accelerometerOffIntent = setupIntent( appContext.getString(R.string.turn_accelerometer_off) );
 		accelerometerOnIntent = setupIntent( appContext.getString(R.string.turn_accelerometer_on) );
+		gyroscopeOffIntent = setupIntent( appContext.getString(R.string.turn_gyroscope_off) );
+		gyroscopeOnIntent = setupIntent( appContext.getString(R.string.turn_gyroscope_on) );
 		bluetoothOffIntent = setupIntent( appContext.getString(R.string.turn_bluetooth_off) );
 		bluetoothOnIntent = setupIntent( appContext.getString(R.string.turn_bluetooth_on) );
 		gpsOffIntent = setupIntent( appContext.getString(R.string.turn_gps_off) );

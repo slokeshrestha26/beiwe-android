@@ -109,7 +109,19 @@
 	        android:layout_height="wrap_content"
 	        android:onClick="accelerometerOff"
 	        android:text="Stop Accelerometer Recording" />
+        <Button
+            android:id="@+id/buttonEnableGyroscope"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="gyroscopeOn"
+            android:text="Trigger Gyroscope Recording" />
 
+        <Button
+            android:id="@+id/buttonTDisableGyroscope"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="gyroscopeOff"
+            android:text="Stop Gyroscope Recording" />
 	    <Button
 	        android:id="@+id/buttonWifiScan"
 	        android:layout_width="wrap_content"

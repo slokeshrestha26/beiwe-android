@@ -23,7 +23,8 @@ public class AccelerometerListener implements SensorEventListener{
 	private Boolean enabled = null;
 	
 	private String accuracy;
-	
+
+	/** Returns a boolean of whether the accelerometer is recording */
 	public Boolean check_status(){ 
 		if (exists) return enabled;
 		return false; }

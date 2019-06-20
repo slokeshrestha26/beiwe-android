@@ -8,6 +8,8 @@ public class SetDeviceSettings {
 		// Write data stream booleans
 		Boolean accelerometerEnabled = deviceSettings.getBoolean("accelerometer");
 		PersistentData.setAccelerometerEnabled(accelerometerEnabled);
+		Boolean gyroscopeEnabled = deviceSettings.getBoolean("gyroscope");
+		PersistentData.setGyroscopeEnabled(gyroscopeEnabled);
 		Boolean gpsEnabled = deviceSettings.getBoolean("gps");
 		PersistentData.setGpsEnabled(gpsEnabled);
 		Boolean callsEnabled = deviceSettings.getBoolean("calls");
@@ -31,6 +33,10 @@ public class SetDeviceSettings {
 		PersistentData.setAccelerometerOffDurationSeconds(accelerometerOffDuration);
 		int accelerometerOnDuration = deviceSettings.getInt("accelerometer_on_duration_seconds");
 		PersistentData.setAccelerometerOnDurationSeconds(accelerometerOnDuration);
+		int gyroscopeOffDuration = deviceSettings.getInt("gyroscope_off_duration_seconds");
+		PersistentData.setAccelerometerOffDurationSeconds(gyroscopeOffDuration);
+		int gyroscopeOnDuration = deviceSettings.getInt("gyroscope_on_duration_seconds");
+		PersistentData.setAccelerometerOnDurationSeconds(gyroscopeOnDuration);
 		int bluetoothOnDurationSeconds = deviceSettings.getInt("bluetooth_on_duration_seconds");
 		PersistentData.setBluetoothOnDurationSeconds(bluetoothOnDurationSeconds);
 		int bluetoothTotalDurationSeconds = deviceSettings.getInt("bluetooth_total_duration_seconds");
