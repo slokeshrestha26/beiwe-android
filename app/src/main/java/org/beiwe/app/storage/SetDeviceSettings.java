@@ -8,7 +8,7 @@ public class SetDeviceSettings {
 		// Write data stream booleans
 		Boolean accelerometerEnabled = deviceSettings.getBoolean("accelerometer");
 		PersistentData.setAccelerometerEnabled(accelerometerEnabled);
-		Boolean gyroscopeEnabled = deviceSettings.getBoolean("gyroscope");
+		Boolean gyroscopeEnabled = deviceSettings.getBoolean("gyro");
 		PersistentData.setGyroscopeEnabled(gyroscopeEnabled);
 		Boolean gpsEnabled = deviceSettings.getBoolean("gps");
 		PersistentData.setGpsEnabled(gpsEnabled);
