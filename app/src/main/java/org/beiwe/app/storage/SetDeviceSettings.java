@@ -57,7 +57,12 @@ public class SetDeviceSettings {
 		PersistentData.setUploadDataFilesFrequencySeconds(uploadDataFilesFrequencySeconds);
 		int voiceRecordingMaxTimeLengthSeconds = deviceSettings.getInt("voice_recording_max_time_length_seconds");
 		PersistentData.setVoiceRecordingMaxTimeLengthSeconds(voiceRecordingMaxTimeLengthSeconds);
+
+		// wifi periodicity needs to have a minimum because it creates a new file every week
 		int wifiLogFrequencySeconds = deviceSettings.getInt("wifi_log_frequency_seconds");
+		if (wifiLogFrequencySeconds < 10){
+			wifiLogFrequencySeconds = 10;
+		}
 		PersistentData.setWifiLogFrequencySeconds(wifiLogFrequencySeconds);
 		
 		// Write text strings
