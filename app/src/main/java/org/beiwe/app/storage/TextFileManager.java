@@ -23,7 +23,6 @@ import org.beiwe.app.survey.AudioRecorderActivity;
 import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
 import org.beiwe.app.survey.SurveyAnswersRecorder;
 import org.beiwe.app.survey.SurveyTimingsRecorder;
-import org.w3c.dom.Text;
 
 import android.content.Context;
 import android.util.Log;

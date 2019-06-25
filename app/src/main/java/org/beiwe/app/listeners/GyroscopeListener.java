@@ -24,7 +24,7 @@ public class GyroscopeListener implements SensorEventListener {
 
     private String accuracy;
 
-    /** Returns a boolean of whether the accelerometer is recording */
+    /** Returns a boolean of whether the Gyroscope is recording */
     public Boolean check_status(){
         if (exists) return enabled;
         return false; }
@@ -44,7 +44,7 @@ public class GyroscopeListener implements SensorEventListener {
             enabled = false;
             this.gyroSensorManager = (SensorManager) appContext.getSystemService(Context.SENSOR_SERVICE);
             if (this.gyroSensorManager ==  null ) {
-                Log.e("Accelerometer Problems", "gyroSensorManager does not exist? (1)" );
+                Log.e("Gyroscope Problems", "gyroSensorManager does not exist? (1)" );
                 TextFileManager.getDebugLogFile().writeEncrypted("gyroSensorManager does not exist? (1)");
                 exists = false;	}
 
