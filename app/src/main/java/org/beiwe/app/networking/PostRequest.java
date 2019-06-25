@@ -201,7 +201,11 @@ public class PostRequest {
 				writeKey(key, response);
 				JSONObject deviceSettings = responseJSON.getJSONObject("device_settings");
 				SetDeviceSettings.writeDeviceSettings(deviceSettings);
-			} catch (JSONException e) { CrashHandler.writeCrashlog(e, appContext); }
+			} catch (JSONException e) {
+				// this gets called once per app lifecycle, print the error because this is a pain to debug.
+				e.printStackTrace();
+				CrashHandler.writeCrashlog(e, appContext); 
+			}
 		}
 		connection.disconnect();
 		return response;

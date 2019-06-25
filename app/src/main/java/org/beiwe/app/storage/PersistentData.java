@@ -51,8 +51,8 @@ public class PersistentData {
 
 	private static final String ACCELEROMETER_OFF_DURATION_SECONDS = "accelerometer_off_duration_seconds";
 	private static final String ACCELEROMETER_ON_DURATION_SECONDS = "accelerometer_on_duration_seconds";
-	private static final String GYROSCOPE_ON_DURATION_SECONDS = "gyroscope_on_duration_seconds";
-	private static final String GYROSCOPE_OFF_DURATION_SECONDS = "gyroscope_off_duration_seconds";
+	private static final String GYROSCOPE_ON_DURATION_SECONDS = "gyro_on_duration_seconds";
+	private static final String GYROSCOPE_OFF_DURATION_SECONDS = "gyro_off_duration_seconds";
 	private static final String BLUETOOTH_ON_DURATION_SECONDS = "bluetooth_on_duration_seconds";
 	private static final String BLUETOOTH_TOTAL_DURATION_SECONDS = "bluetooth_total_duration_seconds";
 	private static final String BLUETOOTH_GLOBAL_OFFSET_SECONDS = "bluetooth_global_offset_seconds";

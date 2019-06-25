@@ -33,9 +33,9 @@ public class SetDeviceSettings {
 		PersistentData.setAccelerometerOffDurationSeconds(accelerometerOffDuration);
 		int accelerometerOnDuration = deviceSettings.getInt("accelerometer_on_duration_seconds");
 		PersistentData.setAccelerometerOnDurationSeconds(accelerometerOnDuration);
-		int gyroscopeOffDuration = deviceSettings.getInt("gyroscope_off_duration_seconds");
+		int gyroscopeOffDuration = deviceSettings.getInt("gyro_off_duration_seconds");
 		PersistentData.setGyroscopeOffDurationSeconds(gyroscopeOffDuration);
-		int gyroscopeOnDuration = deviceSettings.getInt("gyroscope_on_duration_seconds");
+		int gyroscopeOnDuration = deviceSettings.getInt("gyro_on_duration_seconds");
 		PersistentData.setGyroscopeOnDurationSeconds(gyroscopeOnDuration);
 		int bluetoothOnDurationSeconds = deviceSettings.getInt("bluetooth_on_duration_seconds");
 		PersistentData.setBluetoothOnDurationSeconds(bluetoothOnDurationSeconds);
