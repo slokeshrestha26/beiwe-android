@@ -368,6 +368,7 @@ public class PersistentData {
 	public static String getSurveyType(String surveyId){ return pref.getString(surveyId + "-type", null); }
 	public static String getSurveySettings(String surveyId){ return pref.getString(surveyId + "-settings", null); }
 	public static Boolean getSurveyNotificationState( String surveyId) { return pref.getBoolean(surveyId + "-notificationState", false ); }
+	public static Boolean getSurveyAlwaysPresent(String surveyId){ return pref.getBoolean(surveyId + "-always_available", false); }
 	public static long getMostRecentSurveyAlarmTime(String surveyId) { return pref.getLong( surveyId + "-prior_alarm", MAX_LONG); }
 	
 	public static void createSurveyData(String surveyId, String content, String timings, String type, String settings){
@@ -389,6 +390,10 @@ public class PersistentData {
 	public static void setSurveySettings(String surveyId, String settings){
 //		Log.d("presistent data", "setting survey settings: " + settings);
 		editor.putString(surveyId + "-settings", settings);
+		editor.commit();
+	}
+	public static void setSurveyAlwaysPresent(String surveyId, Boolean bool ){
+		editor.putBoolean(surveyId + "-always_avaliable", bool );
 		editor.commit();
 	}
 	
