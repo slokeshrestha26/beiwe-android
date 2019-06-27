@@ -71,7 +71,8 @@ public class DeviceInfo {
 	 * 35: app version 2.4.4, Allow Markdown URL links to be clickable
 	 * 37: app version 2.5.0, googlePlayStore build variants no longer ask for SMS/MMS and Call Log
 	 *      permissions because of Google policy changes effective March 9th, 2019.  onnelaLabServer
-	 *      build variants still collect SMS/MMS and Call Log data.  */
+	 *      build variants still collect SMS/MMS and Call Log data.
+	 * 38: app version 2.5.1, Adds gyroscope sensor. Sets minimum WiFi log frequency.  */
 
 	private static String androidID;
 	private static String bluetoothMAC;
