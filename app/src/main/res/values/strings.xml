@@ -206,4 +206,7 @@
     <string name="numberQuestions">number_of_random_questions</string>
     <string name="triggeredSurvey">trigger_on_first_download</string>
 
+    <string name="permasurvey">permasurvey</string>
+
+
 </resources>

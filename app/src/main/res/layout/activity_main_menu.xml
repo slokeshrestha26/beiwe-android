@@ -46,8 +46,86 @@
             android:onClick="callClinician"
             android:layout_gravity="center"
             android:text="@string/default_call_clinician_text" />
+
         <Button
-            android:id="@+id/permSurvey"
+            android:id="@+id/permSurvey0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey" />
+        <Button
+            android:id="@+id/permSurvey11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
