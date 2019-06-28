@@ -49,6 +49,7 @@
 
         <Button
             android:id="@+id/permSurvey0"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -56,6 +57,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey1"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -63,6 +65,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey2"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -70,6 +73,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey3"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -77,6 +81,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey4"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -84,6 +89,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey5"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -91,6 +97,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey6"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -98,6 +105,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey7"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -105,6 +113,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey8"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -112,6 +121,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey9"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -119,6 +129,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey10"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
@@ -126,6 +137,7 @@
             android:text= "@string/perm_survey" />
         <Button
             android:id="@+id/permSurvey11"
+            android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
