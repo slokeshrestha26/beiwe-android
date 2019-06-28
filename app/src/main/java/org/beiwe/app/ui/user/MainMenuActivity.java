@@ -48,7 +48,9 @@ public class MainMenuActivity extends SessionActivity {
 		if (permSurveyIds.size() !=0 ) {
 			for (int i = 0; i < permSurveyIds.size(); i++) {
 				Button button = (Button) findViewById(getResources().getIdentifier("permSurvey" + i, "id", this.getPackageName()));
-
+				if (PersistentData.getSurveyType(permSurveyIds.get(i)).equals("audio_survey")){
+					button.setText(R.string.permaaudiosurvey);
+				}
 				button.setTag(R.string.permasurvey, permSurveyIds.get(i));
 				button.setVisibility(View.VISIBLE);
 			}
