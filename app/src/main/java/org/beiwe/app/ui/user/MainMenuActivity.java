@@ -1,18 +1,17 @@
 package org.beiwe.app.ui.user;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
 import org.beiwe.app.R;
 import org.beiwe.app.session.SessionActivity;
 import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
 import org.beiwe.app.survey.SurveyActivity;
+import org.beiwe.app.ui.utils.SurveyNotifications;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
 import java.util.ArrayList;
 
@@ -35,7 +34,6 @@ public class MainMenuActivity extends SessionActivity {
 		}
 
 		ArrayList<String> permSurveyIds = new ArrayList<String>();
-		boolean always_enabled;
 		for (String surveyId : PersistentData.getSurveyIds() ){
 			try {
 				JSONObject surveySettings = new JSONObject(PersistentData.getSurveySettings(surveyId));
@@ -43,7 +41,7 @@ public class MainMenuActivity extends SessionActivity {
 					permSurveyIds.add(surveyId);
 				}
 			}
-			catch (JSONException e) {}
+			catch (JSONException e) {e.printStackTrace();}
 		}
 		if (permSurveyIds.size() !=0 ) {
 			for (int i = 0; i < permSurveyIds.size(); i++) {
@@ -61,9 +59,16 @@ public class MainMenuActivity extends SessionActivity {
 	############################## Buttons ####################################
 	#########################################################################*/
 	public void displaySurvey(View view) {
-		Intent activityIntent = new Intent(getApplicationContext(), SurveyActivity.class);
+		Intent activityIntent;
+		String surveyId = (String) view.getTag(R.string.permasurvey);
+
+		if (PersistentData.getSurveyType(surveyId).equals("audio_survey")){
+			activityIntent = new Intent(getApplicationContext(), SurveyNotifications.getAudioSurveyClass(surveyId));
+		} else {
+			activityIntent = new Intent(getApplicationContext(), SurveyActivity.class);
+		}
 		activityIntent.setAction( getApplicationContext().getString(R.string.start_tracking_survey) );
-		activityIntent.putExtra("surveyId", (String) view.getTag(R.string.permasurvey));
+		activityIntent.putExtra("surveyId", surveyId);
 		activityIntent.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 		startActivity(activityIntent);
 	}
