@@ -50,25 +50,34 @@ android {
             debuggable true
         }
     }
-    flavorDimensions "customizableServerUrl"
+    flavorDimensions "version"
     productFlavors {
+        onnelaLabServer {
+            dimension "version"
+            manifestPlaceholders = [appName: "Beiwe"]
+            buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "false")
+            buildConfigField("boolean", "READ_TEXT_AND_CALL_LOGS", 'true')
+        }
         googlePlayStore {
-            dimension "customizableServerUrl"
+            dimension "version"
             manifestPlaceholders = [appName: "Beiwe2"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", 'true')
             buildConfigField("boolean", "READ_TEXT_AND_CALL_LOGS", 'false')
         }
-        onnelaLabServer {
-            dimension "customizableServerUrl"
+        commStatsCustomUrl {
+            dimension "version"
             manifestPlaceholders = [appName: "Beiwe"]
-            buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "false")
+            buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "true")
             buildConfigField("boolean", "READ_TEXT_AND_CALL_LOGS", 'true')
         }
     }
     useLibrary "org.apache.http.legacy"
     sourceSets {
         onnelaLabServer {
-            manifest.srcFile 'src/onnelaLabServer/AndroidManifest.xml'
+            manifest.srcFile 'src/commStatsCustomUrl/AndroidManifest.xml'
+        }
+        commStatsCustomUrl {
+            manifest.srcFile 'src/textsAndCallsStats/AndroidManifest.xml'
         }
     }
 }
