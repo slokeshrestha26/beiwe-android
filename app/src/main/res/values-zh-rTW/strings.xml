@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Reference strings in Java code using a line like this:
+    appContext.getResources().getString(R.string.name_of_string) -->
+
+    <!-- General Strings -->
+    <string name="action_settings">設定</string>
+
+    <!-- Permissions Strings -->
+    <string name="permission_registration_read_sms_alert">為了註冊研究計畫，Beiwe需要連結至您設備的通訊功能，若您看到Beiwe與裝置通訊功能的連結要求，請按下\”允許\”。然而根據研究畫書，您可以在完成軟體註冊後，取消此功能之連結。</string>
+    <string name="permission_registration_actually_need_sms_alert">Beiwe需要與裝置的通訊功能連結，但是您似乎尚未開啟Beiwe與裝置通訊功能之連結，您可能需要透過手動方式啟動通訊功能與Beiwe的連結。</string>
+    <string name="power_management_exception_alert">您將允許Beiwe於您的設備背景當中執行</string>
+    <string name="cant_make_phone_call_alert_title">Beiwe能夠/禁止進行通話功能 </string>
+    <string name="cant_make_a_phone_call_permissions_alert">為了能使通訊功能與Beiwe連結，你必須至設定-> Beiwe 當中開啟\’通訊\’的允許，或是您可以透過開啟Beiwe撥打電話</string>
+
+    <!-- Recording Options Strings -->
+    <string name="title_activity_audio_recorder">紀錄語音訊息</string>
+    <string name="button_play">播放紀錄</string>
+    <string name="button_record">紀錄</string>
+
+    <!-- Debug Menu Strings -->
+    <string name="title_activity_survey">問卷</string>
+
+    <!-- Error Messages -->
+    <string name="question_error_text">若您接收到此訊息，代表軟體發生錯誤。請與研究團隊聯繫，並告知研究團隊該問卷具有錯誤訊息</string>
+    <string name="invalid_device">您所使用的設備與Beiwe的規格不相符合，為了避免系統操作上的錯誤請勿安裝Beiwe</string>
+    <string name="invalid_encryption_key">系統的加密作業出現了錯誤，請與Beiwe開發團隊聯繫</string>
+    <string name="http_message_1">伺服器安裝錯誤，請與研究團隊聯繫，錯誤代碼:1</string>
+    <string name="http_message_400">該設備無法透過此帳號註冊，請與研究團隊聯繫，錯誤代碼:400</string>
+    <string name="http_message_403_during_registration">很抱歉，您輸入的研究計畫網址、帳號或密碼錯誤，錯誤代碼:403</string>
+    <string name="http_message_403_wrong_password">很抱歉，您輸入的密碼錯誤，錯誤代碼:403</string>
+    <string name="http_message_403_wrong_password_forgot_password_page">很抱歉，您所輸入的暫時密碼錯誤，錯誤代碼:403</string>
+    <string name="http_message_405">很抱歉，您所使用的帳號已被註冊，請與研究團隊確認您的帳號，以利後續註冊手續，錯誤代碼:405</string>
+    <string name="http_message_internet_disconnected">網路訊號不穩定，請確認網路品質，並重新啟動軟體</string>
+    <string name="http_message_server_not_found">請確認軟體網址是否正確，Beiwe無法連上伺服器</string>
+    <string name="http_message_unknown_response_code">Beiw出現未知的錯誤訊息</string>
+
+    <!-- Survey Activity Strings -->
+    <string name="survey_next_button_text">下一頁</string>
+    <string name="survey_submit_button">提交答案</string>
+    <string name="default_survey_submit_success_message">感謝您完成此份問卷，研究團隊無法立即更新問卷資訊，若資料上傳過程當中您有任何問題，請與研究團隊連繫。您可以透過\”與研究團隊聯繫\”鍵，向我們反應</string>
+    <string name="survey_submit_error_message">資料上傳過程錯誤，您的答案尚未被記錄儲存</string>
+    <string name="survey_loading_text" tools:ignore="TypographyEllipsis">正從伺服器下載最新的問卷…</string>
+
+    <!-- Login Activity Strings -->
+    <string name="login_page_for_app">Beiwe登入介面</string>
+    <string name="login_activity_please_enter_password">密碼:</string>
+    <string name="incorrect_user_pass_combo">用戶密碼組合錯誤!</string>
+    <string name="title_activity_register">用戶</string>
+    <string name="title_activity_login">登入</string>
+    <string name="title_activity_login_string">登入</string>
+    <string name="login_activity_welcoming_message">歡迎登入Beiwe</string>
+    <string name="user_id_system_mismatch">用戶的帳號不存在，請重新輸入</string>
+    <string name="password_system_mismatch">用戶帳號與密碼錯誤</string>
+
+    <!-- Reset Password Activity Strings -->
+    <string name="title_activity_reset_password">修改密碼</string>
+    <string name="reset_password_title">修改密碼</string>
+    <string name="reset_password_current_password_caption">現行密碼:</string>
+    <string name="reset_password_new_password_caption">新密碼:</string>
+    <string name="reset_password_confirm_new_password_caption">確認新密碼:</string>
+    <string name="reset_password_submit">修改密碼</string>
+    <string name="reset_password_error_alert_title">修改密碼失敗</string>
+    <string name="invalid_old_password">現行密碼輸入錯誤</string>
+    <string name="pass_reset_complete">您已成功修改密碼</string>
+    <string name="password_mismatch">新密碼與確認新密碼輸入不相同</string>
+    <string name="password_too_short">您的新密碼至少需要&d個字元</string>
+
+    <!-- Forgot Password Activity Strings -->
+    <string name="title_activity_forgot_password">忘記密碼</string>
+    <string name="forgot_password_title">請與研究團隊聯繫，以取得臨時密碼</string>
+    <string name="forgot_password_title_with_id">Call the research assistant to get a temporary password. Your ID is \"%s\".請與研究團隊聯繫，已取得臨時密碼。您的帳號是\”%s\”</string>
+    <string name="forgot_password_instructions_text">您的帳號是\”%s\”請透過帳號驗證身分，並非您的真實姓名</string>
+    <string name="forgot_password_call_button_text">與研究團隊聯繫</string>
+    <string name="forgot_password_temporary_password_caption">臨時密碼 (研究團隊給您的密碼)</string>
+
+    <!-- Registration Activity Strings -->
+    <string name="registration_welcome_message">歡迎登入Beiwe </string>
+    <string name="registration_server_url_label">國立台灣大學人類遺傳與精神流行病學研究室</string>
+    <string name="registration_server_url_hint"> http://homepage.ntu.edu.tw/~phkuo/Index_T.html </string>
+    <string name="registration_user_id_label">用戶帳號:</string>
+    <string name="registration_user_id_hint">用戶帳號</string>
+    <string name="registration_temp_password_label">臨時密碼:</string>
+    <string name="registration_temp_password_hint">臨時密碼</string>
+    <string name="registration_new_password_label">新密碼:</string>
+    <string name="registration_new_password_hint">至少6個字元</string>
+    <string name="registration_confirm_new_password_label">確認密碼:</string>
+    <string name="registration_confirm_new_password_hint">至少6個字元</string>
+    <string name="registration_replacement_password_hint">至少%d個字元</string>
+    <string name="registration_submit">註冊</string>
+    <string name="title_activity_loading">載入Beiwe中…</string>
+    <string name="empty_temp_password">請輸入您登入前的臨時密碼</string>
+    <string name="url_too_short">請輸入您的研究計畫網址</string>
+    <string name="invalid_user_id">請輸入您的用戶帳號</string>
+    <string name="invalid_password">無效密碼</string>
+    <string name="couldnt_register">註冊失敗</string>
+
+    <!-- Phone Numbers -->
+    <string name="title_activity_phone_number_entry">用戶電話號碼</string>
+    <string name="number_entry_top_message">用戶電話號碼</string>
+    <string name="number_entry_button">號碼輸入鍵</string>
+    <string name="phone_number_entry_your_clinician_label">國立台灣大學人類遺傳與精神流行病學研究室電話</string>
+    <string name="phone_number_entry_your_clinician_hint">(02)3366-8015</string>
+    <string name="phone_number_entry_research_assistant_label">國立台灣大學人類遺傳與精神流行病學研究室電話:</string>
+    <string name="phone_number_entry_research_assistant_hint">(02)3366-8015</string>
+
+    <!-- Loading Activity Strings -->
+    <string name="loading_activity_loading_message" tools:ignore="TypographyEllipsis">載入中...</string>
+    <string name="survey_notification_title_template">問卷: %1$s</string>
+    <string name="action_share">分享</string>
+    <string name="action_reply">回覆</string>
+
+    <!-- Main menu strings -->
+    <string name="title_activity_main_menu">Beiwe 主畫面</string>
+    <string name="main_menu_top_message">歡迎光臨Beiwe!</string>
+    <string name="main_menu_view_graph">圖像化:問卷答案</string>
+    <string name="default_call_clinician_text">與研究團隊聯繫</string>
+    <string name="title_activity_graph">問卷歷史紀錄</string>
+    <string name="permasurvey">研究計畫</string>
+    <string name="perm_survey">問卷調查</string>
+    <string name="permaaudiosurvey">語音問卷</string>
+
+    <!-- Recording Activity -->
+    <string name="record_activity_default_message">為了記錄您一天的活動紀錄，請按下\"紀錄\"並開始約2分鐘的語音紀錄。當您完成後請按下\"停止\"。語音紀錄將會於開始記錄後4分鐘自動結束。研究團隊將於研究結後進行審查分析，因此若您有需要與研究團隊聯繫，請按\"與研究團隊聯繫\"鍵</string>
+    <string name="record_activity_button">按下紀錄鍵</string>
+    <string name="record_activity_playback">播放紀錄</string>
+    <string name="play_button_text">播放</string>
+    <string name="play_button_stop_text">停止</string>
+    <string name="record_button_text">紀錄</string>
+    <string name="record_button_stop_text">停止</string>
+    <string name="done_button_text">儲存</string>
+    <string name="timeout_msg_1st_half">"Beiwe將無法繼續記錄語音資訊超過 "</string>
+    <string name="timeout_msg_2nd_half">" 分鐘，您目前的語音紀錄已自動停止與儲存"</string>
+
+    <!-- Notifications -->
+    <string name="survey_notification_app_name">Beiwe</string>
+    <string name="new_android_survey_notification_ticker">更新版問卷通知</string>
+    <string name="new_android_survey_notification_details">請填寫問卷表格</string>
+    <string name="new_audio_survey_notification_ticker">新增語音紀錄</string>
+    <string name="new_audio_survey_notification_details">請新增語音紀錄</string>
+
+    <!-- Menu Items -->
+    <string name="menu_sign_out">登出</string>
+    <string name="menu_change_password">修改密碼</string>
+    <string name="menu_about">關於</string>
+    <string name="call_research_assistant">與研究團隊聯繫</string>
+    <string name="view_survey_answers">問卷歷史紀錄</string>
+
+    <!-- About Page -->
+    <string name="title_activity_about">關於</string>
+    <string name="default_about_page_text">Beiwe是一款手機APP，協助研究團隊蒐集有關用戶的健康與行為資訊。它將會提醒您每日填寫問卷及語音紀錄。Beiwe 不僅透過裝置的GPS與感應器了解您的位置資訊及活動量(移動距離)，亦了解您日常於通訊之時數與頻率。用戶隱私方面，Beiwe將不會擷取用戶通訊的姓名、電話號碼與對話內容，僅藉由統計結果了解您與不同對象的通訊頻率。位置資訊方面，軟體將會透過WIFI更新您的位置，但地點名稱將透過隨機代號取代。最後Beiwe也能夠顯示周圍的用戶名單。Beiwe大型資料庫的內容皆具有加密措施，用以保障用戶的隱私，因此軟體無法得知用戶真實姓名、用戶電話號碼以及相關個資，僅透過代號定義用戶個體。因此，若您有任何身體不適或是危險狀況，Beiwe將無法主動無法協助您與研究團隊聯繫。研究團隊在研究結束後才會看到研究期間的問卷資訊，為了方便用戶與研究團隊聯繫，每個頁面上方皆有\"Call my Clinician\"鍵，因此您必須輸入研究團隊的聯絡電話，聯絡電話能夠隨著用戶的需求變更不同研究團隊的電話。\n\nBeiwe是由哈佛大學Dr. Jukka-Pekka 構思與設計，您所參與的研究計畫是由國立台灣大學人類遺傳與精神流行病學研究室郭柏秀教授主持，Beiwe由Zagaran, Inc.製作。</string>
+
+    <!-- Phone Numbers -->
+    <string name="phone_number_length_error">"電話長度必須為%d個字元"</string>
+    <string name="enter_clinician_number">國立台灣大學人類遺傳與精神流行病學研究室電話(02)3366-8015</string>
+    <string name="enter_research_assitant_number">國立台灣大學人類遺傳與精神流行病學研究室電話(02)3366-8015</string>
+
+    <!-- Consent Form -->
+    <string name="title_activity_consent_form">研究計畫同意書</string>
+    <string name="consentButton">我願意參與研究計畫</string>
+    <string name="doNotConsentButton">我不願意參與研究計畫</string>
+    <string name="doNotConsentAlert">您若選取不願意參與研究計畫，代表您將不會參與研究後續內容，若您按下”我了解以上內容”，軟體將自動退出，且將無法完成軟體註冊；若您按下"取消"，軟體將會返回至上一步，並請重新選取”我願意參與研究計畫”，您將可以繼續註冊軟體帳號</string>
+    <string name="default_consent_form_text">本研究將大量收集躁症和鬱症患者與健康對照組的詳細臨床症狀表現資料，包含主觀性問卷、客觀式的數據收集(如配戴裝置Actigraphy數據)，和被動式的數據收集(如手機內建感測數據)等，取得客觀與主觀的大量臨床表徵數據，並進行前瞻式追蹤研究，了解病人在疾病病程中詳細表型數據的波動。利用上述方法收集的臨床數據，透過整合性的分析架構，將各層面的表徵以及數據整併為一預測平台，以預估病患的復發風險與發作類型症狀、治療效果和治療後的功能性表現等。期望此研究的結果能夠加速設立情緒疾患預後即時監控追蹤治療的基礎，在未來能夠在臨床上幫助醫護專業人員，提供病患更即時又適切的幫助。</string>
+</resources>
