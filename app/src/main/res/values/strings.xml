@@ -17,15 +17,15 @@
 
 
     <!-- API URLs -->
-    <string name="staging_website">https://staging.beiwe.org </string>
-    <string name="production_website">https://studies.beiwe.org </string>
+    <string name="staging_website" translatable="false">https://staging.beiwe.org </string>
+    <string name="production_website" translatable="false">https://studies.beiwe.org </string>
 
-    <string name="data_upload_url">/upload</string>
-    <string name="download_surveys_url">/download_surveys</string>
-    <string name="forgot_password_url">/forgot_password</string>
-    <string name="reset_password_url">/set_password</string>
-    <string name="graph_url">/graph</string>
-    <string name="register_url">/register_user</string>
+    <string name="data_upload_url" translatable="false">/upload</string>
+    <string name="download_surveys_url" translatable="false">/download_surveys</string>
+    <string name="forgot_password_url" translatable="false">/forgot_password</string>
+    <string name="reset_password_url" translatable="false">/set_password</string>
+    <string name="graph_url" translatable="false">/graph</string>
+    <string name="register_url" translatable="false">/register_user</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">Make a Voice Recording</string>
@@ -155,26 +155,26 @@
     <string name="new_audio_survey_notification_details">Please make a voice recording.</string>
 
     <!-- Notification Action Pointers -->
-    <string name="start_tracking_survey"> org.beiwe.app.start_android_survey </string>
-    <string name="start_audio_survey"> org.beiwe.app.start_audio_survey </string>
+    <string name="start_tracking_survey" translatable="false"> org.beiwe.app.start_android_survey </string>
+    <string name="start_audio_survey" translatable="false"> org.beiwe.app.start_audio_survey </string>
 
     <!-- Timer Action Strings -->
-    <string name="turn_accelerometer_off">Accelerometer OFF</string>
-    <string name="turn_accelerometer_on">Accelerometer On</string>
-    <string name="turn_gyroscope_off">Gyroscope OFF</string>
-    <string name="turn_gyroscope_on">Gyroscope On</string>
-    <string name="turn_bluetooth_off">Bluetooth OFF</string>
-    <string name="turn_bluetooth_on">Bluetooth On</string>
-    <string name="turn_gps_off">GPS OFF</string>
-    <string name="turn_gps_on">GPS On</string>
-    <string name="signout_intent">Signout</string>
-    <string name="voice_recording">Voice Recording</string>
-    <string name="upload_data_files_intent">Upload data files</string>
-    <string name="create_new_data_files_intent">Create new data files</string>
-    <string name="check_for_new_surveys_intent">Check for new surveys</string>
-    <string name="run_wifi_log">Wifi Log</string>
-    <string name="check_for_sms_enabled">Check SMS</string>
-    <string name="check_for_calls_enabled">Check Calls</string>
+    <string name="turn_accelerometer_off" translatable="false">Accelerometer OFF</string>
+    <string name="turn_accelerometer_on" translatable="false">Accelerometer On</string>
+    <string name="turn_gyroscope_off" translatable="false">Gyroscope OFF</string>
+    <string name="turn_gyroscope_on" translatable="false">Gyroscope On</string>
+    <string name="turn_bluetooth_off" translatable="false">Bluetooth OFF</string>
+    <string name="turn_bluetooth_on" translatable="false">Bluetooth On</string>
+    <string name="turn_gps_off" translatable="false">GPS OFF</string>
+    <string name="turn_gps_on" translatable="false">GPS On</string>
+    <string name="signout_intent" translatable="false">Signout</string>
+    <string name="voice_recording" translatable="false">Voice Recording</string>
+    <string name="upload_data_files_intent" translatable="false">Upload data files</string>
+    <string name="create_new_data_files_intent" translatable="false">Create new data files</string>
+    <string name="check_for_new_surveys_intent" translatable="false">Check for new surveys</string>
+    <string name="run_wifi_log" translatable="false">Wifi Log</string>
+    <string name="check_for_sms_enabled" translatable="false">Check SMS</string>
+    <string name="check_for_calls_enabled" translatable="false">Check Calls</string>
 
     <!-- Menu Items -->
     <string name="menu_sign_out">Sign Out</string>
@@ -207,6 +207,4 @@
     <string name="randomizeWithMemory">randomize_with_memory</string>
     <string name="numberQuestions">number_of_random_questions</string>
     <string name="triggeredSurvey">trigger_on_first_download</string>
-
-
 </resources>
