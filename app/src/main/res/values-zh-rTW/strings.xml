@@ -7,11 +7,31 @@
     <string name="action_settings">設定</string>
 
     <!-- Permissions Strings -->
+    <string name="permissions_alert_title">需要權限</string>
+    <string name="permission_normal_request_template">對於本研究，Beiwe需要獲得%s的許可。請按下以下權限請求。</string>
+    <string name="permission_bumping_request_template">要完全註冊此研究，Beiwe需要獲得%s的許可。您似乎已拒絕或取消此權限。 Beiwe現在會將您帶到其設置頁面，以便您可以手動啟用它。</string>
     <string name="permission_registration_read_sms_alert">為了註冊研究計畫，Beiwe需要連結至您設備的通訊功能，若您看到Beiwe與裝置通訊功能的連結要求，請按下\”允許\”。然而根據研究畫書，您可以在完成軟體註冊後，取消此功能之連結。</string>
     <string name="permission_registration_actually_need_sms_alert">Beiwe需要與裝置的通訊功能連結，但是您似乎尚未開啟Beiwe與裝置通訊功能之連結，您可能需要透過手動方式啟動通訊功能與Beiwe的連結。</string>
     <string name="power_management_exception_alert">您將允許Beiwe於您的設備背景當中執行</string>
     <string name="cant_make_phone_call_alert_title">Beiwe能夠/禁止進行通話功能 </string>
     <string name="cant_make_a_phone_call_permissions_alert">為了能使通訊功能與Beiwe連結，你必須至設定-> Beiwe 當中開啟\’通訊\’的允許，或是您可以透過開啟Beiwe撥打電話</string>
+    <string name="go_to_settings_button">打開設定</string>
+    <string name="permission_access_fine_location">使用位置服務</string>
+    <string name="permission_access_network_state">查看您的網絡狀態</string>
+    <string name="permission_access_wifi_state">查看您的Wifi狀態</string>
+    <string name="permission_read_sms">查看您的短信</string>
+    <string name="permission_bluetooth">使用藍牙</string>
+    <string name="permission_bluetooth_admin">使用藍牙</string>
+    <string name="permission_call_phone">訪問您的電話服務</string>
+    <string name="permission_internet">連接網絡</string>
+    <string name="permission_read_call_log">訪問您的電話服務</string>
+    <string name="permission_read_contacts">訪問您的聯繫人</string>
+    <string name="permission_read_phone_state">訪問您的電話服務</string>
+    <string name="permission_receive_boot_completed">手機開機時啟動</string>
+    <string name="permission_record_audio">訪問你的麥克風</string>
+    <string name="permission_access_coarse_location">使用位置服務</string>
+    <string name="permission_receive_mms">接收彩信</string>
+    <string name="permission_receive_sms">接收短信</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">紀錄語音訊息</string>
@@ -22,9 +42,13 @@
     <string name="title_activity_survey">問卷</string>
 
     <!-- Error Messages -->
+    <string name="default_alert_title">警報</string>
+    <string name="alert_ok_button_text">好</string>
+    <string name="alert_cancel_button_text">取消</string>
     <string name="question_error_text">若您接收到此訊息，代表軟體發生錯誤。請與研究團隊聯繫，並告知研究團隊該問卷具有錯誤訊息</string>
     <string name="invalid_device">您所使用的設備與Beiwe的規格不相符合，為了避免系統操作上的錯誤請勿安裝Beiwe</string>
     <string name="invalid_encryption_key">系統的加密作業出現了錯誤，請與Beiwe開發團隊聯繫</string>
+    <string name="http_message_200">好</string>
     <string name="http_message_1">伺服器安裝錯誤，請與研究團隊聯繫，錯誤代碼:1</string>
     <string name="http_message_400">該設備無法透過此帳號註冊，請與研究團隊聯繫，錯誤代碼:400</string>
     <string name="http_message_403_during_registration">很抱歉，您輸入的研究計畫網址、帳號或密碼錯誤，錯誤代碼:403</string>
@@ -69,7 +93,6 @@
     <!-- Forgot Password Activity Strings -->
     <string name="title_activity_forgot_password">忘記密碼</string>
     <string name="forgot_password_title">請與研究團隊聯繫，以取得臨時密碼</string>
-    <string name="forgot_password_title_with_id">Call the research assistant to get a temporary password. Your ID is \"%s\".請與研究團隊聯繫，已取得臨時密碼。您的帳號是\”%s\”</string>
     <string name="forgot_password_instructions_text">您的帳號是\”%s\”請透過帳號驗證身分，並非您的真實姓名</string>
     <string name="forgot_password_call_button_text">與研究團隊聯繫</string>
     <string name="forgot_password_temporary_password_caption">臨時密碼 (研究團隊給您的密碼)</string>
@@ -160,5 +183,6 @@
     <string name="consentButton">我願意參與研究計畫</string>
     <string name="doNotConsentButton">我不願意參與研究計畫</string>
     <string name="doNotConsentAlert">您若選取不願意參與研究計畫，代表您將不會參與研究後續內容，若您按下”我了解以上內容”，軟體將自動退出，且將無法完成軟體註冊；若您按下"取消"，軟體將會返回至上一步，並請重新選取”我願意參與研究計畫”，您將可以繼續註冊軟體帳號</string>
+    <string name="i_understand_button_text">我了解以上內容</string>
     <string name="default_consent_form_text">本研究將大量收集躁症和鬱症患者與健康對照組的詳細臨床症狀表現資料，包含主觀性問卷、客觀式的數據收集(如配戴裝置Actigraphy數據)，和被動式的數據收集(如手機內建感測數據)等，取得客觀與主觀的大量臨床表徵數據，並進行前瞻式追蹤研究，了解病人在疾病病程中詳細表型數據的波動。利用上述方法收集的臨床數據，透過整合性的分析架構，將各層面的表徵以及數據整併為一預測平台，以預估病患的復發風險與發作類型症狀、治療效果和治療後的功能性表現等。期望此研究的結果能夠加速設立情緒疾患預後即時監控追蹤治療的基礎，在未來能夠在臨床上幫助醫護專業人員，提供病患更即時又適切的幫助。</string>
 </resources>

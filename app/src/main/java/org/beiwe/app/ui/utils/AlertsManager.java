@@ -27,7 +27,7 @@ public class AlertsManager {
 	 * @param activity
 	 */
 	public static void showAlert(String message, Activity activity) {
-		showAlert(message, "Alert", activity);
+		showAlert(message, activity.getString(R.string.default_alert_title), activity);
 	}
 
 	public static void showAlert(int httpResponseCode, String title, Activity activity) {
@@ -39,7 +39,8 @@ public class AlertsManager {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(title);
 		builder.setMessage(message);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text),
+				new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -51,9 +52,10 @@ public class AlertsManager {
 
 	public static void showErrorAlert(String message, Activity activity, final int alertNumber) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("A critical error occured");
+		builder.setTitle(activity.getString(R.string.default_alert_title));
 		builder.setMessage(message);
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text),
+				new DialogInterface.OnClickListener() {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -71,7 +73,7 @@ public class AlertsManager {
 	 * @return String to be displayed on the Alert in case of a problem	 */
 	private static String httpResponseCodeExplanation(int httpResponseCode, Activity activity) {
 		Log.i("HTTPAsync", "got HTTP response code " + httpResponseCode);
-		if (httpResponseCode == 200) {return "OK";}
+		if (httpResponseCode == 200) {return activity.getString(R.string.http_message_200);}
 		else if (httpResponseCode == 1) {return activity.getString(R.string.http_message_1);}
 		else if (httpResponseCode == 2) {return activity.getString(R.string.invalid_encryption_key);}
 		else if (httpResponseCode == 400) {return activity.getString(R.string.http_message_400);}

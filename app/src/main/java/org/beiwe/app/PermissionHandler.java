@@ -37,30 +37,32 @@ public class PermissionHandler {
 			permissionMap.put( Manifest.permission.RECEIVE_SMS, 17);
 			permissionMap = Collections.unmodifiableMap(permissionMap); }
 	
-	private static Map <String, String> permissionMessages = new HashMap <String, String> ();
-	static {permissionMessages.put( Manifest.permission.ACCESS_FINE_LOCATION, "use Location Services." );
-			permissionMessages.put( Manifest.permission.ACCESS_NETWORK_STATE, "view your Network State." );
-			permissionMessages.put( Manifest.permission.ACCESS_WIFI_STATE, "view your Wifi State." );
-			permissionMessages.put( Manifest.permission.READ_SMS, "view your SMS messages." );
-			permissionMessages.put( Manifest.permission.BLUETOOTH, "use Bluetooth." );
-			permissionMessages.put( Manifest.permission.BLUETOOTH_ADMIN, "use Bluetooth." );
-			permissionMessages.put( Manifest.permission.CALL_PHONE, "access your Phone service." );
-			permissionMessages.put( Manifest.permission.INTERNET, "access The Internet." );
-			permissionMessages.put( Manifest.permission.READ_CALL_LOG, "access your Phone service." );
-			permissionMessages.put( Manifest.permission.READ_CONTACTS, "access your Contacts." );
-			permissionMessages.put( Manifest.permission.READ_PHONE_STATE, "access your Phone service." );
-			permissionMessages.put( Manifest.permission.RECEIVE_BOOT_COMPLETED, "start up on Boot." );
-			permissionMessages.put( Manifest.permission.RECORD_AUDIO, "access your Microphone." );
-			permissionMessages.put( Manifest.permission.ACCESS_COARSE_LOCATION, "use Location Services." );
-			permissionMessages.put( Manifest.permission.RECEIVE_MMS, "receive MMS messages.");
-			permissionMessages.put( Manifest.permission.RECEIVE_SMS, "receive SMS messages.");
+	private static Map <String, Integer> permissionMessages = new HashMap <> ();
+	static {permissionMessages.put( Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_access_fine_location );
+			permissionMessages.put( Manifest.permission.ACCESS_NETWORK_STATE, R.string.permission_access_network_state );
+			permissionMessages.put( Manifest.permission.ACCESS_WIFI_STATE, R.string.permission_access_wifi_state );
+			permissionMessages.put( Manifest.permission.READ_SMS, R.string.permission_read_sms );
+			permissionMessages.put( Manifest.permission.BLUETOOTH, R.string.permission_bluetooth );
+			permissionMessages.put( Manifest.permission.BLUETOOTH_ADMIN, R.string.permission_bluetooth_admin );
+			permissionMessages.put( Manifest.permission.CALL_PHONE, R.string.permission_call_phone );
+			permissionMessages.put( Manifest.permission.INTERNET, R.string.permission_internet );
+			permissionMessages.put( Manifest.permission.READ_CALL_LOG, R.string.permission_read_call_log );
+			permissionMessages.put( Manifest.permission.READ_CONTACTS, R.string.permission_read_contacts );
+			permissionMessages.put( Manifest.permission.READ_PHONE_STATE, R.string.permission_read_phone_state );
+			permissionMessages.put( Manifest.permission.RECEIVE_BOOT_COMPLETED, R.string.permission_receive_boot_completed );
+			permissionMessages.put( Manifest.permission.RECORD_AUDIO, R.string.permission_record_audio );
+			permissionMessages.put( Manifest.permission.ACCESS_COARSE_LOCATION, R.string.permission_access_coarse_location );
+			permissionMessages.put( Manifest.permission.RECEIVE_MMS, R.string.permission_receive_mms);
+			permissionMessages.put( Manifest.permission.RECEIVE_SMS, R.string.permission_receive_sms);
 			permissionMessages = Collections.unmodifiableMap(permissionMessages); }
 
-	public static String getNormalPermissionMessage(String permission) {
-		return String.format("For this study Beiwe needs permission to %s Please press allow on the following permissions request.", permissionMessages.get(permission) );
+	public static String getNormalPermissionMessage(String permission, Context appContext) {
+		return String.format(appContext.getString(R.string.permission_normal_request_template),
+				appContext.getString(permissionMessages.get(permission)));
 	}
-	public static String getBumpingPermissionMessage(String permission) {
-		return String.format("To be fully enrolled in this study Beiwe needs permission to %s You appear to have denied or removed this permission. Beiwe will now bump you to its settings page so you can manually enable it.", permissionMessages.get(permission) );
+	public static String getBumpingPermissionMessage(String permission, Context appContext) {
+		return String.format(appContext.getString(R.string.permission_bumping_request_template),
+				appContext.getString(permissionMessages.get(permission)));
 	}
 	
 	/* The following are enabled by default.

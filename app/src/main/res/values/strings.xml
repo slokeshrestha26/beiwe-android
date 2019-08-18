@@ -7,14 +7,31 @@
     <string name="action_settings">Settings</string>
 	
     <!-- Permissions Strings -->
+    <string name="permissions_alert_title">Permissions Requirement:</string>
+    <string name="permission_normal_request_template">For this study Beiwe needs permission to %s. Please press allow on the following permissions request.</string>
+    <string name="permission_bumping_request_template">To be fully enrolled in this study Beiwe needs permission to %s. You appear to have denied or removed this permission. Beiwe will now bump you to its settings page so you can manually enable it.</string>
     <string name="permission_registration_read_sms_alert"> In order to register for a study, Beiwe requires access to some this device\'s telephone services. Please press \"Allow\" when you see a menu requesting permissions to access SMS. Depending on the details of the study, you are allowed to disable this permission in the Beiwe app\'s preferences after registration is complete.</string>
-
     <string name="permission_registration_actually_need_sms_alert"> Beiwe requires SMS permissions in order to register for a study, but you appear to have denied it permission. We are going to bump you to the Beiwe app\'s settings so that you can manually enable SMS access. </string>
-
     <string name="power_management_exception_alert"> This permission prompt you are about to see is required to allow Beiwe to execute in the background. </string>
     <string name="cant_make_phone_call_alert_title">Beiwe can\'t initiate phone calls</string>
     <string name="cant_make_a_phone_call_permissions_alert">In order for Beiwe to initiate a phone call, you must go to Settings -> Permissions and grant the Beiwe app the \'Phone\' permission.\n\nOr, you can open the Phone app and make the phone call yourself.</string>
-
+    <string name="go_to_settings_button">Go to Settings</string>
+    <string name="permission_access_fine_location">use Location Services</string>
+    <string name="permission_access_network_state">view your Network State</string>
+    <string name="permission_access_wifi_state">view your Wifi State</string>
+    <string name="permission_read_sms">view your SMS messages</string>
+    <string name="permission_bluetooth">use Bluetooth</string>
+    <string name="permission_bluetooth_admin">use Bluetooth</string>
+    <string name="permission_call_phone">access your Phone service</string>
+    <string name="permission_internet">access The Internet</string>
+    <string name="permission_read_call_log">access your Phone service</string>
+    <string name="permission_read_contacts">access your Contacts</string>
+    <string name="permission_read_phone_state">access your Phone service</string>
+    <string name="permission_receive_boot_completed">start up on Boot</string>
+    <string name="permission_record_audio">access your Microphone</string>
+    <string name="permission_access_coarse_location">use Location Services</string>
+    <string name="permission_receive_mms">receive MMS messages</string>
+    <string name="permission_receive_sms">receive SMS messages</string>
 
     <!-- API URLs -->
     <string name="staging_website" translatable="false">https://staging.beiwe.org </string>
@@ -33,13 +50,17 @@
     <string name="button_record">Record</string>
 
     <!-- Debug Menu Strings -->
-    <string name="title_activity_debug_interface">Beiwe debug interface</string>
+    <string name="title_activity_debug_interface" translatable="false">Beiwe debug interface</string>
     <string name="title_activity_survey">Survey</string>
 
     <!-- Error Messages -->
+    <string name="default_alert_title">Alert</string>
+    <string name="alert_ok_button_text">OK</string>
+    <string name="alert_cancel_button_text">Cancel</string>
     <string name="question_error_text">If you are reading this, something broke. Please contact the study administrators, and tell them that there is a bug in the survey!</string>
     <string name="invalid_device">This device does not meet minimum specifications for this app, to avoid any issues resulting from this please uninstall the app.</string>
     <string name="invalid_encryption_key">Received an invalid encryption key, please contact the a Beiwe administrator.</string>
+    <string name="http_message_200">OK</string>
     <string name="http_message_1">Someone misconfigured the server! Please contact research staff.</string>
     <string name="http_message_400">This device could not be registered under the provided patient ID; please contact research staff.</string>
     <string name="http_message_403_during_registration">Sorry: either your Study URL, your User ID, or your Temporary Password is incorrect.</string>
@@ -84,7 +105,6 @@
     <!-- Forgot Password Activity Strings -->
     <string name="title_activity_forgot_password">Forgot Password</string>
     <string name="forgot_password_title">Contact the research assistant to get a temporary password</string>
-    <string name="forgot_password_title_with_id">Call the research assistant to get a temporary password. Your ID is \"%s\".</string>
     <string name="forgot_password_instructions_text">Your ID is \"%s\"; please identify yourself by that ID and not by your name.</string>
     <string name="forgot_password_call_button_text">Call research assistant</string>
     <string name="forgot_password_temporary_password_caption">Temporary password (the one the research assistant gave you)</string>
@@ -101,7 +121,7 @@
     <string name="registration_new_password_hint">At least 6 characters</string>
     <string name="registration_confirm_new_password_label">Confirm password:</string>
     <string name="registration_confirm_new_password_hint">At least 6 characters</string>
-    <string name="registration_replacement_password_hint">At least %d characters</string>
+    <string name="registration_replacement_password_hint">At least %2$d characters</string>
     <string name="registration_submit">Register</string>
     <string name="title_activity_loading">Loading Beiwe</string>
     <string name="empty_temp_password">Please enter the Temporary Password you were given at signup.</string>
@@ -196,6 +216,7 @@
     <string name="consentButton">I consent</string>
     <string name="doNotConsentButton">I do not consent</string>
     <string name="doNotConsentAlert"> You have indicated you do not consent to the terms of this application.  If you press "I understand" the app will exit, and you will not be enrolled in the study.  If you press "Cancel" the app will not exit and you will be able to press the "I Consent" button, which will then enroll you in the study. </string>
+    <string name="i_understand_button_text">I understand</string>
     <string name="default_consent_form_text">
         The Consent Form\n
         Goes\n
@@ -203,8 +224,8 @@
     </string>
 
     <!-- Survey Settings Keys -->
-    <string name="randomize">randomize</string>
-    <string name="randomizeWithMemory">randomize_with_memory</string>
-    <string name="numberQuestions">number_of_random_questions</string>
-    <string name="triggeredSurvey">trigger_on_first_download</string>
+    <string name="randomize" translatable="false">randomize</string>
+    <string name="randomizeWithMemory" translatable="false">randomize_with_memory</string>
+    <string name="numberQuestions" translatable="false">number_of_random_questions</string>
+    <string name="triggeredSurvey" translatable="false">trigger_on_first_download</string>
 </resources>

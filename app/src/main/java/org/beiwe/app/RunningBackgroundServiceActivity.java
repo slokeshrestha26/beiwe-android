@@ -237,10 +237,10 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 				}
 				// Log.d("sessionActivity", "shouldShowRequestPermissionRationale "+ permission +": " + shouldShowRequestPermissionRationale( permission ) );
 				if (shouldShowRequestPermissionRationale( permission ) ) {
-					if (!prePromptActive && !postPromptActive ) { showAlertThatForcesUserToGrantPermission(this, PermissionHandler.getBumpingPermissionMessage(permission),
+					if (!prePromptActive && !postPromptActive ) { showAlertThatForcesUserToGrantPermission(this, PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()),
 							PermissionHandler.permissionMap.get(permission) ); }
 				}
-				else if (!prePromptActive && !postPromptActive ) { showRegularPermissionAlert(this, PermissionHandler.getNormalPermissionMessage(permission),
+				else if (!prePromptActive && !postPromptActive ) { showRegularPermissionAlert(this, PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
 						permission, PermissionHandler.permissionMap.get(permission)); }
 			}
 		}
@@ -252,13 +252,13 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		if (prePromptActive) { return; }
 		prePromptActive = true;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Permissions Requirement:");
+		builder.setTitle(activity.getString(R.string.permissions_alert_title));
 		builder.setMessage(message);
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
 			activity.requestPermissions(new String[]{ permission }, permissionCallback );
 			prePromptActive = false;
 		} } );
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) { } } ); //Okay button
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) { } } ); //Okay button
 		builder.create().show();
 	}
 
@@ -267,7 +267,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		if (postPromptActive) { return; }
 		postPromptActive = true;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Permissions Requirement:");
+		builder.setTitle(activity.getString(R.string.permissions_alert_title));
 		builder.setMessage(message);
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() {
 			@Override
@@ -277,7 +277,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 				postPromptActive = false;
 			}
 		});
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface arg0, int arg1) {}
 		}); //Okay button
 		builder.create().show();
@@ -287,12 +287,12 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(title);
 		builder.setMessage(message);
-		builder.setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(activity.getString(R.string.go_to_settings_button), new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface dialog, int arg1) {
 				activity.goToSettings(permissionCallback);
 			}
 		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(activity.getString(R.string.alert_cancel_button_text), new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface dialog, int arg1) {}
 		});
 		builder.create().show();
@@ -303,7 +303,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		if (powerPromptActive) { return; }
 		powerPromptActive = true;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Permissions Requirement:");
+		builder.setTitle(activity.getString(R.string.permissions_alert_title));
 		builder.setMessage(message);
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
 			Log.d("power management alert", "bumping");
@@ -311,7 +311,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 			activity.goToPowerSettings(powerCallbackIdentifier);
 			powerPromptActive = false;
 		} } );
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
 		builder.create().show();
 	}
 }

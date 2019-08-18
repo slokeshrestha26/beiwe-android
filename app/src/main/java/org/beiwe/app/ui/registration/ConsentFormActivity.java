@@ -29,16 +29,16 @@ public class ConsentFormActivity extends RunningBackgroundServiceActivity {
 	 * to press "Cancel" if they did not mean to press the do not consent. */
 	public void doNotConsentButton(View view) {
 		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(ConsentFormActivity.this);
-		alertBuilder.setTitle("Do Not Consent");
+		alertBuilder.setTitle(getString(R.string.doNotConsentButton));
 		alertBuilder.setMessage(getString(R.string.doNotConsentAlert));
-		alertBuilder.setPositiveButton("I Understand", new DialogInterface.OnClickListener() {
+		alertBuilder.setPositiveButton(getString(R.string.i_understand_button_text), new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				finish();
 				System.exit(0);
 			}
 		});
-		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		alertBuilder.setNegativeButton(getString(R.string.alert_cancel_button_text), new DialogInterface.OnClickListener() {
 			@Override public void onClick(DialogInterface dialog, int which) { return; }} );
 		alertBuilder.create().show();
 	}

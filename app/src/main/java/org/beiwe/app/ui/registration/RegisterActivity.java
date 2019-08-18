@@ -274,13 +274,13 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 		if (prePromptActive) { return; }
 		prePromptActive = true;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Permissions Requirement:");
+		builder.setTitle(activity.getString(R.string.permissions_alert_title));
 		builder.setMessage(R.string.permission_registration_read_sms_alert);
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
 			activity.requestPermissions(new String[]{ Manifest.permission.READ_SMS }, PERMISSION_CALLBACK );
 			prePromptActive = false;
 		} } );
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) { } } ); //Okay button
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) { } } ); //Okay button
 		builder.create().show();
 	}
 	
@@ -289,14 +289,14 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 		if (postPromptActive) { return; }
 		postPromptActive = true;
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle("Permissions Requirement:");
+		builder.setTitle(R.string.permissions_alert_title);
 		builder.setMessage(R.string.permission_registration_actually_need_sms_alert);
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
 			thisResumeCausedByFalseActivityReturn = true;
 			activity.goToSettings();
 			postPromptActive = false;
 		} } );
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
+		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
 		builder.create().show();
 	}
 }

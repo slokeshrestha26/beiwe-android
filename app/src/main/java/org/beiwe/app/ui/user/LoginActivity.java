@@ -49,7 +49,7 @@ public class LoginActivity extends RunningBackgroundServiceActivity {
 			finish();
 			return;
 		}
-		AlertsManager.showAlert("Incorrect password", this);
+		AlertsManager.showAlert(getString(R.string.invalid_password), this);
 	}
 	
 	
