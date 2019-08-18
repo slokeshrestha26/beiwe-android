@@ -73,7 +73,8 @@ public class DeviceInfo {
 	 *      permissions because of Google policy changes effective March 9th, 2019.  onnelaLabServer
 	 *      build variants still collect SMS/MMS and Call Log data.
 	 * 38: app version 2.5.1, Adds gyroscope sensor. Sets minimum WiFi log frequency.
-	 * 39: app version 2.6.0, Adds optional always-available surveys.  */
+	 * 39: app version 2.6.0, Adds optional always-available surveys.
+	 * 41: app version 2.6.1, Adds localization for Traditional Chinese (Taiwan)  */
 
 	private static String androidID;
 	private static String bluetoothMAC;
