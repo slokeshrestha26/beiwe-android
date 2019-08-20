@@ -88,7 +88,7 @@
     <string name="invalid_old_password">現行密碼輸入錯誤</string>
     <string name="pass_reset_complete">您已成功修改密碼</string>
     <string name="password_mismatch">新密碼與確認新密碼輸入不相同</string>
-    <string name="password_too_short">您的新密碼至少需要 %2$d 個字元</string>
+    <string name="password_too_short">您的新密碼至少需要 %d 個字元</string>
 
     <!-- Forgot Password Activity Strings -->
     <string name="title_activity_forgot_password">忘記密碼</string>
@@ -109,7 +109,7 @@
     <string name="registration_new_password_hint">至少6個字元</string>
     <string name="registration_confirm_new_password_label">確認密碼:</string>
     <string name="registration_confirm_new_password_hint">至少6個字元</string>
-    <string name="registration_replacement_password_hint">至少 %2$d 個字元</string>
+    <string name="registration_replacement_password_hint">至少 %d 個字元</string>
     <string name="registration_submit">註冊</string>
     <string name="title_activity_loading">載入Beiwe中…</string>
     <string name="empty_temp_password">請輸入您登入前的臨時密碼</string>
@@ -129,7 +129,7 @@
 
     <!-- Loading Activity Strings -->
     <string name="loading_activity_loading_message" tools:ignore="TypographyEllipsis">載入中...</string>
-    <string name="survey_notification_title_template">問卷: %1$s</string>
+    <string name="survey_notification_title_template">問卷: %s</string>
     <string name="action_share">分享</string>
     <string name="action_reply">回覆</string>
 

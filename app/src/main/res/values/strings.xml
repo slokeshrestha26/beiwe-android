@@ -121,7 +121,7 @@
     <string name="registration_new_password_hint">At least 6 characters</string>
     <string name="registration_confirm_new_password_label">Confirm password:</string>
     <string name="registration_confirm_new_password_hint">At least 6 characters</string>
-    <string name="registration_replacement_password_hint">At least %2$d characters</string>
+    <string name="registration_replacement_password_hint">At least %d characters</string>
     <string name="registration_submit">Register</string>
     <string name="title_activity_loading">Loading Beiwe</string>
     <string name="empty_temp_password">Please enter the Temporary Password you were given at signup.</string>
@@ -141,7 +141,7 @@
 
     <!-- Loading Activity Strings -->
     <string name="loading_activity_loading_message" tools:ignore="TypographyEllipsis">Loading...</string>
-    <string name="survey_notification_title_template">Survey: %1$s</string>
+    <string name="survey_notification_title_template">Survey: %s</string>
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
 
