@@ -7,31 +7,31 @@
     <string name="action_settings">設定</string>
 
     <!-- Permissions Strings -->
-    <string name="permissions_alert_title">需要權限</string>
-    <string name="permission_normal_request_template">對於本研究，Beiwe需要獲得%s的許可。請按下以下權限請求。</string>
-    <string name="permission_bumping_request_template">要完全註冊此研究，Beiwe需要獲得%s的許可。您似乎已拒絕或取消此權限。 Beiwe現在會將您帶到其設置頁面，以便您可以手動啟用它。</string>
+    <string name="permissions_alert_title">允許:</string>
+    <string name="permission_normal_request_template">為了研究目的，Beiwe需連結 %s 的功能，請按下允許，讓Beiwe能與手機功能連結</string>
+    <string name="permission_bumping_request_template">為了研究目的，Beiwe需連結 %s 的功能，但是您好像按到了拒絕或移除了連結允許，因此需要您至設定當中手動開啟允許功能連結。</string>
     <string name="permission_registration_read_sms_alert">為了註冊研究計畫，Beiwe需要連結至您設備的通訊功能，若您看到Beiwe與裝置通訊功能的連結要求，請按下\”允許\”。然而根據研究畫書，您可以在完成軟體註冊後，取消此功能之連結。</string>
     <string name="permission_registration_actually_need_sms_alert">Beiwe需要與裝置的通訊功能連結，但是您似乎尚未開啟Beiwe與裝置通訊功能之連結，您可能需要透過手動方式啟動通訊功能與Beiwe的連結。</string>
     <string name="power_management_exception_alert">您將允許Beiwe於您的設備背景當中執行</string>
     <string name="cant_make_phone_call_alert_title">Beiwe能夠/禁止進行通話功能 </string>
     <string name="cant_make_a_phone_call_permissions_alert">為了能使通訊功能與Beiwe連結，你必須至設定-> Beiwe 當中開啟\’通訊\’的允許，或是您可以透過開啟Beiwe撥打電話</string>
-    <string name="go_to_settings_button">打開設定</string>
-    <string name="permission_access_fine_location">使用位置服務</string>
-    <string name="permission_access_network_state">查看您的網絡狀態</string>
-    <string name="permission_access_wifi_state">查看您的Wifi狀態</string>
-    <string name="permission_read_sms">查看您的短信</string>
-    <string name="permission_bluetooth">使用藍牙</string>
-    <string name="permission_bluetooth_admin">使用藍牙</string>
-    <string name="permission_call_phone">訪問您的電話服務</string>
-    <string name="permission_internet">連接網絡</string>
-    <string name="permission_read_call_log">訪問您的電話服務</string>
-    <string name="permission_read_contacts">訪問您的聯繫人</string>
-    <string name="permission_read_phone_state">訪問您的電話服務</string>
-    <string name="permission_receive_boot_completed">手機開機時啟動</string>
-    <string name="permission_record_audio">訪問你的麥克風</string>
-    <string name="permission_access_coarse_location">使用位置服務</string>
-    <string name="permission_receive_mms">接收彩信</string>
-    <string name="permission_receive_sms">接收短信</string>
+    <string name="go_to_settings_button">前往設定</string>
+    <string name="permission_access_fine_location">使用定位服務</string>
+    <string name="permission_access_network_state">查看網路狀態</string>
+    <string name="permission_access_wifi_state">查看WIFI狀態</string>
+    <string name="permission_read_sms">使用通訊功能</string>
+    <string name="permission_bluetooth">使用藍芽</string>
+    <string name="permission_bluetooth_admin">使用藍芽功能</string>
+    <string name="permission_call_phone">使用通話功能</string>
+    <string name="permission_internet">連結網路</string>
+    <string name="permission_read_call_log">使用通話紀錄</string>
+    <string name="permission_read_contacts">使用通訊錄</string>
+    <string name="permission_read_phone_state">使用通話狀態</string>
+    <string name="permission_receive_boot_completed">啟動Boot功能</string>
+    <string name="permission_record_audio">使用語音功能</string>
+    <string name="permission_access_coarse_location">使用周圍定位系統</string>
+    <string name="permission_receive_mms">使用多媒體訊息功能</string>
+    <string name="permission_receive_sms">使用簡訊功能</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">紀錄語音訊息</string>
@@ -42,9 +42,9 @@
     <string name="title_activity_survey">問卷</string>
 
     <!-- Error Messages -->
-    <string name="default_alert_title">警報</string>
+    <string name="default_alert_title">訊息提醒</string>
     <string name="alert_ok_button_text">好</string>
-    <string name="alert_cancel_button_text">取消</string>
+    <string name="alert_cancel_button_text">拒絕</string>
     <string name="question_error_text">若您接收到此訊息，代表軟體發生錯誤。請與研究團隊聯繫，並告知研究團隊該問卷具有錯誤訊息</string>
     <string name="invalid_device">您所使用的設備與Beiwe的規格不相符合，為了避免系統操作上的錯誤請勿安裝Beiwe</string>
     <string name="invalid_encryption_key">系統的加密作業出現了錯誤，請與Beiwe開發團隊聯繫</string>
