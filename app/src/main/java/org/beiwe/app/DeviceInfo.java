@@ -74,7 +74,9 @@ public class DeviceInfo {
 	 *      build variants still collect SMS/MMS and Call Log data.
 	 * 38: app version 2.5.1, Adds gyroscope sensor. Sets minimum WiFi log frequency.
 	 * 39: app version 2.6.0, Adds optional always-available surveys.
-	 * 41: app version 2.6.1, Adds localization for Traditional Chinese (Taiwan)  */
+	 * 41: app version 2.6.1, Adds localization for Traditional Chinese (Taiwan)
+	 * 42: app version 2.6.2, Deletes app data/registration for APK-installed (non-Google Play
+	 *       Store-installed) app  */
 
 	private static String androidID;
 	private static String bluetoothMAC;
