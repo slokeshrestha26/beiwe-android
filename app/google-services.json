@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "159021994881",
+    "firebase_url": "https://beiwe-20592.firebaseio.com",
+    "project_id": "beiwe-20592",
+    "storage_bucket": "beiwe-20592.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:159021994881:android:f36e160edd9c08cddb8e80",
+        "android_client_info": {
+          "package_name": "org.beiwe.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "159021994881-g8464gopgi5clbftvcfk18749k6ofjf3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVSD417lmt5weANJvEbrNT0w0tHusYxT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "159021994881-g8464gopgi5clbftvcfk18749k6ofjf3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
