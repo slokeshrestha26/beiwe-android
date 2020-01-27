@@ -18,12 +18,12 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
  * This is a STATIC method, and is called from the background service.
  * @author Eli Jones */
-//TODO: Low priority: Eli. Redoc.
+//TODO: Low priority: Eli. Redoc.1
 public class SurveyNotifications {
 	private static final String CHANNEL_ID = "survey_notification_channel";
 	/**Creates a survey notification that transfers the user to the survey activity. 
