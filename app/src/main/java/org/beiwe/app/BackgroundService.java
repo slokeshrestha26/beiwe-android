@@ -1,5 +1,6 @@
 package org.beiwe.app;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
@@ -39,6 +40,13 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
 import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
 import io.sentry.dsn.InvalidDsnException;
@@ -73,12 +81,36 @@ public class BackgroundService extends Service {
 
 		Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(appContext));
 		PersistentData.initialize( appContext );
+		initializeFireBaseIDToken( appContext );
 		TextFileManager.initialize( appContext );
 		PostRequest.initialize( appContext );
-		localHandle = this;  //yes yes, hacky, I know.
+		localHandle = this;  //yes yes, hacky, I know. This line needs to run before registerTimers()
 		registerTimers(appContext);
 		
 		doSetup();
+	}
+
+	public void initializeFireBaseIDToken( Context context ) {
+
+		FirebaseInstanceId.getInstance().getInstanceId()
+				.addOnCompleteListener
+						(new OnCompleteListener<InstanceIdResult>() {
+							@Override
+							public void onComplete(@NonNull Task<InstanceIdResult> task) {
+								if (!task.isSuccessful()) {
+									Log.e("Tuck", "getInstanceId failed", task.getException());
+									return;
+								}
+
+								// Get new Instance ID token
+								String token = task.getResult().getToken();
+
+								String msg = "FCM Token: " + token;
+								Log.i("FCM", msg);
+								PersistentData.setFCMInstanceID(token);
+								PostRequest.setFCMInstanceID(token);
+							}
+						});
 	}
 
 	public void doSetup() {
@@ -483,7 +515,7 @@ public class BackgroundService extends Service {
 	    AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService( Context.ALARM_SERVICE );
 	    alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 500, restartServicePendingIntent);
 	}
-	
+
 	public void crashBackgroundService() { if (BuildConfig.APP_IS_BETA) {
 		throw new NullPointerException("stop poking me!"); } }
 }

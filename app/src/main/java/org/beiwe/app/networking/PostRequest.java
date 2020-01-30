@@ -112,7 +112,7 @@ public class PostRequest {
 			e.printStackTrace();
 			throw new NullPointerException("Download File failed."); }
 	}
-	
+
 	/*##################################################################################
 	 ################################ Common Code ######################################
 	 #################################################################################*/
@@ -278,6 +278,32 @@ public class PostRequest {
 		if (BuildConfig.APP_IS_DEV) { Log.d("uploading", "finished attempt to upload " +
 				file.getName() + "; received code " + response); }
 		return response;
+	}
+
+	public static void setFCMInstanceID(String token) {
+		if ( !NetworkUtility.canUpload(appContext) ) { return; }
+		final String finalToken = token;
+		Thread fcmInstanceIDThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				doSetFCMInstanceID(finalToken);
+			}
+		}, "fcm_instance_id_thread");
+		fcmInstanceIDThread.start();
+	}
+
+	public static void doSetFCMInstanceID(String token) {
+		String url = addWebsitePrefix(appContext.getString(R.string.set_fcm_token));
+		String parameters = PostRequest.makeParameter("fcm_token", token);
+		HttpsURLConnection connection = null;
+		int response = 0;
+		try {
+			connection = setupHTTP(parameters, new URL(url), null);
+			response = connection.getResponseCode();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		connection.disconnect();
 	}
 
 
