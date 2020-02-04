@@ -16,6 +16,10 @@ betaDSN=https://publicKey:secretKey@host:port/1?options
 developmentDSN=https://publicKey:secretKey@host:port/1?options
 ```
 
+### Setting up Firebase
+To receive push notifications, add Firebase to your Android Project following [these steps](https://firebase.google.com/docs/android/setup) up through Step 3. 
+
+
 ### Build Variants and Product Flavors
 There are three Build Variants and three Product Flavors of the Android app, specified in the `buildTypes` section of `app/build.gradle`.  To select which Build Variant the app compiles as, go to **Build** > **Select Build Variant** in the menu bar [(see the documentation)](https://developer.android.com/studio/run/index.html#changing-variant).
 

@@ -53,3 +53,6 @@ builds
 
 # A folder
 private/*
+
+# Firebase generated file
+app/google-services.json
