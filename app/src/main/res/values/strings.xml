@@ -44,6 +44,7 @@
     <string name="graph_url" translatable="false">/graph</string>
     <string name="register_url" translatable="false">/register_user</string>
     <string name="set_fcm_token" translatable="false">/set_fcm_token</string>
+    <string name="notification_url" translatable="false">/send_notification</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">Make a Voice Recording</string>

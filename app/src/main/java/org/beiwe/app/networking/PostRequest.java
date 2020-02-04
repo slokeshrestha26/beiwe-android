@@ -132,6 +132,7 @@ public class PostRequest {
 		connection.setRequestProperty("Cache-Control", "no-cache");
 		connection.setConnectTimeout(3000);
 		connection.setReadTimeout(5000);
+
 		return connection;
 	}
 
@@ -292,7 +293,7 @@ public class PostRequest {
 		fcmInstanceIDThread.start();
 	}
 
-	public static void doSetFCMInstanceID(String token) {
+	private static void doSetFCMInstanceID(String token) {
 		String url = addWebsitePrefix(appContext.getString(R.string.set_fcm_token));
 		String parameters = PostRequest.makeParameter("fcm_token", token);
 		HttpsURLConnection connection = null;
@@ -300,6 +301,31 @@ public class PostRequest {
 		try {
 			connection = setupHTTP(parameters, new URL(url), null);
 			response = connection.getResponseCode();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		connection.disconnect();
+	}
+
+	public static void sendNotification() {
+		if ( !NetworkUtility.canUpload(appContext) ) { return; }
+		Thread sendNotificationThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				doSendNotification();
+			}
+		}, "send_notification_thread");
+		sendNotificationThread.start();
+	}
+
+	private static void doSendNotification() {
+		String url = addWebsitePrefix(appContext.getString(R.string.notification_url));
+		HttpsURLConnection connection = null;
+		int response = 0;
+		try {
+			connection = setupHTTP("", new URL(url), null);
+			response = connection.getResponseCode();
+			String response_message = connection.getResponseMessage();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

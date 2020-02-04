@@ -98,7 +98,7 @@ public class BackgroundService extends Service {
 							@Override
 							public void onComplete(@NonNull Task<InstanceIdResult> task) {
 								if (!task.isSuccessful()) {
-									Log.e("Tuck", "getInstanceId failed", task.getException());
+									Log.e("FCM", "getInstanceId failed", task.getException());
 									return;
 								}
 

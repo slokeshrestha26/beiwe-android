@@ -60,6 +60,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 			((Button) findViewById(R.id.buttonCrashBackgroundInFive)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonTestManualErrorReport)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.stopBackgroundService)).setVisibility(View.VISIBLE);
+			((Button) findViewById(R.id.sendNotification)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonEnterANRUI)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonEnterANRBackground)).setVisibility(View.VISIBLE);
 		}
@@ -264,5 +265,8 @@ public class DebugInterfaceActivity extends SessionActivity {
 		Log.v("debug", "" + i); i++;
 	}
 
+	public void sendNotification(View view) {
+		PostRequest.sendNotification();
+	}
 
 }

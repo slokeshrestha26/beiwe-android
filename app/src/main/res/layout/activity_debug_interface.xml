@@ -128,14 +128,14 @@
 	        android:layout_height="wrap_content"
 	        android:onClick="scanWifi"
 	        android:text="Trigger Wifi Scan" />
-	    	    	    	    
-	    <TextView
-		    android:id="@+id/debugtext7"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:text="Normal users of the Beiwe app will only see the main menu screen. When You are in the main menu screen you may return to the debug menu at any time by pressing the back button." />
-	    	      
-	    <Button
+
+		<TextView
+			android:id="@+id/debugtext7"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Normal users of the Beiwe app will only see the main menu screen. When You are in the main menu screen you may return to the debug menu at any time by pressing the back button." />
+
+		<Button
 	        android:id="@+id/loadMainMenu"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
@@ -299,6 +299,14 @@
 			android:layout_height="wrap_content"
 			android:onClick="stopBackgroundService"
 			android:text="(dev) Stop Background Service Safely"
+			android:visibility="gone"/>
+
+		<Button
+			android:id="@+id/sendNotification"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="sendNotification"
+			android:text="(dev) Send Notification"
 			android:visibility="gone"/>
 
 	</LinearLayout>
