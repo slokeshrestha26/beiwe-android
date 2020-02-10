@@ -306,7 +306,15 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:onClick="sendNotification"
-			android:text="(dev) Send Notification"
+			android:text="(dev) Send Push Notification"
+			android:visibility="gone"/>
+
+		<Button
+			android:id="@+id/sendSurveyNotification"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="sendSurveyNotification"
+			android:text="(dev) Send Survey Push Notification"
 			android:visibility="gone"/>
 
 	</LinearLayout>

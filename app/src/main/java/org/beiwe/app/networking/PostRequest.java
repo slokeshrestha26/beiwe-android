@@ -287,24 +287,10 @@ public class PostRequest {
 		Thread fcmInstanceIDThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doSetFCMInstanceID(finalToken);
+				doRequest(addWebsitePrefix(appContext.getString(R.string.set_fcm_token)), PostRequest.makeParameter("fcm_token", finalToken));
 			}
 		}, "fcm_instance_id_thread");
 		fcmInstanceIDThread.start();
-	}
-
-	private static void doSetFCMInstanceID(String token) {
-		String url = addWebsitePrefix(appContext.getString(R.string.set_fcm_token));
-		String parameters = PostRequest.makeParameter("fcm_token", token);
-		HttpsURLConnection connection = null;
-		int response = 0;
-		try {
-			connection = setupHTTP(parameters, new URL(url), null);
-			response = connection.getResponseCode();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		connection.disconnect();
 	}
 
 	public static void sendNotification() {
@@ -312,20 +298,31 @@ public class PostRequest {
 		Thread sendNotificationThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doSendNotification();
+				doRequest(addWebsitePrefix(appContext.getString(R.string.notification_url)), "");
 			}
 		}, "send_notification_thread");
 		sendNotificationThread.start();
 	}
 
-	private static void doSendNotification() {
-		String url = addWebsitePrefix(appContext.getString(R.string.notification_url));
+	public static void sendSurveyNotification() {
+		if ( !NetworkUtility.canUpload(appContext) ) { return; }
+		Thread sendNotificationThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				doRequest(addWebsitePrefix(appContext.getString(R.string.push_survey_url)), "");
+			}
+		}, "send_survey_notification_thread");
+		sendNotificationThread.start();
+	}
+
+	private static void doRequest(String url, String parameters) {
+//		String url = addWebsitePrefix(appContext.getString(R.string.push_survey_url));
 		HttpsURLConnection connection = null;
 		int response = 0;
 		try {
-			connection = setupHTTP("", new URL(url), null);
+			connection = setupHTTP(parameters, new URL(url), null);
 			response = connection.getResponseCode();
-			String response_message = connection.getResponseMessage();
+			Log.e("Tuck", "Response code: " + response);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -61,6 +61,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 			((Button) findViewById(R.id.buttonTestManualErrorReport)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.stopBackgroundService)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.sendNotification)).setVisibility(View.VISIBLE);
+			((Button) findViewById(R.id.sendSurveyNotification)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonEnterANRUI)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonEnterANRBackground)).setVisibility(View.VISIBLE);
 		}
@@ -269,4 +270,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 		PostRequest.sendNotification();
 	}
 
+	public void sendSurveyNotification(View view) {
+		PostRequest.sendSurveyNotification();
+	}
 }

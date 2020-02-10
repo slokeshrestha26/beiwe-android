@@ -23,17 +23,35 @@ public class SurveyDownloader {
 	
 	public static void downloadSurveys( Context appContext ) {
 		// Log.d("QuestionsDownloader", "downloadJSONQuestions() called");
-		doDownload( addWebsitePrefix(appContext.getResources().getString(R.string.download_surveys_url)), appContext );
+		doDownload( addWebsitePrefix(appContext.getResources().getString(R.string.download_surveys_url)), appContext, null );
 	}
 
-	private static void doDownload(final String url, final Context appContext) { new HTTPAsync(url) {
+	public static void downloadSingleSurvey(Context appContext, String survey_id) {
+		Log.e("Tuck", "DSS Survey ID: " + survey_id);
+		doDownload(addWebsitePrefix(appContext.getResources().getString(R.string.download_survey_url)), appContext, survey_id);
+	}
+
+	private static void doDownload(final String url, final Context appContext, final String survey_id) { new HTTPAsync(url) {
 		String jsonResponseString;
 		@Override
 		protected Void doInBackground(Void... arg0) {
 			String parameters = "";
-			try { jsonResponseString = PostRequest.httpRequestString( parameters, url); }
-			catch (NullPointerException e) {  }  //We do not care.
-			return null; //hate
+			if (survey_id != null) {
+				parameters += PostRequest.makeParameter("survey_id", survey_id);
+				try {
+					// jsonArrayToStringList() is expecting a list of JSON objects
+					// since we are only grabbing one survey, need to put it in a list
+					jsonResponseString = "["+PostRequest.httpRequestString( parameters, url)+"]";
+				}
+				catch (NullPointerException e) {  }  //We do not care.
+				return null; //hate
+			} else {
+				try {
+					jsonResponseString = PostRequest.httpRequestString( parameters, url);
+				}
+				catch (NullPointerException e) {  }  //We do not care.
+				return null; //hate
+			}
 		}
 		@Override
 		protected void onPostExecute(Void arg) {
