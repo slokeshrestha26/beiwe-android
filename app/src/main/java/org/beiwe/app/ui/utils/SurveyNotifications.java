@@ -18,6 +18,8 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
@@ -106,6 +108,12 @@ public class SurveyNotifications {
 
 		//And, finally, set the notification state for zombie alarms.
 		PersistentData.setSurveyNotificationState(surveyId, true);
+
+		// Check if notifications have been disabled
+		if ( !notificationManager.areNotificationsEnabled() ) {
+			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "Participant has blocked notifications (1)");
+			Log.e("SurveyNotifications", "Participant has blocked notifications (1)");
+		}
 	}
 
 	/**
@@ -173,6 +181,12 @@ public class SurveyNotifications {
 
 		//And, finally, set the notification state for zombie alarms.
 		PersistentData.setSurveyNotificationState(surveyId, true);
+
+		// Check if notifications have been disabled
+		if ( !notificationManager.areNotificationsEnabled() ) {
+			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "Participant has blocked notifications (2)");
+			Log.e("SurveyNotifications", "Participant has blocked notifications (2)");
+		}
 	}
 
 	// Apps targeting api 26 or later need a notification channel to display notifications
