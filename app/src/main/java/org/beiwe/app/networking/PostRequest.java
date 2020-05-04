@@ -287,7 +287,7 @@ public class PostRequest {
 		Thread fcmInstanceIDThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doRequest(addWebsitePrefix(appContext.getString(R.string.set_fcm_token)), PostRequest.makeParameter("fcm_token", finalToken));
+				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.set_fcm_token)), PostRequest.makeParameter("fcm_token", finalToken));
 			}
 		}, "fcm_instance_id_thread");
 		fcmInstanceIDThread.start();
@@ -298,7 +298,7 @@ public class PostRequest {
 		Thread sendNotificationThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doRequest(addWebsitePrefix(appContext.getString(R.string.notification_url)), "");
+				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.notification_url)), "");
 			}
 		}, "send_notification_thread");
 		sendNotificationThread.start();
@@ -309,22 +309,21 @@ public class PostRequest {
 		Thread sendNotificationThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doRequest(addWebsitePrefix(appContext.getString(R.string.push_survey_url)), "");
+				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.push_survey_url)), "");
 			}
 		}, "send_survey_notification_thread");
 		sendNotificationThread.start();
 	}
 
-	private static void doRequest(String url, String parameters) {
+	private static void doNotificationRequest(String url, String parameters) {
 //		String url = addWebsitePrefix(appContext.getString(R.string.push_survey_url));
-		HttpsURLConnection connection = null;
-		int response = 0;
+		HttpsURLConnection connection;
 		try {
 			connection = setupHTTP(parameters, new URL(url), null);
-			response = connection.getResponseCode();
-			Log.e("Tuck", "Response code: " + response);
+			Log.e("doNotificationRequest", "Response code: " + connection.getResponseCode());
 		} catch (IOException e) {
 			e.printStackTrace();
+			return;  // return so connection.disconnect() cannot error
 		}
 		connection.disconnect();
 	}
