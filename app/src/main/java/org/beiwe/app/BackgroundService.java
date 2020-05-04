@@ -1,26 +1,5 @@
 package org.beiwe.app;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.List;
-
-import org.beiwe.app.listeners.AccelerometerListener;
-import org.beiwe.app.listeners.GyroscopeListener;
-import org.beiwe.app.listeners.BluetoothListener;
-import org.beiwe.app.listeners.CallLogger;
-import org.beiwe.app.listeners.GPSListener;
-import org.beiwe.app.listeners.MMSSentLogger;
-import org.beiwe.app.listeners.PowerStateListener;
-import org.beiwe.app.listeners.SmsSentLogger;
-import org.beiwe.app.listeners.WifiListener;
-import org.beiwe.app.networking.PostRequest;
-import org.beiwe.app.networking.SurveyDownloader;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.storage.TextFileManager;
-import org.beiwe.app.survey.SurveyScheduler;
-import org.beiwe.app.ui.user.LoginActivity;
-import org.beiwe.app.ui.utils.SurveyNotifications;
-
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -46,6 +25,26 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+
+import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.BluetoothListener;
+import org.beiwe.app.listeners.CallLogger;
+import org.beiwe.app.listeners.GPSListener;
+import org.beiwe.app.listeners.GyroscopeListener;
+import org.beiwe.app.listeners.MMSSentLogger;
+import org.beiwe.app.listeners.PowerStateListener;
+import org.beiwe.app.listeners.SmsSentLogger;
+import org.beiwe.app.listeners.WifiListener;
+import org.beiwe.app.networking.PostRequest;
+import org.beiwe.app.networking.SurveyDownloader;
+import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
+import org.beiwe.app.survey.SurveyScheduler;
+import org.beiwe.app.ui.user.LoginActivity;
+import org.beiwe.app.ui.utils.SurveyNotifications;
+
+import java.util.Calendar;
+import java.util.List;
 
 import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
@@ -89,28 +88,35 @@ public class BackgroundService extends Service {
 		
 		doSetup();
 	}
-
-	public void initializeFireBaseIDToken( Context context ) {
-
+	
+	public void initializeFireBaseIDToken (Context context) {
+		
 		FirebaseInstanceId.getInstance().getInstanceId()
-				.addOnCompleteListener
-						(new OnCompleteListener<InstanceIdResult>() {
-							@Override
-							public void onComplete(@NonNull Task<InstanceIdResult> task) {
-								if (!task.isSuccessful()) {
-									Log.e("FCM", "getInstanceId failed", task.getException());
-									return;
-								}
-
-								// Get new Instance ID token
-								String token = task.getResult().getToken();
-
-								String msg = "FCM Token: " + token;
-								Log.i("FCM", msg);
-								PersistentData.setFCMInstanceID(token);
-								PostRequest.setFCMInstanceID(token);
-							}
-						});
+			.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+				@Override
+				public void onComplete (@NonNull Task<InstanceIdResult> task) {
+					String errorMessage = "Unable to get FCM token, will not be able to receive push notifications.";
+					
+					if (!task.isSuccessful()) {
+						Log.e("FCM", errorMessage, task.getException());
+						TextFileManager.writeDebugLogStatement(errorMessage + "(1)");
+						return;
+					}
+					
+					// Get new Instance ID token
+					InstanceIdResult taskResult = task.getResult();
+					if (taskResult == null) {
+						TextFileManager.writeDebugLogStatement(errorMessage + "(2)");
+						return;
+					}
+					
+					String token = taskResult.getToken();
+					String msg = "FCM Token: " + token;
+					Log.i("FCM", msg);
+					PersistentData.setFCMInstanceID(token);
+					PostRequest.setFCMInstanceID(token);
+				}
+			});
 	}
 
 	public void doSetup() {
@@ -129,7 +135,7 @@ public class BackgroundService extends Service {
 		else if (PersistentData.getCallsEnabled() ) { sendBroadcast(Timer.checkForCallsEnabled); }
 		//Only do the following if the device is registered
 		if ( PersistentData.isRegistered() ) {
-			DeviceInfo.initialize( appContext ); //if at registration this has already been initialized. (we don't care.)			
+			DeviceInfo.initialize( appContext ); //if at registration this has already been initialized. (we don't care.)
 			startTimers();
 		}
 	}
@@ -399,7 +405,7 @@ public class BackgroundService extends Service {
 				if ( PermissionHandler.checkBluetoothPermissions(appContext) ) {
 					if ( bluetoothListener != null) bluetoothListener.disableBLEScan(); }
 				timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDurationMilliseconds(), PersistentData.getBluetoothGlobalOffsetMilliseconds(), Timer.bluetoothOnIntent);
-				return; }			
+				return; }
 			
 			//starts a data upload attempt.
 			if (broadcastAction.equals( appContext.getString(R.string.upload_data_files_intent) ) ) {
@@ -462,7 +468,7 @@ public class BackgroundService extends Service {
 			}
 		}
 	};
-		
+	
 	/*##########################################################################################
 	############## code related to onStartCommand and binding to an activity ###################
 	##########################################################################################*/

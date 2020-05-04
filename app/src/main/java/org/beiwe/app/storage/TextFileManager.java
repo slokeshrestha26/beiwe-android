@@ -135,6 +135,21 @@ public class TextFileManager {
 		return debugLogFile;
 	}
 	
+	/** This correctly formats a debug log statement with a timecode, getDebugLogFile should
+	 * be made private and all usages should be converted */
+	public static void writeDebugLogStatement (String message) {
+		TextFileManager.getDebugLogFile().writeEncrypted(
+				System.currentTimeMillis() + "," + message
+		);
+	}
+	
+	/** As writeDebugLogStatement but takes a custom timecode instead of using the current system time.*/
+	public static void writeDebugLogStatement (long timecode, String message) {
+		TextFileManager.getDebugLogFile().writeEncrypted(
+			timecode + "," + message
+		);
+	}
+	
 	public static TextFileManager getKeyFile () {
 		checkAvailableWithTimeout("keyFile");
 		return keyFile;
