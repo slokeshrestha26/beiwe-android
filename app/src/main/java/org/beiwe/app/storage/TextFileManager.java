@@ -139,7 +139,7 @@ public class TextFileManager {
 	 * be made private and all usages should be converted */
 	public static void writeDebugLogStatement (String message) {
 		TextFileManager.getDebugLogFile().writeEncrypted(
-				System.currentTimeMillis() + "," + message
+			System.currentTimeMillis() + "," + message
 		);
 	}
 	
@@ -241,7 +241,7 @@ public class TextFileManager {
 	public static synchronized void initialize (Context appContext) {
 		//the key file for encryption (it is persistent and never written to)
 		keyFile = new TextFileManager(
-				appContext, "keyFile", "", true, true, false, false
+			appContext, "keyFile", "", true, true, false, false
 		);
 //      Persistent files (old, no longer used, but this is an example of a persistent file (one that does not get abandoned at shut-down/initialization) )
 //		currentDailyQuestions = new TextFileManager(
@@ -252,39 +252,39 @@ public class TextFileManager {
 //		);
 		// The debug file is no longer persistent, so that we can upload it to the server associated with a user, otherwise it has the name "logfile.txt" and fails to upload.
 		debugLogFile = new TextFileManager(
-				appContext, "logFile", "THIS LINE IS A LOG FILE HEADER", false, false, true, false
+			appContext, "logFile", "THIS LINE IS A LOG FILE HEADER", false, false, true, false
 		);
 		// Regularly/periodically-created files
 		GPSFile = new TextFileManager(
-				appContext, "gps", GPSListener.header, false, false, true, !PersistentData.getGpsEnabled()
+			appContext, "gps", GPSListener.header, false, false, true, !PersistentData.getGpsEnabled()
 		);
 		accelFile = new TextFileManager(
-				appContext, "accel", AccelerometerListener.header, false, false, true, !PersistentData.getAccelerometerEnabled()
+			appContext, "accel", AccelerometerListener.header, false, false, true, !PersistentData.getAccelerometerEnabled()
 		);
 		gyroFile = new TextFileManager(
-				appContext, "gyro", GyroscopeListener.header, false, false, true, !PersistentData.getGyroscopeEnabled()
+			appContext, "gyro", GyroscopeListener.header, false, false, true, !PersistentData.getGyroscopeEnabled()
 		);
 		textsLog = new TextFileManager(
-				appContext, "textsLog", SmsSentLogger.header, false, false, true, !PersistentData.getTextsEnabled()
+			appContext, "textsLog", SmsSentLogger.header, false, false, true, !PersistentData.getTextsEnabled()
 		);
 		callLog = new TextFileManager(
-				appContext, "callLog", CallLogger.header, false, false, true, !PersistentData.getCallsEnabled()
+			appContext, "callLog", CallLogger.header, false, false, true, !PersistentData.getCallsEnabled()
 		);
 		powerStateLog = new TextFileManager(
-				appContext, "powerState", PowerStateListener.header, false, false, true, !PersistentData.getPowerStateEnabled()
+			appContext, "powerState", PowerStateListener.header, false, false, true, !PersistentData.getPowerStateEnabled()
 		);
 		bluetoothLog = new TextFileManager(
-				appContext, "bluetoothLog", BluetoothListener.header, false, false, true, !PersistentData.getBluetoothEnabled()
+			appContext, "bluetoothLog", BluetoothListener.header, false, false, true, !PersistentData.getBluetoothEnabled()
 		);
 		// Files created on specific events/written to in one go.
 		surveyTimings = new TextFileManager(
-				appContext, "surveyTimings_", SurveyTimingsRecorder.header, false, false, true, false
+			appContext, "surveyTimings_", SurveyTimingsRecorder.header, false, false, true, false
 		);
 		surveyAnswers = new TextFileManager(
-				appContext, "surveyAnswers_", SurveyAnswersRecorder.header, false, false, true, false
+			appContext, "surveyAnswers_", SurveyAnswersRecorder.header, false, false, true, false
 		);
 		wifiLog = new TextFileManager(
-				appContext, "wifiLog", WifiListener.header, false, false, true, !PersistentData.getWifiEnabled()
+			appContext, "wifiLog", WifiListener.header, false, false, true, !PersistentData.getWifiEnabled()
 		);
 	}
 	
