@@ -33,26 +33,27 @@ public class SurveyDownloader {
 
 	private static void doDownload(final String url, final Context appContext, final String survey_id) { new HTTPAsync(url) {
 		String jsonResponseString;
+		
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			String parameters = "";
+			
 			if (survey_id != null) {
-				parameters += PostRequest.makeParameter("survey_id", survey_id);
+				String parameters = PostRequest.makeParameter("survey_id", survey_id);
 				try {
 					// jsonArrayToStringList() is expecting a list of JSON objects
 					// since we are only grabbing one survey, need to put it in a list
 					jsonResponseString = "["+PostRequest.httpRequestString( parameters, url)+"]";
 				}
-				catch (NullPointerException e) {  }  //We do not care.
-				return null; //hate
+				catch (NullPointerException ignored) {  }
 			} else {
 				try {
-					jsonResponseString = PostRequest.httpRequestString( parameters, url);
+					jsonResponseString = PostRequest.httpRequestString( "", url);
 				}
-				catch (NullPointerException e) {  }  //We do not care.
-				return null; //hate
+				catch (NullPointerException ignored) {  }
 			}
+			return null;  // hate.
 		}
+		
 		@Override
 		protected void onPostExecute(Void arg) {
 			responseCode = updateSurveys( appContext, jsonResponseString);
@@ -84,7 +85,7 @@ public class SurveyDownloader {
 		
 		for (String surveyString : surveys){
 			try { surveyJSON = new JSONObject(surveyString); }
-			catch (JSONException e) { 
+			catch (JSONException e) {
 				CrashHandler.writeCrashlog(e, appContext);
 				Log.e("Survey Downloader", "JSON fail 1"); return -1; }
 //			Log.d("debugging survey update", "whole thing: " + surveyJSON.toString());
@@ -108,7 +109,7 @@ public class SurveyDownloader {
 //			Log.d("debugging survey update", "questions: " + jsonQuestionsString);
 			
 			try { jsonTimingsString = surveyJSON.getString("timings"); }
-			catch (JSONException e) { 
+			catch (JSONException e) {
 				CrashHandler.writeCrashlog(e, appContext);
 				Log.e("Survey Downloader", "JSON fail 4"); return -1; }
 //			Log.d("debugging survey update", "timings: " + jsonTimingsString);
