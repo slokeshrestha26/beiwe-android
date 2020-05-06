@@ -50,6 +50,8 @@ import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
 import io.sentry.dsn.InvalidDsnException;
 
+import static java.lang.Thread.sleep;
+
 public class BackgroundService extends Service {
 	private Context appContext;
 	public GPSListener gpsListener;
@@ -66,8 +68,9 @@ public class BackgroundService extends Service {
 	//begin to run with an already fully instantiated background service.
 	private static BackgroundService localHandle;
 	
-	@Override
+	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
+	@Override
 	public void onCreate() {
 		appContext = this.getApplicationContext();
 		try {
@@ -89,36 +92,6 @@ public class BackgroundService extends Service {
 		doSetup();
 	}
 	
-	public void initializeFireBaseIDToken (Context context) {
-		
-		FirebaseInstanceId.getInstance().getInstanceId()
-			.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-				@Override
-				public void onComplete (@NonNull Task<InstanceIdResult> task) {
-					String errorMessage = "Unable to get FCM token, will not be able to receive push notifications.";
-					
-					if (!task.isSuccessful()) {
-						Log.e("FCM", errorMessage, task.getException());
-						TextFileManager.writeDebugLogStatement(errorMessage + "(1)");
-						return;
-					}
-					
-					// Get new Instance ID token
-					InstanceIdResult taskResult = task.getResult();
-					if (taskResult == null) {
-						TextFileManager.writeDebugLogStatement(errorMessage + "(2)");
-						return;
-					}
-					
-					String token = taskResult.getToken();
-					String msg = "FCM Token: " + token;
-					Log.i("FCM", msg);
-					PersistentData.setFCMInstanceID(token);
-					PostRequest.setFCMInstanceID(token);
-				}
-			});
-	}
-
 	public void doSetup() {
 		//Accelerometer and power state don't need permissons
 		startPowerStateListener();
@@ -237,6 +210,54 @@ public class BackgroundService extends Service {
 		List<String> surveyIds = PersistentData.getSurveyIds();
 		for (String surveyId : surveyIds) { filter.addAction(surveyId); }
 		appContext.registerReceiver(localHandle.timerReceiver, filter);
+	}
+	
+	/** Gets, sets, and pushes the FCM token to the backend. */
+	public void initializeFireBaseIDToken (Context context) {
+		final String errorMessage =
+			"Unable to get FCM token, will not be able to receive push notifications.";
+		
+		// Set up the oncomplete listener for the FCM getter code, then wait until registered
+		// to actually push it to the server or else the post request will error.
+		FirebaseInstanceId.getInstance().getInstanceId()
+			.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+				@Override
+				public void onComplete (@NonNull Task<InstanceIdResult> task) {
+					
+					if (!task.isSuccessful()) {
+						Log.e("FCM", errorMessage, task.getException());
+						TextFileManager.writeDebugLogStatement(errorMessage + "(1)");
+						return;
+					}
+					
+					// Get new Instance ID token
+					InstanceIdResult taskResult = task.getResult();
+					if (taskResult == null) {
+						TextFileManager.writeDebugLogStatement(errorMessage + "(2)");
+						return;
+					}
+					
+					//We need to wait until the participant is registered to send the fcm token.
+					final String token = taskResult.getToken();
+					Thread outerNotifcationBlockerThread = new Thread(new Runnable() {
+						@Override
+						public void run () {
+							while (!PersistentData.isRegistered()) {
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException ignored) {
+									TextFileManager.writeDebugLogStatement(errorMessage + "(3)");
+									return;
+								}
+							}
+							Log.i("FCM", "FCM Token: " + token);
+							PersistentData.setFCMInstanceID(token);
+							PostRequest.setFCMInstanceID(token);
+						}
+					}, "outerNotifcationBlockerThread");
+					outerNotifcationBlockerThread.start();
+				}
+			});
 	}
 	
 	/*#############################################################################
@@ -460,7 +481,7 @@ public class BackgroundService extends Service {
 			//this is a special action that will only run if the app device is in debug mode.
 			if (broadcastAction.equals("enterANR") && BuildConfig.APP_IS_BETA) {
 				try {
-					Thread.sleep(100000);
+					sleep(100000);
 				}
 				catch(InterruptedException ie) {
 					ie.printStackTrace();
