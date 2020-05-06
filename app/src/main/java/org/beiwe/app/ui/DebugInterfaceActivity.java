@@ -1,8 +1,12 @@
 package org.beiwe.app.ui;
 
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-import java.util.List;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import org.beiwe.app.BackgroundService;
 import org.beiwe.app.BuildConfig;
@@ -22,13 +26,9 @@ import org.beiwe.app.ui.utils.SurveyNotifications;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class DebugInterfaceActivity extends SessionActivity {
@@ -44,28 +44,32 @@ public class DebugInterfaceActivity extends SessionActivity {
 		if (BuildConfig.APP_IS_DEV) {
 			((TextView) findViewById(R.id.debugtexttwenty)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.button)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonPrintInternalLog)).setVisibility(View.VISIBLE);
+			((Button) findViewById(R.id.buttonPrintSurveys)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonClearInternalLog)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonDeleteEverything)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonListFiles)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonTimer)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonGetKeyFile)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.testEncryption)).setVisibility(View.VISIBLE);
+			((Button) findViewById(R.id.buttonStartTimer)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonLogDataToggles)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonAlarmStates)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonFeaturesEnabled)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonFeaturesPermissable)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonCrashUi)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonCrashBackground)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonCrashBackgroundInFive)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonTestManualErrorReport)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.stopBackgroundService)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.sendNotification)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.sendSurveyNotification)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonEnterANRUI)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.buttonEnterANRBackground)).setVisibility(View.VISIBLE);
+			
+			// These are specialized and only need to be enabled when testing app resurrection.
+			// ((Button) findViewById(R.id.buttonCrashUi)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonCrashBackground)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonCrashBackgroundInFive)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonTestManualErrorReport)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.stopBackgroundService)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonEnterANRUI)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonEnterANRBackground)).setVisibility(View.VISIBLE);
+			
+			// These are seriously old and don't need to be visible under almost all circumstances.
+			// ((Button) findViewById(R.id.testEncryption)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonPrintInternalLog)).setVisibility(View.VISIBLE);
+			// ((Button) findViewById(R.id.buttonGetKeyFile)).setVisibility(View.VISIBLE);
 		}
-
 	}
 	
 	//Intent triggers caught in BackgroundService
@@ -86,6 +90,15 @@ public class DebugInterfaceActivity extends SessionActivity {
 		for( String line : log.split("\n") ) {
 			Log.i( "log file...", line ); }
 //		Log.i("log file encrypted", EncryptionEngine.encryptAES(log) );
+	}
+	public void printSurveys(View view) {
+		List<String> surveyIDs = PersistentData.getSurveyIds();
+		Log.i("debug", surveyIDs.toString());
+		
+		for( String survey_id : surveyIDs ) {
+			Log.i("survey", survey_id);
+			Log.i("survey", PersistentData.getSurveyContent(survey_id));
+		}
 	}
 	public void testEncrypt (View view) {
 		Log.i("Debug..", TextFileManager.getKeyFile().read());
@@ -160,7 +173,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 	//network operations
 	public void uploadDataFiles(View view) { PostRequest.uploadAllFiles(); }
 	public void runSurveyDownload(View view) { SurveyDownloader.downloadSurveys(getApplicationContext()); }
-	public void buttonTimer(View view) { backgroundService.startTimers(); }	
+	public void buttonStartTimer(View view) { backgroundService.startTimers(); }
 	
 	
 	//file operations

@@ -163,7 +163,15 @@
 			android:layout_height="wrap_content"
 			android:onClick="printInternalLog"
 			android:text="(dev) Log Internal Log"
-		android:visibility="gone"/>
+			android:visibility="gone"/>
+
+		<Button
+			android:id="@+id/buttonPrintSurveys"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="printSurveys"
+			android:text="(dev) Log Surveys"
+			android:visibility="gone"/>
 
 		<Button
 			android:id="@+id/buttonClearInternalLog"
@@ -190,10 +198,10 @@
 			android:visibility="gone"/>
 
 		<Button
-			android:id="@+id/buttonTimer"
+			android:id="@+id/buttonStartTimer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:onClick="buttonTimer"
+			android:onClick="buttonStartTimer"
 			android:text="(dev) Run Start Timer Logic"
 			android:visibility="gone"/>
 
