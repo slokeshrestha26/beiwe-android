@@ -280,7 +280,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 	}
 
 	public void sendNotification(View view) {
-		PostRequest.sendNotification();
+		PostRequest.sendTestNotification();
 	}
 
 	public void sendSurveyNotification(View view) {

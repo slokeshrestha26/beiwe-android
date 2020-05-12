@@ -83,7 +83,7 @@ public class BackgroundService extends Service {
 
 		Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(appContext));
 		PersistentData.initialize( appContext );
-		initializeFireBaseIDToken( appContext );
+		initializeFireBaseIDToken();
 		TextFileManager.initialize( appContext );
 		PostRequest.initialize( appContext );
 		localHandle = this;  //yes yes, hacky, I know. This line needs to run before registerTimers()
@@ -213,7 +213,7 @@ public class BackgroundService extends Service {
 	}
 	
 	/** Gets, sets, and pushes the FCM token to the backend. */
-	public void initializeFireBaseIDToken (Context context) {
+	public void initializeFireBaseIDToken () {
 		final String errorMessage =
 			"Unable to get FCM token, will not be able to receive push notifications.";
 		
@@ -250,7 +250,6 @@ public class BackgroundService extends Service {
 									return;
 								}
 							}
-							Log.i("FCM", "FCM Token: " + token);
 							PersistentData.setFCMInstanceID(token);
 							PostRequest.setFCMInstanceID(token);
 						}

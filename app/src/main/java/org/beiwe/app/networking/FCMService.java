@@ -14,6 +14,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import org.beiwe.app.R;
 import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
 import org.beiwe.app.ui.user.MainMenuActivity;
 import org.beiwe.app.ui.utils.SurveyNotifications;
 
@@ -26,15 +27,28 @@ public class FCMService extends FirebaseMessagingService {
      * is initially generated so this is where you would retrieve the token.
      */
     @Override
-    public void onNewToken(String token) {
-        Log.i("FCM", "Refreshed token: " + token);
-
+    public void onNewToken (String token) {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-
-        PersistentData.setFCMInstanceID(token);
-        PostRequest.setFCMInstanceID(token);
+        final String errorMessage = "Unable to get FCM token, will not be able to receive push notifications.";
+        final String final_token = token;
+        Thread fcmBlockerThread = new Thread(new Runnable() {
+            @Override
+            public void run () {
+                while (!PersistentData.isRegistered()) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                        TextFileManager.writeDebugLogStatement(errorMessage + "(3)");
+                        return;
+                    }
+                }
+                PersistentData.setFCMInstanceID(final_token);
+                PostRequest.setFCMInstanceID(final_token);
+            }
+        }, "fcmBlockerThread");
+        fcmBlockerThread.start();
     }
 
     @Override
