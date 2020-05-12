@@ -132,7 +132,6 @@ public class PostRequest {
 		connection.setRequestProperty("Cache-Control", "no-cache");
 		connection.setConnectTimeout(3000);
 		connection.setReadTimeout(5000);
-
 		return connection;
 	}
 
@@ -156,7 +155,7 @@ public class PostRequest {
 	/**Reads in the response data from an HttpsURLConnection, returns it as a String.
 	 * @param connection an HttpsURLConnection
 	 * @return a String containing return data
-	 * @throws IOException */
+	 * @throws IOException on network requests io exceptions can occur */
 	private static String readResponse(HttpsURLConnection connection) throws IOException {
 		Integer responseCode = connection.getResponseCode();
 		if (responseCode == 200) {
@@ -178,6 +177,7 @@ public class PostRequest {
 		HttpsURLConnection connection = setupHTTP( parameters, new URL( urlString ), null );
 		connection.connect();
 		String data = readResponse(connection);
+		connection.getInputStream().close();
 		connection.disconnect();
 		return data;
 	}
@@ -186,6 +186,7 @@ public class PostRequest {
 	private static int doPostRequestGetResponseCode(String parameters, URL url, String newPassword) throws IOException {
 		HttpsURLConnection connection = setupHTTP(parameters, url, newPassword);
 		int response = connection.getResponseCode();
+		connection.getInputStream().close();
 		connection.disconnect();
 		return response;
 	}
@@ -198,17 +199,19 @@ public class PostRequest {
 			String responseBody = readResponse(connection);
 			try {
 				JSONObject responseJSON = new JSONObject(responseBody);
+				connection.getInputStream().close();
+				connection.disconnect();
 				String key = responseJSON.getString("client_public_key");
 				writeKey(key, response);
 				JSONObject deviceSettings = responseJSON.getJSONObject("device_settings");
 				SetDeviceSettings.writeDeviceSettings(deviceSettings);
 			} catch (JSONException e) {
-				// this gets called once per app lifecycle, print the error because this is a pain to debug.
+				// this gets called once per app lifecycle, always print the error because this is a pain to debug.
 				e.printStackTrace();
+				PersistentData.setErrorDuringRegistration(true);
 				CrashHandler.writeCrashlog(e, appContext); 
 			}
 		}
-		connection.disconnect();
 		return response;
 	}
 
@@ -218,6 +221,7 @@ public class PostRequest {
 		HttpsURLConnection connection = setupHTTP(parameters, url, null);
 		int response = connection.getResponseCode();
 		String responseBody = readResponse(connection);
+		connection.getInputStream().close();
 		connection.disconnect();
 		return response;
 	}
@@ -229,6 +233,7 @@ public class PostRequest {
 		// Log.d( "PostRequest", "Received a key: " + key );
 		TextFileManager.getKeyFile().deleteSafely();
 		TextFileManager.getKeyFile().safeWritePlaintext( key );
+		PersistentData.setKeyWritten(true);
 		return httpResponse;
 	}
 	
@@ -281,24 +286,26 @@ public class PostRequest {
 		return response;
 	}
 
-	public static void setFCMInstanceID(String token) {
-		if ( !NetworkUtility.canUpload(appContext) ) { return; }
+	public static void setFCMInstanceID (String token) {
+		if (!NetworkUtility.canUpload(appContext)) {
+			return;
+		}
 		final String finalToken = token;
 		Thread fcmInstanceIDThread = new Thread(new Runnable() {
 			@Override
-			public void run() {
+			public void run () {
 				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.set_fcm_token)), PostRequest.makeParameter("fcm_token", finalToken));
 			}
 		}, "fcm_instance_id_thread");
 		fcmInstanceIDThread.start();
 	}
 
-	public static void sendNotification() {
+	public static void sendTestNotification () {
 		if ( !NetworkUtility.canUpload(appContext) ) { return; }
 		Thread sendNotificationThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.notification_url)), "");
+				doNotificationRequest(addWebsitePrefix(appContext.getString(R.string.test_notification_url)), "");
 			}
 		}, "send_notification_thread");
 		sendNotificationThread.start();
@@ -316,7 +323,6 @@ public class PostRequest {
 	}
 
 	private static void doNotificationRequest(String url, String parameters) {
-//		String url = addWebsitePrefix(appContext.getString(R.string.push_survey_url));
 		HttpsURLConnection connection;
 		try {
 			connection = setupHTTP(parameters, new URL(url), null);

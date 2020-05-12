@@ -23,9 +23,10 @@ public class PersistentData {
 
 	private static int PRIVATE_MODE = 0;
 	private static boolean isInitialized = false;
-
+	
+	
 	// Private things that are encapsulated using functions in this class 
-	private static SharedPreferences pref; 
+	private static SharedPreferences pref;
 	private static Editor editor;
 	private static Context appContext;
 	
@@ -35,6 +36,10 @@ public class PersistentData {
 	private static final String KEY_ID = "uid";
 	private static final String KEY_PASSWORD = "password";
 	private static final String IS_REGISTERED = "IsRegistered";
+	private static final String DEVICE_SETTINGS_SET = "deviceSettingsSet";
+	private static final String KEY_WRITTEN = "keyWritten";
+	private static final String ERROR_DURING_REGISTRATION = "errorDuringRegistration";
+	
 	private static final String LOGIN_EXPIRATION = "loginExpirationTimestamp";
 	private static final String PCP_PHONE_KEY = "primary_care";
 	private static final String PASSWORD_RESET_NUMBER_KEY = "reset_number";
@@ -69,12 +74,11 @@ public class PersistentData {
 	private static final String SURVEY_IDS = "survey_ids";
 //	private static final String SURVEY_QUESTION_IDS = "question_ids";
 
-	/*#####################################################################################
-	################################### Initializing ######################################
-	#####################################################################################*/
+	/*#################################################################################################
+	################################### Initializing and Editing ######################################
+	#################################################################################################*/
 
-	/**The publicly accessible initializing function for the LoginManager, initializes the internal variables.
-	 * @param context */
+	/**The publicly accessible initializing function for the LoginManager, initializes the internal variables. */
 	public static void initialize( Context context ) {
 		if ( isInitialized ) { return; }
 		appContext = context;
@@ -82,8 +86,29 @@ public class PersistentData {
 		editor = pref.edit();
 		editor.commit();
 		isInitialized = true;
-	} 
+	}
 
+	private static void putCommit(String name, long l) {
+		editor.putLong(name, l);
+		editor.commit();
+	}
+	private static void putCommit(String name, boolean b) {
+		editor.putBoolean(name, b);
+		editor.commit();
+	}
+	private static void putCommit(String name, String s) {
+		editor.putString(name, s);
+		editor.commit();
+	}
+	private static void putCommit(String name, float f) {
+		editor.putFloat(name, f);
+		editor.commit();
+	}
+	private static void putCommit(String name, int i) {
+		editor.putInt(name, i);
+		editor.commit();
+	}
+	
 	/*#####################################################################################
 	##################################### User State ######################################
 	#####################################################################################*/
@@ -92,28 +117,59 @@ public class PersistentData {
 	public static boolean isLoggedIn(){
 		if (pref == null) Log.w("LoginManager", "FAILED AT ISLOGGEDIN");
 		// If the current time is earlier than the expiration time, return TRUE; else FALSE
-		return (System.currentTimeMillis() < pref.getLong(LOGIN_EXPIRATION, 0)); }
+		return (System.currentTimeMillis() < pref.getLong(LOGIN_EXPIRATION, 0));
+	}
 
 	/** Set the login session to expire a fixed amount of time in the future */
 	public static void loginOrRefreshLogin() {
-		editor.putLong(LOGIN_EXPIRATION, System.currentTimeMillis() + getMillisecondsBeforeAutoLogout());
-		editor.commit(); }
+		putCommit(LOGIN_EXPIRATION, System.currentTimeMillis() + getMillisecondsBeforeAutoLogout());
+	}
 
 	/** Set the login session to "expired" */
 	public static void logout() {
-		editor.putLong(LOGIN_EXPIRATION, 0);
-		editor.commit(); }
+		putCommit(LOGIN_EXPIRATION, 0);
+	}
 
 	/**Getter for the IS_REGISTERED value. */
-	public static boolean isRegistered() { 
+	public static boolean isRegistered() {
 		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
 		return pref.getBoolean(IS_REGISTERED, false); }
 
-	/**Setter for the IS_REGISTERED value.
-	 * @param value */
-	public static void setRegistered(boolean value) { 
-		editor.putBoolean(IS_REGISTERED, value);
-		editor.commit(); }
+	/**Setter for the IS_REGISTERED value. */
+	public static void setRegistered(boolean value) {
+		putCommit(IS_REGISTERED, value);
+	}
+	
+	/**Getter for DEVICE_SETTINGS_SET. */
+	public static boolean getDeviceSettingsAreSet() {
+		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
+		return pref.getBoolean(DEVICE_SETTINGS_SET, false); }
+	
+	/**Setter for the DEVICE_SETTINGS_SET value. */
+	public static void setDeviceSettingsAreSet(boolean value) {
+		putCommit(DEVICE_SETTINGS_SET, value);
+	}
+	
+	/**Getter for KEY_WRITTEN. */
+	public static boolean getKeyWritten() {
+		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
+		return pref.getBoolean(KEY_WRITTEN, false); }
+	
+	/**Setter for the KEY_WRITTEN value. */
+	public static void setKeyWritten(boolean value) {
+		putCommit(KEY_WRITTEN, value);
+	}
+	
+	/**Getter for ERROR_DURING_REGISTRATION. */
+	public static boolean getErrorDuringRegistration() {
+		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
+		return pref.getBoolean(ERROR_DURING_REGISTRATION, false); }
+	
+	/**Setter for the ERROR_DURING_REGISTRATION value. */
+	public static void setErrorDuringRegistration(boolean value) {
+		putCommit(ERROR_DURING_REGISTRATION, value);
+	}
+		
 
 	/*######################################################################################
 	##################################### Passwords ########################################
@@ -135,17 +191,12 @@ public class PersistentData {
 		}
 	}
 
- 	/**Takes an input string and returns a boolean value stating whether the input matches the current password.
-	 * @param input
-	 * @param input
-	 * @return */
+ 	/**Takes an input string and returns a boolean value stating whether the input matches the current password. */
 	public static boolean checkPassword(String input){ return ( getPassword().equals( EncryptionEngine.safeHash(input) ) ); }
 
-	/**Sets a password to a hash of the provided value.
-	 * @param password */
+	/**Sets a password to a hash of the provided value. */
 	public static void setPassword(String password) {
-		editor.putString(KEY_PASSWORD, EncryptionEngine.safeHash(password) );
-		editor.commit();
+		putCommit(KEY_PASSWORD, EncryptionEngine.safeHash(password) );
 	}
 
 	/*#####################################################################################
@@ -153,12 +204,13 @@ public class PersistentData {
 	#####################################################################################*/
 
 	public static void setFCMInstanceID(String fcmInstanceID) {
-		editor.putString(FCM_INSTANCE_ID, fcmInstanceID);
-		editor.commit(); }
+		putCommit(FCM_INSTANCE_ID, fcmInstanceID);
+	}
 
 	public static String getFCMInstanceID() {
 		return pref.getString(FCM_INSTANCE_ID, null); }
-
+	
+	
 	
 	/*#####################################################################################
 	################################# Listener Settings ###################################
@@ -175,32 +227,32 @@ public class PersistentData {
 	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
 	
 	public static void setAccelerometerEnabled(boolean enabled) {
-		editor.putBoolean(ACCELEROMETER, enabled);
-		editor.commit(); }
+		putCommit(ACCELEROMETER, enabled);
+	}
 	public static void setGyroscopeEnabled(boolean enabled) {
-		editor.putBoolean(GYROSCOPE, enabled);
-		editor.commit(); }
+		putCommit(GYROSCOPE, enabled);
+	}
 	public static void setGpsEnabled(boolean enabled) {
-		editor.putBoolean(GPS, enabled);
-		editor.commit(); }
+		putCommit(GPS, enabled);
+	}
 	public static void setCallsEnabled(boolean enabled) {
-		editor.putBoolean(CALLS, enabled);
-		editor.commit(); }
+		putCommit(CALLS, enabled);
+	}
 	public static void setTextsEnabled(boolean enabled) {
-		editor.putBoolean(TEXTS, enabled);
-		editor.commit(); }
+		putCommit(TEXTS, enabled);
+	}
 	public static void setWifiEnabled(boolean enabled) {
-		editor.putBoolean(WIFI, enabled);
-		editor.commit(); }
+		putCommit(WIFI, enabled);
+	}
 	public static void setBluetoothEnabled(boolean enabled) {
-		editor.putBoolean(BLUETOOTH, enabled);
-		editor.commit(); }
+		putCommit(BLUETOOTH, enabled);
+	}
 	public static void setPowerStateEnabled(boolean enabled) {
-		editor.putBoolean(POWER_STATE, enabled);
-		editor.commit(); }
+		putCommit(POWER_STATE, enabled);
+	}
 	public static void setAllowUploadOverCellularData(boolean enabled) {
-		editor.putBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled);
-		editor.commit(); }
+		putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled);
+	}
 	
 	/*#####################################################################################
 	################################## Timer Settings #####################################
@@ -240,56 +292,55 @@ public class PersistentData {
 	public static long getWifiLogFrequencyMilliseconds() { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, DEFAULT_WIFI_LOG_FREQUENCY); }
 
 	public static void setAccelerometerOffDurationSeconds(long seconds) {
-		editor.putLong(ACCELEROMETER_OFF_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(ACCELEROMETER_OFF_DURATION_SECONDS, seconds);
+	}
 	public static void setAccelerometerOnDurationSeconds(long seconds) {
-		editor.putLong(ACCELEROMETER_ON_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(ACCELEROMETER_ON_DURATION_SECONDS, seconds);
+	}
 	public static void setGyroscopeOffDurationSeconds(long seconds) {
-		editor.putLong(GYROSCOPE_OFF_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(GYROSCOPE_OFF_DURATION_SECONDS, seconds);
+	}
 	public static void setGyroscopeOnDurationSeconds(long seconds) {
-		editor.putLong(GYROSCOPE_ON_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(GYROSCOPE_ON_DURATION_SECONDS, seconds);
+	}
 	public static void setBluetoothOnDurationSeconds(long seconds) {
-		editor.putLong(BLUETOOTH_ON_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(BLUETOOTH_ON_DURATION_SECONDS, seconds);
+	}
 	public static void setBluetoothTotalDurationSeconds(long seconds) {
-		editor.putLong(BLUETOOTH_TOTAL_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(BLUETOOTH_TOTAL_DURATION_SECONDS, seconds);
+	}
 	public static void setBluetoothGlobalOffsetSeconds(long seconds) {
-		editor.putLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds);
+	}
 	public static void setCheckForNewSurveysFrequencySeconds(long seconds) {
-		editor.putLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds);
+	}
 	public static void setCreateNewDataFilesFrequencySeconds(long seconds) {
-		editor.putLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds);
+	}
 	public static void setGpsOffDurationSeconds(long seconds) {
-		editor.putLong(GPS_OFF_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(GPS_OFF_DURATION_SECONDS, seconds);
+	}
 	public static void setGpsOnDurationSeconds(long seconds) {
-		editor.putLong(GPS_ON_DURATION_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(GPS_ON_DURATION_SECONDS, seconds);
+	}
 	public static void setSecondsBeforeAutoLogout(long seconds) {
-		editor.putLong(SECONDS_BEFORE_AUTO_LOGOUT, seconds);
-		editor.commit(); }
+		putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds);
+	}
 	public static void setUploadDataFilesFrequencySeconds(long seconds) {
-		editor.putLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds);
+	}
 	public static void setVoiceRecordingMaxTimeLengthSeconds(long seconds) {
-		editor.putLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds);
-		editor.commit(); }
+		putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds);
+	}
 	public static void setWifiLogFrequencySeconds(long seconds) {
-		editor.putLong(WIFI_LOG_FREQUENCY_SECONDS, seconds);
-		editor.commit(); }
-
+		putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds);
+	}
 	
 	//accelerometer, gyroscope bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
 	public static void setMostRecentAlarmTime(String identifier, long time) {
-		editor.putLong(identifier + "-prior_alarm", time);
-		editor.commit(); }
+		putCommit(identifier + "-prior_alarm", time);
+	}
 	public static long getMostRecentAlarmTime(String identifier) { return pref.getLong( identifier + "-prior_alarm", 0); }
 	//we want default to be 0 so that checks "is this value less than the current expected value" (eg "did this timer event pass already")
 	
@@ -316,17 +367,17 @@ public class PersistentData {
 		return pref.getString(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, defaultText); }
 	
 	public static void setAboutPageText(String text) {
-		editor.putString(ABOUT_PAGE_TEXT_KEY, text);
-		editor.commit(); }
+		putCommit(ABOUT_PAGE_TEXT_KEY, text);
+	}
 	public static void setCallClinicianButtonText(String text) {
-		editor.putString(CALL_CLINICIAN_BUTTON_TEXT_KEY, text);
-		editor.commit(); }
+		putCommit(CALL_CLINICIAN_BUTTON_TEXT_KEY, text);
+	}
 	public static void setConsentFormText(String text) {
-		editor.putString(CONSENT_FORM_TEXT_KEY, text);
-		editor.commit(); }
+		putCommit(CONSENT_FORM_TEXT_KEY, text);
+	}
 	public static void setSurveySubmitSuccessToastText(String text) {
-		editor.putString(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, text);
-		editor.commit(); }
+		putCommit(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, text);
+	}
 
 	/*###########################################################################################
 	################################### User Credentials ########################################
@@ -334,8 +385,8 @@ public class PersistentData {
 
 	public static void setServerUrl(String serverUrl) {
 		if (editor == null) Log.e("LoginManager.java", "editor is null in setServerUrl()");
-		editor.putString(SERVER_URL_KEY, prependHttpsToServerUrl(serverUrl));
-		editor.commit(); }
+		putCommit(SERVER_URL_KEY, prependHttpsToServerUrl(serverUrl));
+	}
 	private static String prependHttpsToServerUrl(String serverUrl) {
 		if (serverUrl.startsWith("https://")) {
 			return serverUrl;
@@ -349,9 +400,9 @@ public class PersistentData {
 
 	public static void setLoginCredentials( String userID, String password ) {
 		if (editor == null) Log.e("LoginManager.java", "editor is null in setLoginCredentials()");
-		editor.putString(KEY_ID, userID);
+		putCommit(KEY_ID, userID);
 		setPassword(password);
-		editor.commit(); }
+	}
 
 	public static String getPassword() { return pref.getString( KEY_PASSWORD, null ); }
 	public static String getPatientID() { return pref.getString(KEY_ID, NULL_ID); }
@@ -362,13 +413,13 @@ public class PersistentData {
 
 	public static String getPrimaryCareNumber() { return pref.getString(PCP_PHONE_KEY, ""); }
 	public static void setPrimaryCareNumber( String phoneNumber) {
-		editor.putString(PCP_PHONE_KEY, phoneNumber );
-		editor.commit(); }
+		putCommit(PCP_PHONE_KEY, phoneNumber );
+	}
 
 	public static String getPasswordResetNumber() { return pref.getString(PASSWORD_RESET_NUMBER_KEY, ""); }
 	public static void setPasswordResetNumber( String phoneNumber ){
-		editor.putString(PASSWORD_RESET_NUMBER_KEY, phoneNumber );
-		editor.commit(); }
+		putCommit(PASSWORD_RESET_NUMBER_KEY, phoneNumber );
+	}
 
 	/*###########################################################################################
 	###################################### Survey Info ##########################################
@@ -391,28 +442,25 @@ public class PersistentData {
 	}
 	//individual setters
 	public static void setSurveyContent(String surveyId, String content){
-		editor.putString(surveyId + "-content", content);
-		editor.commit(); }
+		putCommit(surveyId + "-content", content);
+	}
 	public static void setSurveyTimes(String surveyId, String times){
-		editor.putString(surveyId + "-times", times);
-		editor.commit(); }
+		putCommit(surveyId + "-times", times);
+	}
 	public static void setSurveyType(String surveyId, String type){
-		editor.putString(surveyId + "-type", type);
-		editor.commit(); }
+		putCommit(surveyId + "-type", type);
+	}
 	public static void setSurveySettings(String surveyId, String settings){
-//		Log.d("presistent data", "setting survey settings: " + settings);
-		editor.putString(surveyId + "-settings", settings);
-		editor.commit();
+		putCommit(surveyId + "-settings", settings);
 	}
 	
 	//survey state storage
 	public static void setSurveyNotificationState(String surveyId, Boolean bool ) {
-		editor.putBoolean(surveyId + "-notificationState", bool );
-		editor.commit(); }
+		putCommit(surveyId + "-notificationState", bool );
+	}
 	public static void setMostRecentSurveyAlarmTime(String surveyId, long time) {
-		editor.putLong(surveyId + "-prior_alarm", time);
-		editor.commit(); }
-	
+		putCommit(surveyId + "-prior_alarm", time);
+	}
 	
 	public static void deleteSurvey(String surveyId) {
 		editor.remove(surveyId + "-content");
@@ -433,13 +481,12 @@ public class PersistentData {
 		try { return new JSONArray(jsonString); }
 		catch (JSONException e) { throw new NullPointerException("getSurveyIds failed, json string was: " + jsonString ); }
 	}
-		
+	
 	public static void addSurveyId(String surveyId) {
 		List<String> list = JSONUtils.jsonArrayToStringList( getSurveyIdsJsonArray() );
 		if ( !list.contains(surveyId) ) {
 			list.add(surveyId);
-			editor.putString(SURVEY_IDS, new JSONArray(list).toString() );
-			editor.commit();
+			putCommit(SURVEY_IDS, new JSONArray(list).toString() );
 		}
 		else { throw new NullPointerException("duplicate survey id added: " + surveyId); } //we ensure uniqueness in the downloader, this should be unreachable.
 	}
@@ -448,34 +495,30 @@ public class PersistentData {
 		List<String> list = JSONUtils.jsonArrayToStringList( getSurveyIdsJsonArray() );
 		if ( list.contains(surveyId) ) {
 			list.remove(surveyId);
-			editor.putString(SURVEY_IDS, new JSONArray(list).toString() );
-			editor.commit();
+			putCommit(SURVEY_IDS, new JSONArray(list).toString() );
 		}
 		else { throw new NullPointerException("survey id does not exist: " + surveyId); } //we ensure uniqueness in the downloader, this should be unreachable.
 	}
 	
-
 	private static JSONArray getSurveyQuestionMemoryJsonArray( String surveyId ) {
 		String jsonString = pref.getString(surveyId + "-questionIds", "0");
 		if (jsonString == "0") { return new JSONArray(); } //return empty if the list is empty
 		try { return new JSONArray(jsonString); }
 		catch (JSONException e) { throw new NullPointerException("getSurveyIds failed, json string was: " + jsonString ); }
 	}
-		
+	
 	public static void addSurveyQuestionMemory(String surveyId, String questionId) {
 		List<String> list = getSurveyQuestionMemory(surveyId);
 		// Log.d("persistent data", "adding questionId: " + questionId);
 		if ( !list.contains(questionId) ) {
 			list.add(questionId);
-			editor.putString(surveyId + "-questionIds", new JSONArray(list).toString() );
-			editor.commit();
+			putCommit(surveyId + "-questionIds", new JSONArray(list).toString() );
 		}
 		else { throw new NullPointerException("duplicate question id added: " + questionId); } //we ensure uniqueness in the downloader, this should be unreachable.
 	}
 	
 	public static void clearSurveyQuestionMemory(String surveyId) {
-		editor.putString(surveyId + "-questionIds", new JSONArray().toString() );
-		editor.commit();
+		putCommit(surveyId + "-questionIds", new JSONArray().toString() );
 	}
 
 	/*###########################################################################################
@@ -491,8 +534,7 @@ public class PersistentData {
 		String saltString = pref.getString(HASH_SALT_KEY, null);
 		if(saltString == null) { // create salt if it does not exist
 			byte[] newSalt = SecureRandom.getSeed(64);
-			editor.putString(HASH_SALT_KEY, new String(newSalt));
-			editor.commit();
+			putCommit(HASH_SALT_KEY, new String(newSalt));
 			return newSalt;
 		}
 		else {
@@ -506,8 +548,7 @@ public class PersistentData {
 		if(iterations == 0) { // create iterations if it does not exist
 			// create random iteration count from 900 to 1100
 			int newIterations = 1100 - new Random().nextInt(200);
-			editor.putInt(HASH_ITERATIONS_KEY, newIterations);
-			editor.commit();
+			putCommit(HASH_ITERATIONS_KEY, newIterations);
 			return newIterations;
 		}
 		else {
@@ -516,8 +557,7 @@ public class PersistentData {
 	}
 
 	public static void setUseAnonymizedHashing(boolean useAnonymizedHashing) {
-		editor.putBoolean(USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing);
-		editor.commit();
+		putCommit(USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing);
 	}
 	public static boolean getUseAnonymizedHashing() {
 		return pref.getBoolean(USE_ANONYMIZED_HASHING_KEY, true); //If not present, default to safe hashing
@@ -538,8 +578,7 @@ public class PersistentData {
 			if(newLatitudeOffset > 1) {
 				newLatitudeOffset = (newLatitudeOffset-.8f) * -1;
 			}
-			editor.putFloat(LATITUDE_OFFSET_KEY, newLatitudeOffset);
-			editor.commit();
+			putCommit(LATITUDE_OFFSET_KEY, newLatitudeOffset);
 			return newLatitudeOffset;
 		}
 		else {
@@ -554,8 +593,7 @@ public class PersistentData {
 			if(newLongitudeOffset > 180) {
 				newLongitudeOffset = (newLongitudeOffset-170) * -1;
 			}
-			editor.putFloat(LONGITUDE_OFFSET_KEY, newLongitudeOffset);
-			editor.commit();
+			putCommit(LONGITUDE_OFFSET_KEY, newLongitudeOffset);
 			return newLongitudeOffset;
 		}
 		else {
@@ -564,8 +602,7 @@ public class PersistentData {
 	}
 
 	public static void setUseGpsFuzzing(boolean useFuzzyGps) {
-		editor.putBoolean(USE_GPS_FUZZING_KEY, useFuzzyGps);
-		editor.commit();
+		putCommit(USE_GPS_FUZZING_KEY, useFuzzyGps);
 	}
 	private static boolean getUseGpsFuzzing() {
 		return pref.getBoolean(USE_GPS_FUZZING_KEY, false);
@@ -583,7 +620,7 @@ public class PersistentData {
 	}
 
 	public static void setCallClinicianButtonEnabled(boolean enabled) {
-		editor.putBoolean(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled);
+		putCommit(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled);
 	}
 
 	public static boolean getCallResearchAssistantButtonEnabled() {
@@ -591,6 +628,14 @@ public class PersistentData {
 	}
 
 	public static void setCallResearchAssistantButtonEnabled(boolean enabled) {
-		editor.putBoolean(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled);
+		putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled);
+	}
+	
+	/** if the key was not written, or the device settings failed to parse, or there was an error
+	 * in the registration request... return false. */
+	public static boolean checkBadRegistration(){
+		return (
+			!PersistentData.getKeyWritten() || !PersistentData.getDeviceSettingsAreSet() || PersistentData.getErrorDuringRegistration()
+		);
 	}
 }

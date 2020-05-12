@@ -73,10 +73,9 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 		newPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
 		confirmNewPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
 	}
-
-
-	/** Registration sequence begins here, called when the submit button is pressed.
-	 * @param view */
+	
+	
+	/** Registration sequence begins here, called when the submit button is pressed. */
 	public synchronized void registerButtonPressed(View view) {
 		String serverUrl = serverUrlInput.getText().toString();
 		String userID = userIdInput.getText().toString();
@@ -90,7 +89,6 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 		} else if (userID.length() == 0) {
 			// If the user id length is too short, alert the user
 			AlertsManager.showAlert(getString(R.string.invalid_user_id), getString(R.string.couldnt_register), this);
-			return;
 		} else if (tempPassword.length() < 1) {
 			// If the temporary registration password isn't filled in
 			AlertsManager.showAlert(getString(R.string.empty_temp_password), getString(R.string.couldnt_register), this);
@@ -98,11 +96,9 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			// If the new password has too few characters
 			String alertMessage = String.format(getString(R.string.password_too_short), PersistentData.minPasswordLength());
 			AlertsManager.showAlert(alertMessage, getString(R.string.couldnt_register), this);
-			return;
 		} else if (!newPassword.equals(confirmNewPassword)) {
 			// If the new password doesn't match the confirm new password
 			AlertsManager.showAlert(getString(R.string.password_mismatch), getString(R.string.couldnt_register), this);
-			return;
 		} else {
 			if (BuildConfig.CUSTOMIZABLE_SERVER_URL) {
 				PersistentData.setServerUrl(serverUrl);
@@ -110,6 +106,10 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			PersistentData.setLoginCredentials(userID, tempPassword);
 			// Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
 			tryToRegisterWithTheServer(this, addWebsitePrefix(getApplicationContext().getString(R.string.register_url)), newPassword);
+			
+			if (PersistentData.checkBadRegistration()){
+				showBadRegistrationServerAlert(this);
+			}
 		}
 	}
 	
@@ -135,11 +135,17 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 							PostRequest.makeParameter("product", DeviceInfo.getProduct() ) +
 							PostRequest.makeParameter("beiwe_version", DeviceInfo.getBeiweVersion() );
 				responseCode = PostRequest.httpRegister(parameters, url);
-
+				
+				// if the key did not get written, or the device settings were not set, or there was
+				// an error during registration, fail.
+				if (PersistentData.checkBadRegistration()){
+					return null;
+				}
+				
 				// If we are not using anonymized hashing, resubmit the phone identifying information
 				if (responseCode == 200 && !PersistentData.getUseAnonymizedHashing()) { // This short circuits so if the initial register fails, it won't try here
 					try {
-						//Sleep for one second so the backend does not receive information with overlapping timestamps
+						//Sleep for one second so the backend does not receive information with overlapping timestamps.... haaax...
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -156,7 +162,7 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 							PostRequest.makeParameter("model", DeviceInfo.getModel() ) +
 							PostRequest.makeParameter("product", DeviceInfo.getProduct() ) +
 							PostRequest.makeParameter("beiwe_version", DeviceInfo.getBeiweVersion() );
-					int resp = PostRequest.httpRegisterAgain(parameters, url);
+					PostRequest.httpRegisterAgain(parameters, url);
 				}
 				return null;
 			}
@@ -164,6 +170,11 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			@Override
 			protected void onPostExecute(Void arg) {
 				super.onPostExecute(arg);
+				
+				if (PersistentData.checkBadRegistration()){
+					return;
+				}
+				
 				if (responseCode == 200) {
 					PersistentData.setPassword(newPassword);
 
@@ -218,7 +229,7 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 
 	
 	@Override
-	protected void onResume() {  
+	protected void onResume() {
 		// Log.i("reg", "onResume");
 		super.onResume();
 		activityNotVisible = false;
@@ -235,7 +246,7 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 				!PermissionHandler.checkAccessReadSms(getApplicationContext()) &&
 				!thisResumeCausedByFalseActivityReturn) {
 			if (shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS) ) {
-				if (!prePromptActive && !postPromptActive ) { showPostPermissionAlert(this); } 
+				if (!prePromptActive && !postPromptActive ) { showPostPermissionAlert(this); }
 			}
 			else if (!prePromptActive && !postPromptActive ) { showPrePermissionAlert(this); }
 		}

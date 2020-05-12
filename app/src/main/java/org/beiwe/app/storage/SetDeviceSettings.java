@@ -97,5 +97,8 @@ public class SetDeviceSettings {
 		try { callResearchAssistantButtonEnabled = deviceSettings.getBoolean("call_research_assistant_button_enabled"); }
 		catch (JSONException e) { callResearchAssistantButtonEnabled = true; }
 		PersistentData.setCallResearchAssistantButtonEnabled(callResearchAssistantButtonEnabled);
+		
+		// Set whether the device settings have been parsed and set,
+		PersistentData.setDeviceSettingsAreSet(true);
 	}
 }
