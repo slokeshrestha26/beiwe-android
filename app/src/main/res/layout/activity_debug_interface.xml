@@ -55,8 +55,15 @@
 	        android:layout_height="wrap_content"
 	        android:onClick="popSurveyNotifications"
 	        android:text="Trigger All Survey Notifications" />
-	    
-	    <TextView
+
+		<Button
+			android:id="@+id/clearNotifications"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="clearNotifications"
+			android:text="Clear Notifications" />
+
+		<TextView
 		    android:id="@+id/debugtext5"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
@@ -310,11 +317,11 @@
 			android:visibility="gone"/>
 
 		<Button
-			android:id="@+id/sendNotification"
+			android:id="@+id/sendTestNotification"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:onClick="sendNotification"
-			android:text="(dev) Send Push Notification"
+			android:onClick="sendTestNotification"
+			android:text="(dev) Send Test Push Notification"
 			android:visibility="gone"/>
 
 		<Button

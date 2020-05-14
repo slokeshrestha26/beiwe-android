@@ -216,6 +216,7 @@ public class SurveyNotifications {
 	public static void dismissNotification(Context appContext, String surveyId) {
  		NotificationManager notificationManager = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.cancel(surveyId.hashCode());
+		PersistentData.setSurveyNotificationState(surveyId, false);
 	}
 	
 	

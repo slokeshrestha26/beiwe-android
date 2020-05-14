@@ -53,7 +53,7 @@ public class DebugInterfaceActivity extends SessionActivity {
 			((Button) findViewById(R.id.buttonAlarmStates)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonFeaturesEnabled)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.buttonFeaturesPermissable)).setVisibility(View.VISIBLE);
-			((Button) findViewById(R.id.sendNotification)).setVisibility(View.VISIBLE);
+			((Button) findViewById(R.id.sendTestNotification)).setVisibility(View.VISIBLE);
 			((Button) findViewById(R.id.sendSurveyNotification)).setVisibility(View.VISIBLE);
 			
 			// These are specialized and only need to be enabled when testing app resurrection.
@@ -279,11 +279,17 @@ public class DebugInterfaceActivity extends SessionActivity {
 		Log.v("debug", "" + i); i++;
 	}
 
-	public void sendNotification(View view) {
+	public void sendTestNotification(View view) {
 		PostRequest.sendTestNotification();
 	}
 
 	public void sendSurveyNotification(View view) {
 		PostRequest.sendSurveyNotification();
+	}
+	
+	public void clearNotifications(View view) {
+		for (String surveyId : PersistentData.getSurveyIds()){
+			SurveyNotifications.dismissNotification(appContext, surveyId);
+		}
 	}
 }
