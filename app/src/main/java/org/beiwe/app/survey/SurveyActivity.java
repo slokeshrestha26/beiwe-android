@@ -163,7 +163,6 @@ public class SurveyActivity extends SessionActivity implements
 
 		// Close the Activity
 		startActivity(new Intent(getApplicationContext(), MainMenuActivity.class));
-		PersistentData.setSurveyNotificationState(surveyId, false);
 		SurveyNotifications.dismissNotification(getApplicationContext(), surveyId);
 		finish();
 	}

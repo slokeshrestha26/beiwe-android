@@ -58,7 +58,6 @@ public class FCMService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.i("FCM", "Message data payload: " + remoteMessage.getData());
-
         }
 
         if (remoteMessage.getNotification() != null) {
@@ -74,7 +73,7 @@ public class FCMService extends FirebaseMessagingService {
         Intent intent;
         if (remoteMessage.getData().get("type").equals("survey")) {
             String surveyId = remoteMessage.getData().get("survey_id");
-            SurveyDownloader.downloadSingleSurvey(appContext, surveyId);
+            SurveyDownloader.downloadSurveys(appContext);
             SurveyNotifications.displaySurveyNotification(appContext, surveyId);
         } else {
             intent = new Intent(appContext, MainMenuActivity.class);
