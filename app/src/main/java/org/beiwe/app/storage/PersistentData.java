@@ -474,7 +474,7 @@ public class PersistentData {
 	}
 	
 	//array style storage and removal for surveyIds and questionIds	
-	private static JSONArray getSurveyIdsJsonArray() {
+	public static JSONArray getSurveyIdsJsonArray() {
 		String jsonString = pref.getString(SURVEY_IDS, "0");
 		// Log.d("persistant data", "getting ids: " + jsonString);
 		if (jsonString == "0") { return new JSONArray(); } //return empty if the list is empty
