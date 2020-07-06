@@ -46,7 +46,6 @@
     <string name="set_fcm_token" translatable="false">/set_fcm_token</string>
     <string name="test_notification_url" translatable="false">/test_notification</string>
     <string name="push_survey_url" translatable="false">/send_survey_notification</string>
-    <string name="download_survey_url" translatable="false">/download_survey</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">Make a Voice Recording</string>
