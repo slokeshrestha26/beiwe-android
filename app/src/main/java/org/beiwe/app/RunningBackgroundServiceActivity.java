@@ -68,7 +68,10 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	@Override
 	protected void onCreate(Bundle bundle){ 
 		super.onCreate(bundle);
-		Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
+		if (!BuildConfig.APP_IS_DEV) {
+			Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(getApplicationContext()));
+		}
+		
 		PersistentData.initialize(getApplicationContext());
 	}
 	

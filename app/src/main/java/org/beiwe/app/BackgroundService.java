@@ -80,8 +80,11 @@ public class BackgroundService extends Service {
 		catch (InvalidDsnException ie){
 			Sentry.init(new AndroidSentryClientFactory(appContext));
 		}
-
-		Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(appContext));
+		
+		if (!BuildConfig.APP_IS_DEV) {
+			Thread.setDefaultUncaughtExceptionHandler(new CrashHandler(appContext));
+		}
+		
 		PersistentData.initialize( appContext );
 		initializeFireBaseIDToken();
 		TextFileManager.initialize( appContext );
