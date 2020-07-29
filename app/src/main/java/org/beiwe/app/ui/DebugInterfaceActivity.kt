@@ -5,8 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_debug_interface.*
 import org.beiwe.app.*
 import org.beiwe.app.Timer
 import org.beiwe.app.networking.PostRequest
@@ -20,7 +19,6 @@ import org.beiwe.app.ui.user.MainMenuActivity
 import org.beiwe.app.ui.utils.SurveyNotifications
 import org.json.JSONArray
 import org.json.JSONException
-import java.lang.Boolean
 import java.security.spec.InvalidKeySpecException
 import java.util.*
 
@@ -31,34 +29,32 @@ class DebugInterfaceActivity : SessionActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_debug_interface)
         appContext = this.applicationContext
-        if (BuildConfig.APP_IS_DEV) {
-            (findViewById<View>(R.id.debugtexttwenty) as TextView).visibility = View.VISIBLE
-            (findViewById<View>(R.id.button) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonPrintSurveys) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonClearInternalLog) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonDeleteEverything) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonListFiles) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonStartTimer) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonLogDataToggles) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonAlarmStates) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonFeaturesEnabled) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.buttonFeaturesPermissable) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.sendTestNotification) as Button).visibility = View.VISIBLE
-            (findViewById<View>(R.id.sendSurveyNotification) as Button).visibility = View.VISIBLE
-
+        if (BuildConfig.APP_IS_DEV) {   debugtexttwenty.visibility = View.VISIBLE
+            button.visibility = View.VISIBLE
+            buttonPrintSurveys.visibility = View.VISIBLE
+            buttonClearInternalLog.visibility = View.VISIBLE
+            buttonDeleteEverything.visibility = View.VISIBLE
+            buttonListFiles.visibility = View.VISIBLE
+            buttonStartTimer.visibility = View.VISIBLE
+            buttonLogDataToggles.visibility = View.VISIBLE
+            buttonAlarmStates.visibility = View.VISIBLE
+            buttonFeaturesEnabled.visibility = View.VISIBLE
+            buttonFeaturesPermissable.visibility = View.VISIBLE
+            sendTestNotification.visibility = View.VISIBLE
+            sendSurveyNotification.visibility = View.VISIBLE
             // These are specialized and only need to be enabled when testing app resurrection.
-            // ((Button) findViewById(R.id.buttonCrashUi)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonCrashBackground)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonCrashBackgroundInFive)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonTestManualErrorReport)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.stopBackgroundService)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonEnterANRUI)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonEnterANRBackground)).setVisibility(View.VISIBLE);
+            // buttonCrashUi.visibility = View.VISIBLE
+            // buttonCrashBackground.visibility = View.VISIBLE
+            // buttonCrashBackgroundInFive.visibility = View.VISIBLE
+            // buttonTestManualErrorReport.visibility = View.VISIBLE
+            // stopBackgroundService.visibility = View.VISIBLE
+            // buttonEnterANRUI.visibility = View.VISIBLE
+            // buttonEnterANRBackground.visibility = View.VISIBLE
 
             // These are seriously old and don't need to be visible under almost all circumstances.
-            // ((Button) findViewById(R.id.testEncryption)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonPrintInternalLog)).setVisibility(View.VISIBLE);
-            // ((Button) findViewById(R.id.buttonGetKeyFile)).setVisibility(View.VISIBLE);
+            // testEncryption.visibility View.VISIBLE
+            // buttonPrintInternalLog.visibility View.VISIBLE
+            // buttonGetKeyFile.visibility View.VISIBLE
         }
     }
 
@@ -122,6 +118,7 @@ class DebugInterfaceActivity : SessionActivity() {
         Log.i("Debug..", TextFileManager.getKeyFile().read())
         val data = TextFileManager.getKeyFile().read()
         Log.i("reading keyFile:", data)
+
         try {
             EncryptionEngine.readKey()
         } catch (e: InvalidKeySpecException) {
@@ -129,14 +126,15 @@ class DebugInterfaceActivity : SessionActivity() {
             e.printStackTrace()
             throw NullPointerException("some form of encryption error, type 1")
         }
-        val encrypted: String
-        encrypted = try {
+
+        val encrypted = try {
             EncryptionEngine.encryptRSA("ThIs Is a TeSt".toByteArray()).toString()
         } catch (e: InvalidKeySpecException) {
             Log.e("DebugInterfaceActivity", "this is only partially implemented, unknown behavior")
             e.printStackTrace()
             throw NullPointerException("some form of encryption error, type 2")
         }
+
         Log.i("test encrypt - length:", "" + encrypted.length)
         Log.i("test encrypt - output:", encrypted)
         Log.i("test hash:", EncryptionEngine.safeHash(encrypted))
@@ -144,14 +142,14 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun logDataToggles(view: View?) {
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Accelerometer: " + Boolean.toString(PersistentData.getAccelerometerEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Gyroscope: " + Boolean.toString(PersistentData.getGyroscopeEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "GPS: " + Boolean.toString(PersistentData.getGpsEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Calls: " + Boolean.toString(PersistentData.getCallsEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Texts: " + Boolean.toString(PersistentData.getTextsEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "WiFi: " + Boolean.toString(PersistentData.getWifiEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Bluetooth: " + Boolean.toString(PersistentData.getBluetoothEnabled()))
-        Log.i("DebugInterfaceActivity.logDataToggles()", "Power State: " + Boolean.toString(PersistentData.getPowerStateEnabled()))
+        Log.i("Debug.DataToggles", "Accelerometer: " + PersistentData.getAccelerometerEnabled().toString() )
+        Log.i("Debug.DataToggles", "Gyroscope: " + PersistentData.getGyroscopeEnabled().toString() )
+        Log.i("Debug.DataToggles", "GPS: " + PersistentData.getGpsEnabled().toString() )
+        Log.i("Debug.DataToggles", "Calls: " + PersistentData.getCallsEnabled().toString() )
+        Log.i("Debug.DataToggles", "Texts: " + PersistentData.getTextsEnabled().toString() )
+        Log.i("Debug.DataToggles", "WiFi: " + PersistentData.getWifiEnabled().toString() )
+        Log.i("Debug.DataToggles", "Bluetooth: " + PersistentData.getBluetoothEnabled().toString() )
+        Log.i("Debug.DataToggles", "Power State: " + PersistentData.getPowerStateEnabled().toString() )
     }
 
     fun getAlarmStates(view: View?) {
@@ -162,114 +160,113 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun getEnabledFeatures(view: View?) {
-        if (PersistentData.getAccelerometerEnabled()) {
+        if (PersistentData.getAccelerometerEnabled())
             Log.i("features", "Accelerometer Enabled.")
-        } else {
+        else
             Log.e("features", "Accelerometer Disabled.")
-        }
-        if (PersistentData.getGyroscopeEnabled()) {
+
+        if (PersistentData.getGyroscopeEnabled())
             Log.i("features", "Gyroscope Enabled.")
-        } else {
+        else
             Log.e("features", "Gyroscope Disabled.")
-        }
-        if (PersistentData.getGpsEnabled()) {
+
+        if (PersistentData.getGpsEnabled())
             Log.i("features", "Gps Enabled.")
-        } else {
+        else
             Log.e("features", "Gps Disabled.")
-        }
-        if (PersistentData.getCallsEnabled()) {
+
+        if (PersistentData.getCallsEnabled())
             Log.i("features", "Calls Enabled.")
-        } else {
+        else
             Log.e("features", "Calls Disabled.")
-        }
-        if (PersistentData.getTextsEnabled()) {
+
+        if (PersistentData.getTextsEnabled())
             Log.i("features", "Texts Enabled.")
-        } else {
+        else
             Log.e("features", "Texts Disabled.")
-        }
-        if (PersistentData.getWifiEnabled()) {
+
+        if (PersistentData.getWifiEnabled())
             Log.i("features", "Wifi Enabled.")
-        } else {
+        else
             Log.e("features", "Wifi Disabled.")
-        }
-        if (PersistentData.getBluetoothEnabled()) {
+
+        if (PersistentData.getBluetoothEnabled())
             Log.i("features", "Bluetooth Enabled.")
-        } else {
+        else
             Log.e("features", "Bluetooth Disabled.")
-        }
-        if (PersistentData.getPowerStateEnabled()) {
+
+        if (PersistentData.getPowerStateEnabled())
             Log.i("features", "PowerState Enabled.")
-        } else {
+        else
             Log.e("features", "PowerState Disabled.")
-        }
+
     }
 
     fun getPermissableFeatures(view: View?) {
-        if (PermissionHandler.checkAccessFineLocation(applicationContext)) {
+        if (PermissionHandler.checkAccessFineLocation(applicationContext))
             Log.i("permissions", "AccessFineLocation enabled.")
-        } else {
+        else
             Log.e("permissions", "AccessFineLocation disabled.")
-        }
-        if (PermissionHandler.checkAccessNetworkState(applicationContext)) {
+
+        if (PermissionHandler.checkAccessNetworkState(applicationContext))
             Log.i("permissions", "AccessNetworkState enabled.")
-        } else {
+        else
             Log.e("permissions", "AccessNetworkState disabled.")
-        }
-        if (PermissionHandler.checkAccessWifiState(applicationContext)) {
+
+        if (PermissionHandler.checkAccessWifiState(applicationContext))
             Log.i("permissions", "AccessWifiState enabled.")
-        } else {
+        else
             Log.e("permissions", "AccessWifiState disabled.")
-        }
-        if (PermissionHandler.checkAccessBluetooth(applicationContext)) {
+
+        if (PermissionHandler.checkAccessBluetooth(applicationContext))
             Log.i("permissions", "Bluetooth enabled.")
-        } else {
+        else
             Log.e("permissions", "Bluetooth disabled.")
-        }
-        if (PermissionHandler.checkAccessBluetoothAdmin(applicationContext)) {
+
+        if (PermissionHandler.checkAccessBluetoothAdmin(applicationContext))
             Log.i("permissions", "BluetoothAdmin enabled.")
-        } else {
+        else
             Log.e("permissions", "BluetoothAdmin disabled.")
-        }
-        if (PermissionHandler.checkAccessCallPhone(applicationContext)) {
+
+        if (PermissionHandler.checkAccessCallPhone(applicationContext))
             Log.i("permissions", "CallPhone enabled.")
-        } else {
+        else
             Log.e("permissions", "CallPhone disabled.")
-        }
-        if (PermissionHandler.checkAccessReadCallLog(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReadCallLog(applicationContext))
             Log.i("permissions", "ReadCallLog enabled.")
-        } else {
+        else
             Log.e("permissions", "ReadCallLog disabled.")
-        }
-        if (PermissionHandler.checkAccessReadContacts(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReadContacts(applicationContext))
             Log.i("permissions", "ReadContacts enabled.")
-        } else {
+        else
             Log.e("permissions", "ReadContacts disabled.")
-        }
-        if (PermissionHandler.checkAccessReadPhoneState(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReadPhoneState(applicationContext))
             Log.i("permissions", "ReadPhoneState enabled.")
-        } else {
+        else
             Log.e("permissions", "ReadPhoneState disabled.")
-        }
-        if (PermissionHandler.checkAccessReadSms(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReadSms(applicationContext))
             Log.i("permissions", "ReadSms enabled.")
-        } else {
+        else
             Log.e("permissions", "ReadSms disabled.")
-        }
-        if (PermissionHandler.checkAccessReceiveMms(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReceiveMms(applicationContext))
             Log.i("permissions", "ReceiveMms enabled.")
-        } else {
+        else
             Log.e("permissions", "ReceiveMms disabled.")
-        }
-        if (PermissionHandler.checkAccessReceiveSms(applicationContext)) {
+
+        if (PermissionHandler.checkAccessReceiveSms(applicationContext))
             Log.i("permissions", "ReceiveSms enabled.")
-        } else {
+        else
             Log.e("permissions", "ReceiveSms disabled.")
-        }
-        if (PermissionHandler.checkAccessRecordAudio(applicationContext)) {
+
+        if (PermissionHandler.checkAccessRecordAudio(applicationContext))
             Log.i("permissions", "RecordAudio enabled.")
-        } else {
+        else
             Log.e("permissions", "RecordAudio disabled.")
-        }
     }
 
     fun clearInternalLog(view: View?) {
@@ -312,15 +309,16 @@ class DebugInterfaceActivity : SessionActivity() {
         Log.w("files...", "UPLOADABLE FILES")
         var files = TextFileManager.getAllUploadableFiles()
         Arrays.sort(files)
-        for (file in files) {
+
+        for (file in files)
             Log.i("files...", file)
-        }
+
         Log.w("files...", "ALL FILES")
         files = TextFileManager.getAllFiles()
         Arrays.sort(files)
-        for (file in files) {
+
+        for (file in files)
             Log.i("files...", file)
-        }
     }
 
     //ui operations
@@ -456,7 +454,6 @@ class DebugInterfaceActivity : SessionActivity() {
         i++
         steve.nextQuestion
         Log.v("debug", "" + i)
-        i++
     }
 
     fun sendTestNotification(view: View?) {
@@ -468,8 +465,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun clearNotifications(view: View?) {
-        for (surveyId in PersistentData.getSurveyIds()) {
+        for (surveyId in PersistentData.getSurveyIds())
             SurveyNotifications.dismissNotification(appContext, surveyId)
-        }
     }
 }
