@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.View;
@@ -45,12 +47,18 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 	private final static int PERMISSION_CALLBACK = 0; //This callback value can be anything, we are not really using it
 	private final static int REQUEST_PERMISSIONS_IDENTIFIER = 1500;
 	
+	Handler handler;
+	RegisterActivity self;
+	
 	/** Users will go into this activity first to register information on the phone and on the server. */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_register);
-
+		
+		handler = new Handler(Looper.getMainLooper());
+		self = this;
+		
 		if (!BuildConfig.CUSTOMIZABLE_SERVER_URL) {
 			TextView serverUrlCaption = (TextView) findViewById(R.id.serverUrlCaption);
 			EditText serverUrlInput = (EditText) findViewById(R.id.serverUrlInput);
@@ -111,11 +119,30 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			PersistentData.setLoginCredentials(userID, tempPassword);
 			
 			// Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
-			// this is asynchronous, it returns before the operations is finished.
 			tryToRegisterWithTheServer(this, addWebsitePrefix(getApplicationContext().getString(R.string.register_url)), newPassword);
+			
+			// We need a check here because the regeistering operation can return at weird times and
+			// result in some very confusing ui/ux.  By waiting 5 seconds we should hit 99% of
+			// usage scenarios.  (requires handler, added removal of callback in the ondestroy.
+			handler.postDelayed(checkBadRegistration, 5000);
 		}
 	}
 	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		// clear out bad registration callbacks on exit of activity.
+		handler.removeCallbacks(checkBadRegistration);
+	}
+	
+	Runnable checkBadRegistration = new Runnable() {
+		// expects to be run on the main thread
+		@Override
+		public void run () {
+			if (PersistentData.checkBadRegistration())
+				showBadRegistrationServerAlert(self);
+		}
+	};
 	
 	/**Implements the server request logic for user, device registration. 
 	 * @param url the URL for device registration*/

@@ -3,7 +3,6 @@ package org.beiwe.app.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_debug_interface.*
 import org.beiwe.app.*
@@ -29,8 +28,10 @@ class DebugInterfaceActivity : SessionActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_debug_interface)
         appContext = this.applicationContext
-        if (BuildConfig.APP_IS_DEV) {   debugtexttwenty.visibility = View.VISIBLE
-            button.visibility = View.VISIBLE
+
+        if (BuildConfig.APP_IS_DEV) {
+            debugtexttwenty.visibility = View.VISIBLE
+            testJsonLogicParser.visibility = View.VISIBLE
             buttonPrintSurveys.visibility = View.VISIBLE
             buttonClearInternalLog.visibility = View.VISIBLE
             buttonDeleteEverything.visibility = View.VISIBLE
@@ -42,6 +43,8 @@ class DebugInterfaceActivity : SessionActivity() {
             buttonFeaturesPermissable.visibility = View.VISIBLE
             sendTestNotification.visibility = View.VISIBLE
             sendSurveyNotification.visibility = View.VISIBLE
+            printSurveyContent.visibility = View.VISIBLE
+
             // These are specialized and only need to be enabled when testing app resurrection.
             // buttonCrashUi.visibility = View.VISIBLE
             // buttonCrashBackground.visibility = View.VISIBLE
@@ -53,7 +56,7 @@ class DebugInterfaceActivity : SessionActivity() {
 
             // These are seriously old and don't need to be visible under almost all circumstances.
             // testEncryption.visibility View.VISIBLE
-            // buttonPrintInternalLog.visibility View.VISIBLE
+            // buttonPrintInternalprintvisibility View.VISIBLE
             // buttonGetKeyFile.visibility View.VISIBLE
         }
     }
@@ -97,32 +100,39 @@ class DebugInterfaceActivity : SessionActivity() {
 
     //raw debugging info
     fun printInternalLog(view: View?) {
-        // Log.i("print log button pressed", "press.");
+        // printi("print log button pressed", "press.");
         val log = TextFileManager.getDebugLogFile().read()
         for (line in log.split("\n".toRegex()).toTypedArray()) {
-            Log.i("log file...", line)
+            printi("log file...", line)
         }
-        //		Log.i("log file encrypted", EncryptionEngine.encryptAES(log) );
+        //		printi("log file encrypted", EncryptionEngine.encryptAES(log) );
     }
 
     fun printSurveys(view: View?) {
         val surveyIDs = PersistentData.getSurveyIds()
-        Log.i("debug", surveyIDs.toString())
+        printi("debug", surveyIDs.toString())
         for (survey_id in surveyIDs) {
-            Log.i("survey", survey_id)
-            Log.i("survey", PersistentData.getSurveyContent(survey_id))
+            printi("survey", survey_id)
+            printi("survey", PersistentData.getSurveyContent(survey_id))
+        }
+    }
+
+    fun printSurveySettings(view: View) {
+        for (survey_id in PersistentData.getSurveyIds() ){
+            print(survey_id)
+            print(PersistentData.getSurveySettings(survey_id));
         }
     }
 
     fun testEncrypt(view: View?) {
-        Log.i("Debug..", TextFileManager.getKeyFile().read())
+        printi("Debug..", TextFileManager.getKeyFile().read())
         val data = TextFileManager.getKeyFile().read()
-        Log.i("reading keyFile:", data)
+        printi("reading keyFile:", data)
 
         try {
             EncryptionEngine.readKey()
         } catch (e: InvalidKeySpecException) {
-            Log.e("DebugInterfaceActivity", "this is only partially implemented, unknown behavior")
+            printe("DebugInterfaceActivity", "this is only partially implemented, unknown behavior")
             e.printStackTrace()
             throw NullPointerException("some form of encryption error, type 1")
         }
@@ -130,143 +140,143 @@ class DebugInterfaceActivity : SessionActivity() {
         val encrypted = try {
             EncryptionEngine.encryptRSA("ThIs Is a TeSt".toByteArray()).toString()
         } catch (e: InvalidKeySpecException) {
-            Log.e("DebugInterfaceActivity", "this is only partially implemented, unknown behavior")
+            printe("DebugInterfaceActivity", "this is only partially implemented, unknown behavior")
             e.printStackTrace()
             throw NullPointerException("some form of encryption error, type 2")
         }
 
-        Log.i("test encrypt - length:", "" + encrypted.length)
-        Log.i("test encrypt - output:", encrypted)
-        Log.i("test hash:", EncryptionEngine.safeHash(encrypted))
-        Log.i("test hash:", EncryptionEngine.hashMAC(encrypted))
+        printi("test encrypt - length:", "" + encrypted.length)
+        printi("test encrypt - output:", encrypted)
+        printi("test hash:", EncryptionEngine.safeHash(encrypted))
+        printi("test hash:", EncryptionEngine.hashMAC(encrypted))
     }
 
     fun logDataToggles(view: View?) {
-        Log.i("Debug.DataToggles", "Accelerometer: " + PersistentData.getAccelerometerEnabled().toString() )
-        Log.i("Debug.DataToggles", "Gyroscope: " + PersistentData.getGyroscopeEnabled().toString() )
-        Log.i("Debug.DataToggles", "GPS: " + PersistentData.getGpsEnabled().toString() )
-        Log.i("Debug.DataToggles", "Calls: " + PersistentData.getCallsEnabled().toString() )
-        Log.i("Debug.DataToggles", "Texts: " + PersistentData.getTextsEnabled().toString() )
-        Log.i("Debug.DataToggles", "WiFi: " + PersistentData.getWifiEnabled().toString() )
-        Log.i("Debug.DataToggles", "Bluetooth: " + PersistentData.getBluetoothEnabled().toString() )
-        Log.i("Debug.DataToggles", "Power State: " + PersistentData.getPowerStateEnabled().toString() )
+        printi("Debug.DataToggles", "Accelerometer: " + PersistentData.getAccelerometerEnabled().toString() )
+        printi("Debug.DataToggles", "Gyroscope: " + PersistentData.getGyroscopeEnabled().toString() )
+        printi("Debug.DataToggles", "GPS: " + PersistentData.getGpsEnabled().toString() )
+        printi("Debug.DataToggles", "Calls: " + PersistentData.getCallsEnabled().toString() )
+        printi("Debug.DataToggles", "Texts: " + PersistentData.getTextsEnabled().toString() )
+        printi("Debug.DataToggles", "WiFi: " + PersistentData.getWifiEnabled().toString() )
+        printi("Debug.DataToggles", "Bluetooth: " + PersistentData.getBluetoothEnabled().toString() )
+        printi("Debug.DataToggles", "Power State: " + PersistentData.getPowerStateEnabled().toString() )
     }
 
     fun getAlarmStates(view: View?) {
         val ids = PersistentData.getSurveyIds()
         for (surveyId in ids) {
-            Log.i("most recent alarm state", "survey id: " + surveyId + ", " + PersistentData.getMostRecentSurveyAlarmTime(surveyId) + ", " + PersistentData.getSurveyNotificationState(surveyId))
+            printi("most recent alarm state", "survey id: " + surveyId + ", " + PersistentData.getMostRecentSurveyAlarmTime(surveyId) + ", " + PersistentData.getSurveyNotificationState(surveyId))
         }
     }
 
     fun getEnabledFeatures(view: View?) {
         if (PersistentData.getAccelerometerEnabled())
-            Log.i("features", "Accelerometer Enabled.")
+            printi("features", "Accelerometer Enabled.")
         else
-            Log.e("features", "Accelerometer Disabled.")
+            printe("features", "Accelerometer Disabled.")
 
         if (PersistentData.getGyroscopeEnabled())
-            Log.i("features", "Gyroscope Enabled.")
+            printi("features", "Gyroscope Enabled.")
         else
-            Log.e("features", "Gyroscope Disabled.")
+            printe("features", "Gyroscope Disabled.")
 
         if (PersistentData.getGpsEnabled())
-            Log.i("features", "Gps Enabled.")
+            printi("features", "Gps Enabled.")
         else
-            Log.e("features", "Gps Disabled.")
+            printe("features", "Gps Disabled.")
 
         if (PersistentData.getCallsEnabled())
-            Log.i("features", "Calls Enabled.")
+            printi("features", "Calls Enabled.")
         else
-            Log.e("features", "Calls Disabled.")
+            printe("features", "Calls Disabled.")
 
         if (PersistentData.getTextsEnabled())
-            Log.i("features", "Texts Enabled.")
+            printi("features", "Texts Enabled.")
         else
-            Log.e("features", "Texts Disabled.")
+            printe("features", "Texts Disabled.")
 
         if (PersistentData.getWifiEnabled())
-            Log.i("features", "Wifi Enabled.")
+            printi("features", "Wifi Enabled.")
         else
-            Log.e("features", "Wifi Disabled.")
+            printe("features", "Wifi Disabled.")
 
         if (PersistentData.getBluetoothEnabled())
-            Log.i("features", "Bluetooth Enabled.")
+            printi("features", "Bluetooth Enabled.")
         else
-            Log.e("features", "Bluetooth Disabled.")
+            printe("features", "Bluetooth Disabled.")
 
         if (PersistentData.getPowerStateEnabled())
-            Log.i("features", "PowerState Enabled.")
+            printi("features", "PowerState Enabled.")
         else
-            Log.e("features", "PowerState Disabled.")
+            printe("features", "PowerState Disabled.")
 
     }
 
     fun getPermissableFeatures(view: View?) {
         if (PermissionHandler.checkAccessFineLocation(applicationContext))
-            Log.i("permissions", "AccessFineLocation enabled.")
+            printi("permissions", "AccessFineLocation enabled.")
         else
-            Log.e("permissions", "AccessFineLocation disabled.")
+            printe("permissions", "AccessFineLocation disabled.")
 
         if (PermissionHandler.checkAccessNetworkState(applicationContext))
-            Log.i("permissions", "AccessNetworkState enabled.")
+            printi("permissions", "AccessNetworkState enabled.")
         else
-            Log.e("permissions", "AccessNetworkState disabled.")
+            printe("permissions", "AccessNetworkState disabled.")
 
         if (PermissionHandler.checkAccessWifiState(applicationContext))
-            Log.i("permissions", "AccessWifiState enabled.")
+            printi("permissions", "AccessWifiState enabled.")
         else
-            Log.e("permissions", "AccessWifiState disabled.")
+            printe("permissions", "AccessWifiState disabled.")
 
         if (PermissionHandler.checkAccessBluetooth(applicationContext))
-            Log.i("permissions", "Bluetooth enabled.")
+            printi("permissions", "Bluetooth enabled.")
         else
-            Log.e("permissions", "Bluetooth disabled.")
+            printe("permissions", "Bluetooth disabled.")
 
         if (PermissionHandler.checkAccessBluetoothAdmin(applicationContext))
-            Log.i("permissions", "BluetoothAdmin enabled.")
+            printi("permissions", "BluetoothAdmin enabled.")
         else
-            Log.e("permissions", "BluetoothAdmin disabled.")
+            printe("permissions", "BluetoothAdmin disabled.")
 
         if (PermissionHandler.checkAccessCallPhone(applicationContext))
-            Log.i("permissions", "CallPhone enabled.")
+            printi("permissions", "CallPhone enabled.")
         else
-            Log.e("permissions", "CallPhone disabled.")
+            printe("permissions", "CallPhone disabled.")
 
         if (PermissionHandler.checkAccessReadCallLog(applicationContext))
-            Log.i("permissions", "ReadCallLog enabled.")
+            printi("permissions", "ReadCallLog enabled.")
         else
-            Log.e("permissions", "ReadCallLog disabled.")
+            printe("permissions", "ReadCallLog disabled.")
 
         if (PermissionHandler.checkAccessReadContacts(applicationContext))
-            Log.i("permissions", "ReadContacts enabled.")
+            printi("permissions", "ReadContacts enabled.")
         else
-            Log.e("permissions", "ReadContacts disabled.")
+            printe("permissions", "ReadContacts disabled.")
 
         if (PermissionHandler.checkAccessReadPhoneState(applicationContext))
-            Log.i("permissions", "ReadPhoneState enabled.")
+            printi("permissions", "ReadPhoneState enabled.")
         else
-            Log.e("permissions", "ReadPhoneState disabled.")
+            printe("permissions", "ReadPhoneState disabled.")
 
         if (PermissionHandler.checkAccessReadSms(applicationContext))
-            Log.i("permissions", "ReadSms enabled.")
+            printi("permissions", "ReadSms enabled.")
         else
-            Log.e("permissions", "ReadSms disabled.")
+            printe("permissions", "ReadSms disabled.")
 
         if (PermissionHandler.checkAccessReceiveMms(applicationContext))
-            Log.i("permissions", "ReceiveMms enabled.")
+            printi("permissions", "ReceiveMms enabled.")
         else
-            Log.e("permissions", "ReceiveMms disabled.")
+            printe("permissions", "ReceiveMms disabled.")
 
         if (PermissionHandler.checkAccessReceiveSms(applicationContext))
-            Log.i("permissions", "ReceiveSms enabled.")
+            printi("permissions", "ReceiveSms enabled.")
         else
-            Log.e("permissions", "ReceiveSms disabled.")
+            printe("permissions", "ReceiveSms disabled.")
 
         if (PermissionHandler.checkAccessRecordAudio(applicationContext))
-            Log.i("permissions", "RecordAudio enabled.")
+            printi("permissions", "RecordAudio enabled.")
         else
-            Log.e("permissions", "RecordAudio disabled.")
+            printe("permissions", "RecordAudio disabled.")
     }
 
     fun clearInternalLog(view: View?) {
@@ -274,7 +284,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun getKeyFile(view: View?) {
-        Log.i("DEBUG", "key file data: " + TextFileManager.getKeyFile().read())
+        printi("DEBUG", "key file data: " + TextFileManager.getKeyFile().read())
     }
 
     //network operations
@@ -296,29 +306,29 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun deleteEverything(view: View?) {
-        Log.i("Delete Everything button pressed", "poke.")
+        printi("Delete Everything button pressed", "poke.")
         val files = TextFileManager.getAllFiles()
         Arrays.sort(files)
         for (file in files) {
-            Log.i("files...", file)
+            printi("files...", file)
         }
         TextFileManager.deleteEverything()
     }
 
     fun listFiles(view: View?) {
-        Log.w("files...", "UPLOADABLE FILES")
+        printw("files...", "UPLOADABLE FILES")
         var files = TextFileManager.getAllUploadableFiles()
         Arrays.sort(files)
 
         for (file in files)
-            Log.i("files...", file)
+            printi("files...", file)
 
-        Log.w("files...", "ALL FILES")
+        printw("files...", "ALL FILES")
         files = TextFileManager.getAllFiles()
         Arrays.sort(files)
 
         for (file in files)
-            Log.i("files...", file)
+            printi("files...", file)
     }
 
     //ui operations
@@ -379,81 +389,81 @@ class DebugInterfaceActivity : SessionActivity() {
             questions = JSONArray(JsonQuestionsListString)
             steve = JsonSkipLogic(questions, runDisplayLogic, applicationContext)
         } catch (e: JSONException) {
-            Log.e("Debug", "it dun gon wronge.")
+            printe("Debug", "it dun gon wronge.")
             e.printStackTrace()
             throw NullPointerException("it done gon wronge")
         }
         var i = 0
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
         i++
         steve.nextQuestion
-        Log.v("debug", "" + i)
+        printv("debug", "" + i)
     }
 
     fun sendTestNotification(view: View?) {

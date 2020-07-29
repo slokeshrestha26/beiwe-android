@@ -95,24 +95,40 @@ public class BackgroundService extends Service {
 		doSetup();
 	}
 	
-	public void doSetup() {
+	public void doSetup () {
 		//Accelerometer and power state don't need permissons
 		startPowerStateListener();
 		gpsListener = new GPSListener(appContext); // Permissions are checked in the broadcast receiver
-		WifiListener.initialize( appContext );
-		if ( PersistentData.getAccelerometerEnabled() ) { accelerometerListener = new AccelerometerListener( appContext ); }
-		if ( PersistentData.getGyroscopeEnabled() ) { gyroscopeListener = new GyroscopeListener( appContext ); }
+		WifiListener.initialize(appContext);
+		
+		if (PersistentData.getAccelerometerEnabled())
+			accelerometerListener = new AccelerometerListener(appContext);
+		
+		if (PersistentData.getGyroscopeEnabled())
+			gyroscopeListener = new GyroscopeListener(appContext);
+		
 		//Bluetooth, wifi, gps, calls, and texts need permissions
-		if ( PermissionHandler.confirmBluetooth(appContext)) { startBluetooth(); }
-//		if ( PermissionHandler.confirmWifi(appContext) ) { WifiListener.initialize( appContext ); }
-		if ( PermissionHandler.confirmTexts(appContext) ) { startSmsSentLogger(); startMmsSentLogger(); }
-		else if(PersistentData.getTextsEnabled() ){ sendBroadcast(Timer.checkForSMSEnabled); }
-		if ( PermissionHandler.confirmCalls(appContext) ) { startCallLogger(); }
-		else if (PersistentData.getCallsEnabled() ) { sendBroadcast(Timer.checkForCallsEnabled); }
+		if (PermissionHandler.confirmBluetooth(appContext))
+			startBluetooth();
+
+		//		if ( PermissionHandler.confirmWifi(appContext) ) { WifiListener.initialize( appContext ); }
+		
+		if (PermissionHandler.confirmTexts(appContext)) {
+			startSmsSentLogger();
+			startMmsSentLogger();
+		} else if (PersistentData.getTextsEnabled()) {
+			sendBroadcast(Timer.checkForSMSEnabled);
+		}
+		
+		if (PermissionHandler.confirmCalls(appContext))
+			startCallLogger();
+		else if (PersistentData.getCallsEnabled())
+			sendBroadcast(Timer.checkForCallsEnabled);
+		
 		//Only do the following if the device is registered
-		if ( PersistentData.isRegistered() ) {
-			DeviceInfo.initialize( appContext ); //if at registration this has already been initialized. (we don't care.)
-			startTimers();
+		if (PersistentData.isRegistered()) {
+			DeviceInfo.initialize(appContext); //if at registration this has already been initialized. (we don't care.)
+//			startTimers();
 		}
 	}
 	
@@ -192,7 +208,7 @@ public class BackgroundService extends Service {
 		localHandle.timer = new Timer(localHandle);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction( appContext.getString( R.string.turn_accelerometer_off ) );
-		filter.addAction(appContext.getString( R.string.turn_gyroscope_off ));
+		filter.addAction( appContext.getString( R.string.turn_gyroscope_off ));
 		filter.addAction( appContext.getString( R.string.turn_accelerometer_on ) );
 		filter.addAction( appContext.getString( R.string.turn_gyroscope_on ) );
 		filter.addAction( appContext.getString( R.string.turn_bluetooth_off ) );
