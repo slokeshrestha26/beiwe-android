@@ -19,9 +19,6 @@ public class Timer {
 	private AlarmManager alarmManager;
 	private Context appContext;
 	
-	public static final long ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000L;
-	public static final long ONE_WEEK_IN_MILLISECONDS = 7 * ONE_DAY_IN_MILLISECONDS;
-	
 	// Control Message Intents
 	public static Intent accelerometerOffIntent;
 	public static Intent accelerometerOnIntent;
@@ -29,59 +26,44 @@ public class Timer {
 	public static Intent gyroscopeOnIntent;
 	public static Intent bluetoothOffIntent;
 	public static Intent bluetoothOnIntent;
-	public static Intent dailySurveyIntent;
+	//	public static Intent dailySurveyIntent;
 	public static Intent gpsOffIntent;
 	public static Intent gpsOnIntent;
 	public static Intent signoutIntent;
-	public static Intent voiceRecordingIntent;
-	public static Intent weeklySurveyIntent;
+	//	public static Intent voiceRecordingIntent;
+//	public static Intent weeklySurveyIntent;
 	public static Intent wifiLogIntent;
 	public static Intent uploadDatafilesIntent;
 	public static Intent createNewDataFilesIntent;
 	public static Intent checkForNewSurveysIntent;
 	public static Intent checkForSMSEnabled;
 	public static Intent checkForCallsEnabled;
-
-	// Intent filters
-	//TODO: Eli. These are never used? investigate.
-	public IntentFilter getAccelerometerOnIntentFilter() { return new IntentFilter( accelerometerOnIntent.getAction() ); }
-	public IntentFilter getAccelerometerOffIntentFilter() { return new IntentFilter( accelerometerOffIntent.getAction() ); }
-	public IntentFilter getBluetoothOffIntentFilter() { return new IntentFilter( bluetoothOffIntent.getAction() ); }
-	public IntentFilter getBluetoothOnIntentFilter() { return new IntentFilter( bluetoothOnIntent.getAction() ); }
-	public IntentFilter getDailySurveyIntentFilter() { return new IntentFilter( dailySurveyIntent.getAction() ); }
-	public IntentFilter getGPSIntentOffFilter() { return new IntentFilter( gpsOffIntent.getAction() ); }
-	public IntentFilter getGPSIntentOnFilter() { return new IntentFilter( gpsOnIntent.getAction() ); }
-	public IntentFilter getSignoutIntentFilter() { return new IntentFilter( signoutIntent.getAction() ); }
-	public IntentFilter getVoiceRecordingIntentFilter() { return new IntentFilter( voiceRecordingIntent.getAction() ); }
-	public IntentFilter getWeeklySurveyIntentFilter() { return new IntentFilter( weeklySurveyIntent.getAction() ); }
-	public IntentFilter getUploadDatafilesIntent() { return new IntentFilter( uploadDatafilesIntent.getAction() ); }
-	public IntentFilter getCreateNewDataFilesIntent() { return new IntentFilter( createNewDataFilesIntent.getAction() ); }
-	public IntentFilter getCheckForNewSurveysIntent() { return new IntentFilter( checkForNewSurveysIntent.getAction() ); }
-		
+	
+	
 	// Constructor
-	public Timer( BackgroundService backgroundService ) {
+	public Timer(BackgroundService backgroundService) {
 		appContext = backgroundService.getApplicationContext();
-		alarmManager = (AlarmManager)( backgroundService.getSystemService( Context.ALARM_SERVICE ));
+		alarmManager = (AlarmManager) (backgroundService.getSystemService(Context.ALARM_SERVICE));
 		
 		// double alarm intents
-		accelerometerOffIntent = setupIntent( appContext.getString(R.string.turn_accelerometer_off) );
-		accelerometerOnIntent = setupIntent( appContext.getString(R.string.turn_accelerometer_on) );
-		gyroscopeOffIntent = setupIntent( appContext.getString(R.string.turn_gyroscope_off) );
-		gyroscopeOnIntent = setupIntent( appContext.getString(R.string.turn_gyroscope_on) );
-		bluetoothOffIntent = setupIntent( appContext.getString(R.string.turn_bluetooth_off) );
-		bluetoothOnIntent = setupIntent( appContext.getString(R.string.turn_bluetooth_on) );
-		gpsOffIntent = setupIntent( appContext.getString(R.string.turn_gps_off) );
-		gpsOnIntent = setupIntent( appContext.getString(R.string.turn_gps_on) );
+		accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off));
+		accelerometerOnIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_on));
+		gyroscopeOffIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_off));
+		gyroscopeOnIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_on));
+		bluetoothOffIntent = setupIntent(appContext.getString(R.string.turn_bluetooth_off));
+		bluetoothOnIntent = setupIntent(appContext.getString(R.string.turn_bluetooth_on));
+		gpsOffIntent = setupIntent(appContext.getString(R.string.turn_gps_off));
+		gpsOnIntent = setupIntent(appContext.getString(R.string.turn_gps_on));
 		
 		// Set up event triggering alarm intents
-		signoutIntent = setupIntent( appContext.getString(R.string.signout_intent) );
-		wifiLogIntent = setupIntent( appContext.getString(R.string.run_wifi_log) );
-		uploadDatafilesIntent = setupIntent( appContext.getString(R.string.upload_data_files_intent) );
-		createNewDataFilesIntent = setupIntent( appContext.getString(R.string.create_new_data_files_intent) );
-		checkForNewSurveysIntent = setupIntent( appContext.getString(R.string.check_for_new_surveys_intent) );
-
-		checkForSMSEnabled = setupIntent( appContext.getString( R.string.check_for_sms_enabled ) );
-		checkForCallsEnabled = setupIntent( appContext.getString( R.string.check_for_calls_enabled ) );
+		signoutIntent = setupIntent(appContext.getString(R.string.signout_intent));
+		wifiLogIntent = setupIntent(appContext.getString(R.string.run_wifi_log));
+		uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent));
+		createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent));
+		checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent));
+		
+		checkForSMSEnabled = setupIntent(appContext.getString(R.string.check_for_sms_enabled));
+		checkForCallsEnabled = setupIntent(appContext.getString(R.string.check_for_calls_enabled));
 	}
 	
 	/* ######################################################################
@@ -89,9 +71,9 @@ public class Timer {
 	 * ####################################################################*/
 	
 	// Setup custom intents to be sent to the listeners running in the background service
-	private static Intent setupIntent( String action ){
+	private static Intent setupIntent(String action) {
 		Intent newIntent = new Intent();
-		newIntent.setAction( action );
+		newIntent.setAction(action);
 		return newIntent;
 	}
 	
@@ -115,13 +97,15 @@ public class Timer {
 	public void setupExactSingleAbsoluteTimeAlarm(long period, long startTimeInPeriod, Intent intentToBeBroadcast) {
 		long currentTime = System.currentTimeMillis();
 		// current unix time (mod) 3,600,000 milliseconds = the next hour-boundry, to which we add the EXACT_REPEAT_TIMER_OFFSET.
-		Long nextTriggerTime = currentTime - ( currentTime % period ) + startTimeInPeriod;
-		if (nextTriggerTime < currentTime) { nextTriggerTime += period; }
+		Long nextTriggerTime = currentTime - (currentTime % period) + startTimeInPeriod;
+		if (nextTriggerTime < currentTime) {
+			nextTriggerTime += period;
+		}
 		PendingIntent pendingTimerIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
 		setExactAlarm(AlarmManager.RTC_WAKEUP, nextTriggerTime, pendingTimerIntent);
 	}
 	
-	public void startSurveyAlarm(String surveyId, Calendar alarmTime){
+	public void startSurveyAlarm(String surveyId, Calendar alarmTime) {
 		Intent intentToBeBroadcast = new Intent(surveyId);
 		// Log.d("timer", "action: " + intentToBeBroadcast.getAction() );
 		setupSurveyAlarm(surveyId, intentToBeBroadcast, alarmTime);
@@ -139,10 +123,9 @@ public class Timer {
 		PersistentData.setMostRecentSurveyAlarmTime(surveyId, nextTriggerTime);
 	}
 	
-	
 	/* ##################################################################################
 	 * ############################ Other Utility Functions #############################
-	 * ################################################################################*/	
+	 * ################################################################################*/
 	
 	/** In API 19 and above, alarms are inexact (to save power).  In API 18 and
 	 *  below, alarms are exact.
@@ -151,18 +134,20 @@ public class Timer {
 	 *  or below), and returns FALSE if alarms are inexact.  */
 	public static Boolean alarmsAreExactInThisApiVersion() {
 		int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-		if (currentApiVersion < android.os.Build.VERSION_CODES.KITKAT) {
-			return true; }
-		else { return false; }
+		if (currentApiVersion < android.os.Build.VERSION_CODES.KITKAT)
+			return true;
+		else
+			return false;
 	}
 	
 	/** Calls AlarmManager.set() for API < 19, and AlarmManager.setExact() for API 19+
 	 * For an exact alarm, it seems you need to use .set() for API 18 and below, and
 	 * .setExact() for API 19 (KitKat) and above. */
 	private void setExactAlarm(int type, long triggerAtMillis, PendingIntent operation) {
-		if (alarmsAreExactInThisApiVersion()) {			
-			alarmManager.set(type, triggerAtMillis, operation); }
-		else { alarmManager.setExact(type, triggerAtMillis, operation); }
+		if (alarmsAreExactInThisApiVersion())
+			alarmManager.set(type, triggerAtMillis, operation);
+		else
+			alarmManager.setExact(type, triggerAtMillis, operation);
 	}
 	
 	/**Cancels an alarm, does not return any info about whether the alarm existed.
@@ -171,13 +156,16 @@ public class Timer {
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
 		alarmManager.cancel(pendingIntent);
 	}
-		
+	
 	/**Checks if an alarm is set.
 	 * @param intent an Intent identifying the alarm to check.
 	 * @return Returns TRUE if there is an alarm set matching that intent; otherwise false. */
 	public Boolean alarmIsSet(Intent intent) {
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, PendingIntent.FLAG_NO_CREATE);
-		if (pendingIntent == null) { return false; }
-		else { return true; }
+		if (pendingIntent == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

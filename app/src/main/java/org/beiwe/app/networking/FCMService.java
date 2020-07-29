@@ -37,6 +37,7 @@ public class FCMService extends FirebaseMessagingService {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ignored) {
+                        printe(errorMessage + "(3)");
                         TextFileManager.writeDebugLogStatement(errorMessage + "(3)");
                         return;
                     }

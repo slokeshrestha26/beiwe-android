@@ -128,7 +128,7 @@ public class BackgroundService extends Service {
 		//Only do the following if the device is registered
 		if (PersistentData.isRegistered()) {
 			DeviceInfo.initialize(appContext); //if at registration this has already been initialized. (we don't care.)
-//			startTimers();
+			startTimers();
 		}
 	}
 	

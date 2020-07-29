@@ -1,21 +1,18 @@
 package org.beiwe.app;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import org.beiwe.app.networking.PostRequest;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.ui.DebugInterfaceActivity;
-import org.beiwe.app.ui.LoadingActivity;
-import org.beiwe.app.ui.user.MainMenuActivity;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
+
+import org.beiwe.app.networking.PostRequest;
+import org.beiwe.app.storage.PersistentData;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import io.sentry.Sentry;
 import io.sentry.event.BreadcrumbBuilder;
@@ -57,66 +54,8 @@ public class CrashHandler implements java.lang.Thread.UncaughtExceptionHandler{
 	 * @param exception A Throwable (probably your error).
 	 * @param context An android Context */
 	public static void writeCrashlog(Throwable exception, Context context) {
-
-		try {
-			Sentry.getContext().addTag("user_id", PersistentData.getPatientID());
-			Sentry.getContext().addTag("server_url", PostRequest.addWebsitePrefix(""));
-			Sentry.capture(exception);
-		}
-		catch(Exception e1) {
-			String exceptionInfo =  System.currentTimeMillis() + "\n"
-									+ "BeiweVersion:" + DeviceInfo.getBeiweVersion()
-									+ ", AndroidVersion:" + DeviceInfo.getAndroidVersion()
-									+ ", Product:" + DeviceInfo.getProduct()
-									+ ", Brand:" + DeviceInfo.getBrand()
-									+ ", HardwareId:" + DeviceInfo.getHardwareId()
-									+ ", Manufacturer:" + DeviceInfo.getManufacturer()
-									+ ", Model:" + DeviceInfo.getModel() + "\n";
-
-			exceptionInfo += "Error message: " + exception.getMessage() + "\n";
-			exceptionInfo += "Error type: " + exception.getClass() + "\n";
-
-			if (exception.getSuppressed().length > 0) {
-				for (Throwable throwable: exception.getSuppressed() ) {
-					exceptionInfo += "\nSuppressed Error:\n";
-					for (StackTraceElement element : throwable.getStackTrace() ) { exceptionInfo +="\t" + element.toString() + "\n"; }
-				}
-			}
-
-			//We encountered an error exactly once where we had a null reference inside this function,
-			// this occurred when downloading a new survey to test that randomized surveys worked,
-			// crashed with a null reference error on an element of a stacktrace. We now check for null.
-			if (exception.fillInStackTrace().getStackTrace() != null) {
-				exceptionInfo += "\nError-fill:\n";
-				for (StackTraceElement element : exception.fillInStackTrace().getStackTrace()) {
-					exceptionInfo += "\t" + element.toString() + "\n";
-				}
-			}
-			else { exceptionInfo += "java threw an error with an error-fill stack trace that was null."; }
-
-			if (exception.getCause() != null && exception.getCause().getStackTrace() != null) {
-				exceptionInfo += "\nActual Error:\n";
-				for (StackTraceElement element : exception.getCause().getStackTrace()) {
-					exceptionInfo += "\t" + element.toString() + "\n";
-				}
-			}
-			else { exceptionInfo += "java threw an error with a null error cause or stack trace, this means we are manually creating a crash report."; }
-
-			//Print an error log if debug mode is active.
-			if (BuildConfig.APP_IS_BETA) {
-				Log.e("BEIWE ENCOUNTERED THIS ERROR", exceptionInfo); //Log error...
-			}
-
-			FileOutputStream outStream; //write a file...
-			try { outStream = context.openFileOutput("crashlog_" + System.currentTimeMillis(), Context.MODE_APPEND);
-				outStream.write( ( exceptionInfo ).getBytes() );
-				outStream.flush(); outStream.close(); }
-			catch (FileNotFoundException e) {
-				Log.e("Error Handler Failure", "Could not write to file, file DNE.");
-				e.printStackTrace(); }
-			catch (IOException e) {
-				Log.e("Error Handler Failure", "Could not write to file, IOException.");
-				e.printStackTrace(); }
-		}
+		Sentry.getContext().addTag("user_id", PersistentData.getPatientID());
+		Sentry.getContext().addTag("server_url", PostRequest.addWebsitePrefix(""));
+		Sentry.capture(exception);
 	}
 }
