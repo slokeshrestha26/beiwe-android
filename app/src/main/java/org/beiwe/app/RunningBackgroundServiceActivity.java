@@ -329,8 +329,6 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		builder.setTitle(activity.getString(R.string.default_alert_title));
 		builder.setMessage(activity.getString(R.string.http_message_403_during_registration));
 		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
-			Log.d("power management alert", "bumping");
-//			thisResumeCausedByFalseActivityReturn = true;
 			badRegistrationServerPromptActive = false;
 		} } );
 		builder.create().show();

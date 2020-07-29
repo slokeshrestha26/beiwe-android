@@ -326,7 +326,8 @@ public class PostRequest {
 		HttpsURLConnection connection;
 		try {
 			connection = setupHTTP(parameters, new URL(url), null);
-			Log.e("doNotificationRequest", "Response code: " + connection.getResponseCode());
+			if (300 <= connection.getResponseCode())
+				Log.e("doNotificationRequest", "Response code: " + connection.getResponseCode());
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;  // return so connection.disconnect() cannot error

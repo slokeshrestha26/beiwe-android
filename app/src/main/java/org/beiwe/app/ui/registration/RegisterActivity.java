@@ -72,6 +72,11 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 
 		newPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
 		confirmNewPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
+		
+		if (BuildConfig.APP_IS_DEV) {
+			serverUrlInput.setText("staging.beiwe.org");
+			((EditText) findViewById(R.id.registerUserIdInput)).setText("hrvdr34k");
+		}
 	}
 	
 	
@@ -104,12 +109,10 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 				PersistentData.setServerUrl(serverUrl);
 			}
 			PersistentData.setLoginCredentials(userID, tempPassword);
-			// Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
-			tryToRegisterWithTheServer(this, addWebsitePrefix(getApplicationContext().getString(R.string.register_url)), newPassword);
 			
-			if (PersistentData.checkBadRegistration()){
-				showBadRegistrationServerAlert(this);
-			}
+			// Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
+			// this is asynchronous, it returns before the operations is finished.
+			tryToRegisterWithTheServer(this, addWebsitePrefix(getApplicationContext().getString(R.string.register_url)), newPassword);
 		}
 	}
 	

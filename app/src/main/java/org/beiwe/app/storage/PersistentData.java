@@ -633,7 +633,10 @@ public class PersistentData {
 	
 	/** if the key was not written, or the device settings failed to parse, or there was an error
 	 * in the registration request... return false. */
-	public static boolean checkBadRegistration(){
+	public static boolean checkBadRegistration() {
+//		Log.e("thang", "getKeyWritten: " + PersistentData.getKeyWritten() );
+//		Log.e("thang", "getDeviceSettingsAreSet: " + PersistentData.getDeviceSettingsAreSet() );
+//		Log.e("thang", "getErrorDuringRegistration: " + PersistentData.getErrorDuringRegistration() );
 		return (
 			!PersistentData.getKeyWritten() || !PersistentData.getDeviceSettingsAreSet() || PersistentData.getErrorDuringRegistration()
 		);

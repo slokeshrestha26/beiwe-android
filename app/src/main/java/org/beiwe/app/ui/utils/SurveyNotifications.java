@@ -223,11 +223,15 @@ public class SurveyNotifications {
 	/**Tries to determine the type of audio survey.  If it is an Enhanced audio survey AudioRecorderEnhancedActivity.class is returned,
 	 * any other outcome (including an inability to determine type) returns AudioRecorderActivity.class instead. */
 	@SuppressWarnings("rawtypes")
-	public static Class getAudioSurveyClass(String surveyId) {
-		try { JSONObject surveySettings = new JSONObject( PersistentData.getSurveySettings(surveyId) );
-			if ( surveySettings.getString("audio_survey_type").equals("raw") ) {
-				return AudioRecorderEnhancedActivity.class; } }
-		catch (JSONException e) { e.printStackTrace(); }
+	public static Class getAudioSurveyClass (String surveyId) {
+		JSONObject surveySettings;
+		try {
+			surveySettings = new JSONObject(PersistentData.getSurveySettings(surveyId));
+			if (surveySettings.getString("audio_survey_type").equals("raw"))
+				return AudioRecorderEnhancedActivity.class;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 		return AudioRecorderActivity.class;
 	}
 }

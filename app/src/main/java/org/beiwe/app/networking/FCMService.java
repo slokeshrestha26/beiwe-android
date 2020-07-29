@@ -13,14 +13,16 @@ import org.json.JSONException;
 import java.util.List;
 import java.util.Map;
 
+import static org.beiwe.app.UtilsKt.print;
+import static org.beiwe.app.UtilsKt.printe;
+import static org.beiwe.app.UtilsKt.printi;
+
 
 public class FCMService extends FirebaseMessagingService {
-
     /**
      * Called if InstanceID token is updated. This may occur if the security of
      * the previous token had been compromised. Note that this is called when the InstanceID token
-     * is initially generated so this is where you would retrieve the token.
-     */
+     * is initially generated so this is where you would retrieve the token. */
     @Override
     public void onNewToken (String token) {
         // If you want to send messages to this application instance or
@@ -48,19 +50,14 @@ public class FCMService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-//        Log.i("FCM", "From: " + remoteMessage.getFrom());
-
-        // Check if message contains a data payload.
-//        if (remoteMessage.getData().size() > 0) {
-//            Log.i("FCM", "Message data payload: " + remoteMessage.getData());
-//        }
-//
-//        if (remoteMessage.getNotification() != null) {
-//            Log.i("FCM", "Message Notification Body: " + remoteMessage.getNotification().getBody());
-//        }
-        
+        printi("FCM", "From: " + remoteMessage.getFrom());
         Map<String, String> data = remoteMessage.getData();
-//        Log.i("FCM", "Content: " + data.get("content"));
+        // Check if message contains a data payload.
+//        if (remoteMessage.getData().size() > 0)
+//            printi("FCM", "Message data payload: " + remoteMessage.getData());
+//        if (remoteMessage.getNotification() != null)
+//            printi("FCM", "Message Notification Body: " + remoteMessage.getNotification().getBody());
+//        printi("FCM", "Content: " + data.get("content"));
         
         if (data.get("type").equals("survey")) {
             // check for surveys first.  This can fail (gracefully), so handle the case where the
@@ -73,6 +70,7 @@ public class FCMService extends FirebaseMessagingService {
                 survey_ids = JSONUtils.jsonArrayToStringList( new JSONArray(data.get("survey_ids") ));
             } catch (JSONException e) {
                 e.printStackTrace();
+                printe("received unparsable push notification for new surveys");
                 TextFileManager.writeDebugLogStatement("received unparsable push notification for new surveys");
                 return;
             }
@@ -82,6 +80,7 @@ public class FCMService extends FirebaseMessagingService {
                 if (local_survey_ids.contains(survey_id)){
                     SurveyNotifications.displaySurveyNotification(getApplicationContext(), survey_id);
                 } else {
+                    printe("received a survey id in a push notification that this device has not received: " + survey_id);
                     TextFileManager.writeDebugLogStatement("received a survey id in a push notification that this device has not received: " + survey_id);
                 }
             }
