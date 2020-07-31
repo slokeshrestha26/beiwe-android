@@ -1,16 +1,16 @@
 package org.beiwe.app.ui.registration;
 
-import org.beiwe.app.R;
-import org.beiwe.app.RunningBackgroundServiceActivity;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.survey.TextFieldKeyboard;
-import org.beiwe.app.ui.utils.AlertsManager;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.beiwe.app.R;
+import org.beiwe.app.RunningBackgroundServiceActivity;
+import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.survey.TextFieldKeyboard;
+import org.beiwe.app.ui.utils.AlertsManager;
 
 public class PhoneNumberEntryActivity extends RunningBackgroundServiceActivity {
 	private EditText primaryCarePhone;

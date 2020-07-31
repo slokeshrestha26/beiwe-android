@@ -13,11 +13,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
 import org.beiwe.app.storage.PersistentData;

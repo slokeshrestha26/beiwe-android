@@ -1,15 +1,14 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.storage.EncryptionEngine;
-import org.beiwe.app.storage.TextFileManager;
-
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.CallLog;
-import android.util.Log;
+
+import org.beiwe.app.storage.EncryptionEngine;
+import org.beiwe.app.storage.TextFileManager;
 
 /** The CallLogger logs data from voice call, sent or received.
  *  @author Dor Samet */

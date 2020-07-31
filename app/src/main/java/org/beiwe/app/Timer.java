@@ -1,15 +1,13 @@
 package org.beiwe.app;
 
-import java.util.Calendar;
-
-import org.beiwe.app.storage.PersistentData;
-
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+
+import org.beiwe.app.storage.PersistentData;
+
+import java.util.Calendar;
 
 /** The Timer class provides a meeans of setting various timers.  These are used by the BackgroundService
  * for devices that must be turned on/off, and timing the user to automatically logout after a period of time.

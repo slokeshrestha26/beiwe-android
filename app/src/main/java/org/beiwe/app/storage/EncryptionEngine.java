@@ -1,4 +1,14 @@
 package org.beiwe.app.storage;
+
+import android.annotation.SuppressLint;
+import android.util.Base64;
+import android.util.Log;
+
+import org.spongycastle.crypto.PBEParametersGenerator;
+import org.spongycastle.crypto.digests.SHA256Digest;
+import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.spongycastle.crypto.params.KeyParameter;
+
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -18,15 +28,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
-import android.annotation.SuppressLint;
-import android.util.Base64;
-import android.util.Log;
-
-import org.spongycastle.crypto.PBEParametersGenerator;
-import org.spongycastle.crypto.digests.SHA256Digest;
-import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
-import org.spongycastle.crypto.params.KeyParameter;
 
 /**The EncryptionEngine handles all encryption and hashing duties for the app.
  * Per-file AES encryption keys are generated and encrypted with the provided RSA key.

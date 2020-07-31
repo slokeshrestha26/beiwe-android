@@ -1,17 +1,17 @@
 package org.beiwe.app.ui.user;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
 import org.beiwe.app.R;
 import org.beiwe.app.RunningBackgroundServiceActivity;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.survey.TextFieldKeyboard;
 import org.beiwe.app.ui.registration.ForgotPasswordActivity;
 import org.beiwe.app.ui.utils.AlertsManager;
-
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
 
 
 /**The LoginActivity presents the user with a password prompt.

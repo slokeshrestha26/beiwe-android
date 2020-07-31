@@ -1,13 +1,12 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
-import org.beiwe.app.storage.TextFileManager;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
 import android.util.Log;
+
+import org.beiwe.app.storage.TextFileManager;
 
 /** Listens for power state changes.
  *  Screen On/Off, Power Connect/Disconnect, Airplane Mode.

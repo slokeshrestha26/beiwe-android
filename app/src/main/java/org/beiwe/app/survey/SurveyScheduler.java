@@ -1,9 +1,8 @@
 package org.beiwe.app.survey;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 import org.beiwe.app.BackgroundService;
 import org.beiwe.app.CrashHandler;
@@ -14,9 +13,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
   
 //TODO: Low priority. Eli. document.
 /**I am ... 85% certain time zones work like this:

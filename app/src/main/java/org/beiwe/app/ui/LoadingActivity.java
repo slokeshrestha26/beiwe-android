@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
 import org.beiwe.app.BackgroundService;
 import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
@@ -23,8 +22,8 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import io.sentry.Sentry;
-import io.sentry.dsn.InvalidDsnException;
 import io.sentry.android.AndroidSentryClientFactory;
+import io.sentry.dsn.InvalidDsnException;
 
 /**The LoadingActivity is a temporary RunningBackgroundServiceActivity (Not a SessionActivity,
  * check out those classes if you are confused) that pops up when the user opens the app.

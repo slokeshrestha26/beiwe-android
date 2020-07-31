@@ -1,11 +1,5 @@
 package org.beiwe.app.ui.user;
 
-import org.apache.http.util.EncodingUtils;
-import org.beiwe.app.R;
-import org.beiwe.app.networking.PostRequest;
-import org.beiwe.app.session.SessionActivity;
-import org.beiwe.app.storage.PersistentData;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
@@ -13,6 +7,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+
+import org.apache.http.util.EncodingUtils;
+import org.beiwe.app.R;
+import org.beiwe.app.networking.PostRequest;
+import org.beiwe.app.session.SessionActivity;
+import org.beiwe.app.storage.PersistentData;
 
 import static org.beiwe.app.networking.PostRequest.addWebsitePrefix;
 

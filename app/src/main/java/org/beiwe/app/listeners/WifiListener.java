@@ -1,14 +1,13 @@
 package org.beiwe.app.listeners;
 
-import java.util.List;
+import android.content.Context;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 
 import org.beiwe.app.storage.EncryptionEngine;
 import org.beiwe.app.storage.TextFileManager;
 
-import android.content.Context;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
-import android.util.Log;
+import java.util.List;
 
 /**WifiListener
  * WifiListener houses a single public function, scanWifi.  This function grabs the mac

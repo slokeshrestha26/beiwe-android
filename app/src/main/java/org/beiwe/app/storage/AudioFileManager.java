@@ -1,5 +1,10 @@
 package org.beiwe.app.storage;
 
+import android.content.Context;
+import android.util.Log;
+
+import org.beiwe.app.CrashHandler;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,11 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
-
-import org.beiwe.app.CrashHandler;
-
-import android.content.Context;
-import android.util.Log;
 
 public class AudioFileManager {
 

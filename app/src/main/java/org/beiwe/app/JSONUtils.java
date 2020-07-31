@@ -1,16 +1,16 @@
 package org.beiwe.app;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import android.util.Log;
 
 import org.beiwe.app.storage.PersistentData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class JSONUtils {
 	public static List<String> jsonArrayToStringList( JSONArray array ) {

@@ -1,14 +1,5 @@
 package org.beiwe.app.ui.utils;
 
-import org.beiwe.app.R;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.storage.TextFileManager;
-import org.beiwe.app.survey.AudioRecorderActivity;
-import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
-import org.beiwe.app.survey.SurveyActivity;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -21,6 +12,15 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+
+import org.beiwe.app.R;
+import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
+import org.beiwe.app.survey.AudioRecorderActivity;
+import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
+import org.beiwe.app.survey.SurveyActivity;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
  * This is a STATIC method, and is called from the background service.

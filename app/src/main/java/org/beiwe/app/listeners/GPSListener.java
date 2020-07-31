@@ -1,10 +1,5 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.CrashHandler;
-import org.beiwe.app.PermissionHandler;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.storage.TextFileManager;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,6 +7,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+
+import org.beiwe.app.PermissionHandler;
+import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
 
 /* Notes/observation on Location Services:
  * We are passing in "0" as the minimum time for location updates to be pushed to us, this results in about

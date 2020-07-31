@@ -1,8 +1,10 @@
 package org.beiwe.app.survey;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.Bundle;
+import android.util.Log;
 
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.storage.AudioFileManager;
@@ -10,11 +12,9 @@ import org.beiwe.app.storage.PersistentData;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.media.AudioFormat;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
-import android.os.Bundle;
-import android.util.Log;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 //http://www.edumobile.org/android/audio-recording-in-wav-format-in-android-programming/
 

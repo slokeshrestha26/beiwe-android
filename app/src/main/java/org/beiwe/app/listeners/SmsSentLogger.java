@@ -1,15 +1,15 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.CrashHandler;
-import org.beiwe.app.storage.EncryptionEngine;
-import org.beiwe.app.storage.TextFileManager;
-
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Telephony.TextBasedSmsColumns;
+
+import org.beiwe.app.CrashHandler;
+import org.beiwe.app.storage.EncryptionEngine;
+import org.beiwe.app.storage.TextFileManager;
 
 /**
  * Records outgoing SMS messages when they're sent

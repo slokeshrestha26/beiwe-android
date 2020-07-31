@@ -1,18 +1,19 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.storage.EncryptionEngine;
-import org.beiwe.app.storage.TextFileManager;
-
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothAdapter.LeScanCallback;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-//import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
+
+import org.beiwe.app.storage.EncryptionEngine;
+import org.beiwe.app.storage.TextFileManager;
+
+//import android.content.pm.PackageManager;
 
 //http://code.tutsplus.com/tutorials/android-quick-look-bluetoothadapter--mobile-7813
 

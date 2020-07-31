@@ -1,11 +1,11 @@
 package org.beiwe.app.ui.user;
 
+import android.os.Bundle;
+import android.widget.TextView;
+
 import org.beiwe.app.R;
 import org.beiwe.app.session.SessionActivity;
 import org.beiwe.app.storage.PersistentData;
-
-import android.os.Bundle;
-import android.widget.TextView;
 
 /**The about page!
  * @author Everyone! */

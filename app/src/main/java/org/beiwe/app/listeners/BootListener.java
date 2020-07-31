@@ -1,11 +1,10 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.BackgroundService;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
+import org.beiwe.app.BackgroundService;
 
 /**The BootListener is never actually instantiated elsewhere in the app.  It's job is to sit
  * and wait for either the boot broadcast or the SD (external) applications available.

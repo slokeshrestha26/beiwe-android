@@ -1,5 +1,22 @@
 package org.beiwe.app.storage;
 
+import android.content.Context;
+import android.util.Log;
+
+import org.beiwe.app.CrashHandler;
+import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.BluetoothListener;
+import org.beiwe.app.listeners.CallLogger;
+import org.beiwe.app.listeners.GPSListener;
+import org.beiwe.app.listeners.GyroscopeListener;
+import org.beiwe.app.listeners.PowerStateListener;
+import org.beiwe.app.listeners.SmsSentLogger;
+import org.beiwe.app.listeners.WifiListener;
+import org.beiwe.app.survey.AudioRecorderActivity;
+import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
+import org.beiwe.app.survey.SurveyAnswersRecorder;
+import org.beiwe.app.survey.SurveyTimingsRecorder;
+
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,24 +26,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.beiwe.app.CrashHandler;
-import org.beiwe.app.listeners.AccelerometerListener;
-import org.beiwe.app.listeners.GyroscopeListener;
-import org.beiwe.app.listeners.BluetoothListener;
-import org.beiwe.app.listeners.CallLogger;
-import org.beiwe.app.listeners.GPSListener;
-import org.beiwe.app.listeners.PowerStateListener;
-import org.beiwe.app.listeners.SmsSentLogger;
-import org.beiwe.app.listeners.WifiListener;
-import org.beiwe.app.survey.AudioRecorderActivity;
-import org.beiwe.app.survey.AudioRecorderEnhancedActivity;
-import org.beiwe.app.survey.SurveyAnswersRecorder;
-import org.beiwe.app.survey.SurveyTimingsRecorder;
-
-import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 /**The (Text)FileManager.
  * The FileManager is implemented as a Singleton.  More accurately the static object contains several

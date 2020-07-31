@@ -1,14 +1,14 @@
 package org.beiwe.app.survey;
 
-import java.io.IOException;
+import android.media.MediaRecorder;
+import android.os.Bundle;
+import android.util.Log;
 
 import org.beiwe.app.storage.PersistentData;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.media.MediaRecorder;
-import android.os.Bundle;
-import android.util.Log;
+import java.io.IOException;
 
 
 public class AudioRecorderActivity extends AudioRecorderCommon {    

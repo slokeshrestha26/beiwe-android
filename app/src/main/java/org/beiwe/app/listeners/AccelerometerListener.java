@@ -1,7 +1,5 @@
 package org.beiwe.app.listeners;
 
-import org.beiwe.app.storage.TextFileManager;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -9,6 +7,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+
+import org.beiwe.app.storage.TextFileManager;
 
 public class AccelerometerListener implements SensorEventListener{
 	public static String header = "timestamp,accuracy,x,y,z";

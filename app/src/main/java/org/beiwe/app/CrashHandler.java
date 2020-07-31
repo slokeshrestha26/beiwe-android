@@ -10,10 +10,6 @@ import android.util.Log;
 import org.beiwe.app.networking.PostRequest;
 import org.beiwe.app.storage.PersistentData;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 import io.sentry.Sentry;
 import io.sentry.event.BreadcrumbBuilder;
 

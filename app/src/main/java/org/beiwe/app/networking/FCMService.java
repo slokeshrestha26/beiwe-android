@@ -13,7 +13,6 @@ import org.json.JSONException;
 import java.util.List;
 import java.util.Map;
 
-import static org.beiwe.app.UtilsKt.print;
 import static org.beiwe.app.UtilsKt.printe;
 import static org.beiwe.app.UtilsKt.printi;
 

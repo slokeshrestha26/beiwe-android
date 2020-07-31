@@ -1,17 +1,5 @@
 package org.beiwe.app.survey;
 
-import java.io.IOException;
-
-import org.beiwe.app.R;
-import org.beiwe.app.session.SessionActivity;
-import org.beiwe.app.storage.AudioFileManager;
-import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.ui.user.MainMenuActivity;
-import org.beiwe.app.ui.utils.SurveyNotifications;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -23,8 +11,19 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import org.beiwe.app.R;
+import org.beiwe.app.session.SessionActivity;
+import org.beiwe.app.storage.AudioFileManager;
+import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.ui.user.MainMenuActivity;
+import org.beiwe.app.ui.utils.SurveyNotifications;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 
 
