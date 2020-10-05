@@ -74,7 +74,7 @@ android {
     useLibrary "org.apache.http.legacy"
     sourceSets {
         onnelaLabServer {
-            manifest.srcFile 'src/commStatsCustomUrl/AndroidManifest.xml'
+            manifest.srcFile 'src/textsAndCallsStats/AndroidManifest.xml'
         }
         commStatsCustomUrl {
             manifest.srcFile 'src/textsAndCallsStats/AndroidManifest.xml'
