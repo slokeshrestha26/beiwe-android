@@ -205,6 +205,15 @@ public class PostRequest {
 				writeKey(key, response);
 				JSONObject deviceSettings = responseJSON.getJSONObject("device_settings");
 				SetDeviceSettings.writeDeviceSettings(deviceSettings);
+				if (responseJSON.has("study_id") && responseJSON.has("study_name")) {
+					PersistentData.setStudyID(responseJSON.getString("study_id"));
+					PersistentData.setStudyName(responseJSON.getString("study_name"));
+					//log.w(responseJSON.getString("study_id"));
+					//log.w(responseJSON.getString("study_name"));
+				}
+				Log.w("sentrylog", "finished registering");
+				String mystring = responseJSON.getString("sadlkjfadslkjaslkj");
+
 			} catch (JSONException e) {
 				// If it caught a JSONException, the likeliest cause is that the server returned a
 				// 200 response code but didn't send a key or device settings, which means it's not
