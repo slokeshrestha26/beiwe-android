@@ -51,16 +51,12 @@ class CrashHandler(private val errorHandlerContext: Context) : Thread.UncaughtEx
         @JvmStatic
         fun writeCrashlog(exception: Throwable?, context: Context?) {
             Log.w("sentrylog", "entered crashlog function")
-            /*Sentry.getContext().addTag("user_id", PersistentData.getPatientID())
+            Sentry.getContext().addTag("user_id", PersistentData.getPatientID())
             Sentry.getContext().addTag("server_url", PostRequest.addWebsitePrefix(""))
-            Sentry.getContext().addTag("study_name", "sample study name")
-            Sentry.getContext().addTag("study_id", "sample study ")*/
-            //Sentry.getContext().addTag("study_name", PersistentData.getStudyName())
-            //Sentry.getContext().addTag("study_id", PersistentData.getStudyID())
-            Sentry.getContext().addTag("study_name", "sample study name")
-            Sentry.getContext().addTag("study_id", "sample study ")
-            Sentry.capture(exception)
-            Log.w("sentrylog", "finished sentry report")
+            Sentry.getContext().addTag("study_name", PersistentData.getStudyName())
+            Sentry.getContext().addTag("study_id", PersistentData.getStudyID())
+            Sentry.capture(exception);
+            Log.w("sentrylog", "finished sentry report");
         }
     }
 
