@@ -80,11 +80,6 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 
 		newPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
 		confirmNewPasswordInput.setHint(String.format(getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()));
-		
-		if (BuildConfig.APP_IS_DEV) {
-			serverUrlInput.setText("staging.beiwe.org");
-			((EditText) findViewById(R.id.registerUserIdInput)).setText("hrvdr34k");
-		}
 	}
 	
 	
@@ -120,30 +115,10 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			
 			// Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
 			tryToRegisterWithTheServer(this, addWebsitePrefix(getApplicationContext().getString(R.string.register_url)), newPassword);
-			
-			// We need a check here because the regeistering operation can return at weird times and
-			// result in some very confusing ui/ux.  By waiting 5 seconds we should hit 99% of
-			// usage scenarios.  (requires handler, added removal of callback in the ondestroy.
-			handler.postDelayed(checkBadRegistration, 5000);
 		}
 	}
 	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		// clear out bad registration callbacks on exit of activity.
-		handler.removeCallbacks(checkBadRegistration);
-	}
-	
-	Runnable checkBadRegistration = new Runnable() {
-		// expects to be run on the main thread
-		@Override
-		public void run () {
-			if (PersistentData.checkBadRegistration())
-				showBadRegistrationServerAlert(self);
-		}
-	};
-	
+
 	/**Implements the server request logic for user, device registration. 
 	 * @param url the URL for device registration*/
 	static private void tryToRegisterWithTheServer(final Activity currentActivity, final String url, final String newPassword) {
@@ -165,12 +140,6 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 							PostRequest.makeParameter("product", DeviceInfo.getProduct() ) +
 							PostRequest.makeParameter("beiwe_version", DeviceInfo.getBeiweVersion() );
 				responseCode = PostRequest.httpRegister(parameters, url);
-				
-				// if the key did not get written, or the device settings were not set, or there was
-				// an error during registration, fail.
-				if (PersistentData.checkBadRegistration()){
-					return null;
-				}
 				
 				// If we are not using anonymized hashing, resubmit the phone identifying information
 				if (responseCode == 200 && !PersistentData.getUseAnonymizedHashing()) { // This short circuits so if the initial register fails, it won't try here
@@ -200,11 +169,6 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 			@Override
 			protected void onPostExecute(Void arg) {
 				super.onPostExecute(arg);
-				
-				if (PersistentData.checkBadRegistration()){
-					return;
-				}
-				
 				if (responseCode == 200) {
 					PersistentData.setPassword(newPassword);
 

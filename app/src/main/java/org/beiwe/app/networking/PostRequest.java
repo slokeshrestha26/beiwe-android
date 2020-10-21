@@ -206,10 +206,14 @@ public class PostRequest {
 				JSONObject deviceSettings = responseJSON.getJSONObject("device_settings");
 				SetDeviceSettings.writeDeviceSettings(deviceSettings);
 			} catch (JSONException e) {
-				// this gets called once per app lifecycle, always print the error because this is a pain to debug.
+				// If it caught a JSONException, the likeliest cause is that the server returned a
+				// 200 response code but didn't send odds are that the server didn't send a key or
+				// device settings, which means it's not a Beiwe server (or it's an improperly-
+				// configured Beiwe server, so return a 404.  Also, log some debugging data in case
+				// that's not what happened.
 				e.printStackTrace();
-				PersistentData.setErrorDuringRegistration(true);
-				CrashHandler.writeCrashlog(e, appContext); 
+				CrashHandler.writeCrashlog(e, appContext);
+				return 404;
 			}
 		}
 		return response;
@@ -226,14 +230,16 @@ public class PostRequest {
 		return response;
 	}
 	
-	private static int writeKey(String key, int httpResponse) {
+	private static int writeKey(String key, int httpResponse) throws JSONException {
 		if ( !key.startsWith("MIIBI") ) {
-			Log.e("PostRequest - register", " Received an invalid encryption key from server: " + key );
-			return 2; }
-		// Log.d( "PostRequest", "Received a key: " + key );
+			// If the key doesn't start with "MIIBI" it's invalid, so throw a JSONException, which
+			// doRegisterRequest() will handle as a registration failure.
+			String errorMsg = "Received an invalid encryption key from server: " + key;
+			Log.e("PostRequest - register",  errorMsg);
+			throw new JSONException(errorMsg);
+		}
 		TextFileManager.getKeyFile().deleteSafely();
 		TextFileManager.getKeyFile().safeWritePlaintext( key );
-		PersistentData.setKeyWritten(true);
 		return httpResponse;
 	}
 	

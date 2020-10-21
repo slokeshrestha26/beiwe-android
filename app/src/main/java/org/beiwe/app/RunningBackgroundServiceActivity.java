@@ -181,7 +181,6 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	private static Boolean prePromptActive = false;
 	private static Boolean postPromptActive = false;
 	private static Boolean powerPromptActive = false;
-	private static Boolean badRegistrationServerPromptActive = false;
 	private static Boolean thisResumeCausedByFalseActivityReturn = false;
 	private static Boolean aboutToResetFalseActivityReturn = false;
 	private static Boolean activityNotVisible = false;
@@ -317,21 +316,6 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 			powerPromptActive = false;
 		} } );
 		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
-		builder.create().show();
-	}
-	
-	public static void showBadRegistrationServerAlert(final RunningBackgroundServiceActivity activity) {
-		Log.i("sessionActivity", "bad registration alert");
-		if (badRegistrationServerPromptActive) {
-			return;
-		}
-		badRegistrationServerPromptActive = true;
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle(activity.getString(R.string.default_alert_title));
-		builder.setMessage(activity.getString(R.string.http_message_403_during_registration));
-		builder.setOnDismissListener( new DialogInterface.OnDismissListener() { @Override public void onDismiss(DialogInterface dialog) {
-			badRegistrationServerPromptActive = false;
-		} } );
 		builder.create().show();
 	}
 }

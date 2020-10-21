@@ -36,10 +36,7 @@ public class PersistentData {
 	private static final String KEY_ID = "uid";
 	private static final String KEY_PASSWORD = "password";
 	private static final String IS_REGISTERED = "IsRegistered";
-	private static final String DEVICE_SETTINGS_SET = "deviceSettingsSet";
-	private static final String KEY_WRITTEN = "keyWritten";
-	private static final String ERROR_DURING_REGISTRATION = "errorDuringRegistration";
-	
+
 	private static final String LOGIN_EXPIRATION = "loginExpirationTimestamp";
 	private static final String PCP_PHONE_KEY = "primary_care";
 	private static final String PASSWORD_RESET_NUMBER_KEY = "reset_number";
@@ -139,37 +136,6 @@ public class PersistentData {
 	public static void setRegistered(boolean value) {
 		putCommit(IS_REGISTERED, value);
 	}
-	
-	/**Getter for DEVICE_SETTINGS_SET. */
-	public static boolean getDeviceSettingsAreSet() {
-		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
-		return pref.getBoolean(DEVICE_SETTINGS_SET, false); }
-	
-	/**Setter for the DEVICE_SETTINGS_SET value. */
-	public static void setDeviceSettingsAreSet(boolean value) {
-		putCommit(DEVICE_SETTINGS_SET, value);
-	}
-	
-	/**Getter for KEY_WRITTEN. */
-	public static boolean getKeyWritten() {
-		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
-		return pref.getBoolean(KEY_WRITTEN, false); }
-	
-	/**Setter for the KEY_WRITTEN value. */
-	public static void setKeyWritten(boolean value) {
-		putCommit(KEY_WRITTEN, value);
-	}
-	
-	/**Getter for ERROR_DURING_REGISTRATION. */
-	public static boolean getErrorDuringRegistration() {
-		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
-		return pref.getBoolean(ERROR_DURING_REGISTRATION, false); }
-	
-	/**Setter for the ERROR_DURING_REGISTRATION value. */
-	public static void setErrorDuringRegistration(boolean value) {
-		putCommit(ERROR_DURING_REGISTRATION, value);
-	}
-		
 
 	/*######################################################################################
 	##################################### Passwords ########################################
@@ -629,16 +595,5 @@ public class PersistentData {
 
 	public static void setCallResearchAssistantButtonEnabled(boolean enabled) {
 		putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled);
-	}
-	
-	/** if the key was not written, or the device settings failed to parse, or there was an error
-	 * in the registration request... return false. */
-	public static boolean checkBadRegistration() {
-//		Log.e("thang", "getKeyWritten: " + PersistentData.getKeyWritten() );
-//		Log.e("thang", "getDeviceSettingsAreSet: " + PersistentData.getDeviceSettingsAreSet() );
-//		Log.e("thang", "getErrorDuringRegistration: " + PersistentData.getErrorDuringRegistration() );
-		return (
-			!PersistentData.getKeyWritten() || !PersistentData.getDeviceSettingsAreSet() || PersistentData.getErrorDuringRegistration()
-		);
 	}
 }
