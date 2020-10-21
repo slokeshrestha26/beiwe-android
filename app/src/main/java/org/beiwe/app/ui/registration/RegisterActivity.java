@@ -86,7 +86,7 @@ public class RegisterActivity extends RunningBackgroundServiceActivity {
 	/** Registration sequence begins here, called when the submit button is pressed. */
 	public synchronized void registerButtonPressed(View view) {
 		String serverUrl = serverUrlInput.getText().toString();
-		String userID = userIdInput.getText().toString();
+		String userID = userIdInput.getText().toString().replaceAll("\\s+", "");
 		String tempPassword = tempPasswordInput.getText().toString();
 		String newPassword = newPasswordInput.getText().toString();
 		String confirmNewPassword = confirmNewPasswordInput.getText().toString();
