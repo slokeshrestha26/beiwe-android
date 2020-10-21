@@ -124,7 +124,7 @@ public class PersistentData {
 
 	/** Set the login session to "expired" */
 	public static void logout() {
-		putCommit(LOGIN_EXPIRATION, 0);
+		putCommit(LOGIN_EXPIRATION, 0L);  // LOGIN_EXPIRATION must be stored as a long
 	}
 
 	/**Getter for the IS_REGISTERED value. */
