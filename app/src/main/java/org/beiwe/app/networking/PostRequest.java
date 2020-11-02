@@ -207,10 +207,9 @@ public class PostRequest {
 				SetDeviceSettings.writeDeviceSettings(deviceSettings);
 			} catch (JSONException e) {
 				// If it caught a JSONException, the likeliest cause is that the server returned a
-				// 200 response code but didn't send odds are that the server didn't send a key or
-				// device settings, which means it's not a Beiwe server (or it's an improperly-
-				// configured Beiwe server, so return a 404.  Also, log some debugging data in case
-				// that's not what happened.
+				// 200 response code but didn't send a key or device settings, which means it's not
+				// a Beiwe server (or it's an improperly-configured Beiwe server, so return a 404).
+				// Also, log some debugging data in case that's not what happened.
 				e.printStackTrace();
 				CrashHandler.writeCrashlog(e, appContext);
 				return 404;
