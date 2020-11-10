@@ -459,7 +459,7 @@ public class BackgroundService extends Service {
 				return; }
 			//Downloads the most recent survey questions and schedules the surveys.
 			if (broadcastAction.equals( appContext.getString(R.string.check_for_new_surveys_intent))) {
-				SurveyDownloader.downloadSurveys( getApplicationContext() );
+				SurveyDownloader.downloadSurveys(getApplicationContext(), null);
 				timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequencyMilliseconds(), Timer.checkForNewSurveysIntent);
 				return; }
 			// Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 

@@ -293,7 +293,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun runSurveyDownload(view: View?) {
-        SurveyDownloader.downloadSurveys(applicationContext)
+        SurveyDownloader.downloadSurveys(applicationContext, null)
     }
 
     fun buttonStartTimer(view: View?) {

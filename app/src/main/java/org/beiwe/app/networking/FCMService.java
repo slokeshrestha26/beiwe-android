@@ -6,7 +6,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import org.beiwe.app.JSONUtils;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.TextFileManager;
-import org.beiwe.app.ui.utils.SurveyNotifications;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -62,44 +61,20 @@ public class FCMService extends FirebaseMessagingService {
         if (data.get("type").equals("survey")) {
             // check for surveys first.  This can fail (gracefully), so handle the case where the
             // device does not have a particular survey.
-            SurveyDownloader.downloadSurveys(getApplicationContext());
-            
-            // This code is... gross.  Why is java like this.
-            List<String> survey_ids;
+
+            // Get the list of survey_ids from the push notification's JSON data
+            List<String> notificationSurveyIds;
             try {
-                survey_ids = JSONUtils.jsonArrayToStringList( new JSONArray(data.get("survey_ids") ));
+                notificationSurveyIds = JSONUtils.jsonArrayToStringList(new JSONArray(data.get("survey_ids")));
             } catch (JSONException e) {
                 e.printStackTrace();
-                printe("received unparsable push notification for new surveys");
-                TextFileManager.writeDebugLogStatement("received unparsable push notification for new surveys");
+                String errorMsg = "received unparsable push notification for new surveys";
+                printe(errorMsg);
+                TextFileManager.writeDebugLogStatement(errorMsg);
                 return;
             }
-            
-            List<String> local_survey_ids = JSONUtils.jsonArrayToStringList( PersistentData.getSurveyIdsJsonArray() );
-            for (String survey_id: survey_ids) {
-                if (local_survey_ids.contains(survey_id)){
-                    SurveyNotifications.displaySurveyNotification(getApplicationContext(), survey_id);
-                } else {
-                    printe("received a survey id in a push notification that this device has not received: " + survey_id);
-                    TextFileManager.writeDebugLogStatement("received a survey id in a push notification that this device has not received: " + survey_id);
-                }
-            }
+
+            SurveyDownloader.downloadSurveys(getApplicationContext(), notificationSurveyIds);
         }
-//        else {
-//            // Using NotificationCompat.Builder for devices < API 26. For devices running >=26, create
-//            // a Notification Channel and use Notification.Builder
-//            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(appContext);
-//            Intent intent = new Intent(appContext, MainMenuActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-//            notificationBuilder.setSmallIcon(R.drawable.survey_icon);
-//            notificationBuilder.setLargeIcon( BitmapFactory.decodeResource(appContext.getResources(), R.drawable.survey_icon ) );
-//            notificationBuilder.setContentTitle("Hello There!");
-//            notificationBuilder.setContentText("General Kenobi, you are a bold one");
-//            notificationBuilder.setContentIntent(pendingIntent);
-//            notificationBuilder.setAutoCancel(true);
-//            NotificationManager notificationManager = (NotificationManager) appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-//            notificationManager.notify(0, notificationBuilder.build());
-//        }
     }
 }

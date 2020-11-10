@@ -8,6 +8,7 @@ import org.beiwe.app.CrashHandler;
 import org.beiwe.app.JSONUtils;
 import org.beiwe.app.R;
 import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
 import org.beiwe.app.survey.SurveyScheduler;
 import org.beiwe.app.ui.utils.SurveyNotifications;
 import org.json.JSONArray;
@@ -18,15 +19,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.beiwe.app.networking.PostRequest.addWebsitePrefix;
+import static org.beiwe.app.UtilsKt.printe;
 
 public class SurveyDownloader {
-	
-	public static void downloadSurveys( Context appContext ) {
-		// Log.d("QuestionsDownloader", "downloadJSONQuestions() called");
-		doDownload( addWebsitePrefix(appContext.getResources().getString(R.string.download_surveys_url)), appContext);
+
+	/**
+	 * @param notificationSurveyIds if any IDs are passed in, immediately show notifications for
+	 *                              those surveys (after the app finishes downloading all surveys).
+	 */
+	public static void downloadSurveys(Context appContext, List<String> notificationSurveyIds) {
+		doDownload(addWebsitePrefix(appContext.getResources().getString(R.string.download_surveys_url)), appContext, notificationSurveyIds);
 	}
 
-	private static void doDownload(final String url, final Context appContext) { new HTTPAsync(url) {
+	private static void doDownload(final String url, final Context appContext,
+								   final List<String> notificationSurveyIds) {
+		new HTTPAsync(url) {
 		String jsonResponseString;
 		
 		@Override
@@ -40,7 +47,8 @@ public class SurveyDownloader {
 		
 		@Override
 		protected void onPostExecute(Void arg) {
-			responseCode = updateSurveys( appContext, jsonResponseString);
+			responseCode = updateSurveys(appContext, jsonResponseString);
+			showSurveyNotifications(appContext, notificationSurveyIds);
 			super.onPostExecute(arg);
 		} }.execute();
 	}
@@ -66,7 +74,7 @@ public class SurveyDownloader {
 		String jsonQuestionsString;
 		String jsonTimingsString;
 		String jsonSettingsString;
-		
+
 		for (String surveyString : surveys){
 			try { surveyJSON = new JSONObject(surveyString); }
 			catch (JSONException e) {
@@ -79,7 +87,7 @@ public class SurveyDownloader {
 				CrashHandler.writeCrashlog(e, appContext);
 				Log.e("Survey Downloader", "JSON fail 2"); return -1; }
 //			Log.d("debugging survey update", "id: " + surveyId.toString());
-			
+
 			try { surveyType = surveyJSON.getString("survey_type"); }
 			catch (JSONException e) {
 				CrashHandler.writeCrashlog(e, appContext);
@@ -141,5 +149,21 @@ public class SurveyDownloader {
 			}
 		}
 		return 200;
+	}
+
+	private static void showSurveyNotifications(Context appContext, List<String> surveyIds) {
+		if (surveyIds != null) {
+			List<String> idsOfStoredSurveys = JSONUtils.jsonArrayToStringList(PersistentData.getSurveyIdsJsonArray());
+			for (String surveyId : surveyIds) {
+				if (idsOfStoredSurveys.contains(surveyId)) {
+					SurveyNotifications.displaySurveyNotification(appContext, surveyId);
+				} else {
+					String errorMsg = "Tried to show notification for survey ID " + surveyId +
+							" but didn't have that survey stored in PersistentData.";
+					printe(errorMsg);
+					TextFileManager.writeDebugLogStatement(errorMsg);
+				}
+			}
+		}
 	}
 }
