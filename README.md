@@ -1,20 +1,24 @@
 ## Compiling and running the Beiwe Android app
 
 ### Compiling
-To compile and sign the app, you must add a directory called `private` (`beiwe-android`'s `.gitignore` file keeps the `private` directory out of Git), and a file called `private/keystore.properties`, with these lines (no quotes around the values that you fill in):
-```
-storePassword=KEYSTORE_PASSWORD
-keyPassword=KEY_PASSWORD
-keyAlias=KEY_ALIAS
-storeFile=KEYSTORE_FILEPATH
-```
+1. To compile and sign the app, you must add a directory called `private` (`beiwe-android`'s `.gitignore` file keeps the `private` directory out of Git), and a file called `private/keystore.properties`, containing these lines (no quotes around the values that you fill in):
+    ```
+    storePassword=KEYSTORE_PASSWORD
+    keyPassword=KEY_PASSWORD
+    keyAlias=KEY_ALIAS
+    storeFile=KEYSTORE_FILEPATH
+    ```
 
-You can also configure a Sentry DSN for each build type in this file.
-```
-releaseDSN=https://publicKey:secretKey@host:port/1?options
-betaDSN=https://publicKey:secretKey@host:port/1?options
-developmentDSN=https://publicKey:secretKey@host:port/1?options
-```
+2. If it's your first time running the project, **open Android Studio and click "Sync Project with Gradle Files"**.  If you run into errors, open Android Studio's "SDK Manager" and make sure you have the correct SDK Platform installed (the "API level" should match the one specified in app/build.gradle's `compileSdkVersion`).
+
+3. You'll need to **generate a key file** by running Build -> Generate Signed Bundle/APK, and then, inside `private/keystore.properties`, update the four values with the information from your newly-generated key and keystore.
+
+4. (Optional) You can also configure a Sentry DSN for each build type inside your `private/keystore.properties` file.
+    ```
+    releaseDSN=https://publicKey:secretKey@host:port/1?options
+    betaDSN=https://publicKey:secretKey@host:port/1?options
+    developmentDSN=https://publicKey:secretKey@host:port/1?options
+    ```
 
 ### Setting up Firebase
 To receive push notifications, add Firebase to your Android Project following [these steps](https://firebase.google.com/docs/android/setup) up through Step 3. 
