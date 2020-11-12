@@ -20,8 +20,8 @@ android {
         applicationId "org.beiwe.app"
         minSdkVersion 16
         targetSdkVersion 28
-        versionCode 42       //TODO: update this Beiwe version code for new releases
-        versionName '2.6.2'  //TODO: update this Beiwe version number for new releases
+        versionCode 43       //TODO: update this Beiwe version code for new releases
+        versionName '2.6.3'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
     buildTypes {
@@ -76,7 +76,7 @@ android {
     useLibrary "org.apache.http.legacy"
     sourceSets {
         onnelaLabServer {
-            manifest.srcFile 'src/commStatsCustomUrl/AndroidManifest.xml'
+            manifest.srcFile 'src/textsAndCallsStats/AndroidManifest.xml'
         }
         commStatsCustomUrl {
             manifest.srcFile 'src/textsAndCallsStats/AndroidManifest.xml'
