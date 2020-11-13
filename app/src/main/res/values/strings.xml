@@ -32,6 +32,7 @@
     <string name="permission_access_coarse_location">use Location Services</string>
     <string name="permission_receive_mms">receive MMS messages</string>
     <string name="permission_receive_sms">receive SMS messages</string>
+    <string name="permission_access_background_location">use Location Services while the app is in the background</string>
 
     <!-- API URLs -->
     <string name="staging_website" translatable="false">https://staging.beiwe.org </string>

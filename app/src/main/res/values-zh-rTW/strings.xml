@@ -32,6 +32,7 @@
     <string name="permission_access_coarse_location">使用周圍定位系統</string>
     <string name="permission_receive_mms">使用多媒體訊息功能</string>
     <string name="permission_receive_sms">使用簡訊功能</string>
+    <string name="permission_access_background_location">使用定位服務</string>
 
     <!-- Recording Options Strings -->
     <string name="title_activity_audio_recorder">紀錄語音訊息</string>
