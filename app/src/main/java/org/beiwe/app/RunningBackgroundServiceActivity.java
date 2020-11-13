@@ -333,9 +333,6 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 				activity.goToSettings(permissionCallback);
 			}
 		});
-		builder.setNegativeButton(activity.getString(R.string.alert_cancel_button_text), new DialogInterface.OnClickListener() {
-			@Override public void onClick(DialogInterface dialog, int arg1) {}
-		});
 		builder.create().show();
 	}
 }
