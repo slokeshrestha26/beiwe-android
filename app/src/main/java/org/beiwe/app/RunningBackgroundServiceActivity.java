@@ -240,7 +240,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 					return;
 				}
 				// Log.d("sessionActivity", "shouldShowRequestPermissionRationale "+ permission +": " + shouldShowRequestPermissionRationale( permission ) );
-				if(PermissionHandler.getPermissionStatus(this, permission) == PermissionHandler.BLOCKED_OR_NEVER_ASKED && PersistentData.getLastRequestPermission() == permission && (!prePromptActive && !postPromptActive )){
+				if(PermissionHandler.getPermissionStatus(this, permission) == PermissionHandler.BLOCKED_OR_NEVER_ASKED && PersistentData.getLastRequestedPermission() == permission && (!prePromptActive && !postPromptActive )){
 					//in this case, the user has selected "don't ask me again" for a permission, and requests for permission in other ways will (silently) fail
 					showAlertForRedirectToSettings(this, permission, PermissionHandler.permissionMap.get(permission), PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()));
 				}
@@ -250,7 +250,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 				}
 				else if (!prePromptActive && !postPromptActive ) { showRegularPermissionAlert(this, PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
 						permission, PermissionHandler.permissionMap.get(permission)); }
-				PersistentData.setLastRequestPermission(permission);
+				PersistentData.setLastRequestedPermission(permission);
 			}
 		}
 	}

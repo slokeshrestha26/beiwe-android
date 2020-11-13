@@ -69,7 +69,7 @@ public class PersistentData {
 	private static final String VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS = "voice_recording_max_time_length_seconds";
 	private static final String WIFI_LOG_FREQUENCY_SECONDS = "wifi_log_frequency_seconds";
 	private static final String SURVEY_IDS = "survey_ids";
-	private static final String LastRequestPermission = "last_request_permission";
+	private static final String LastRequestedPermission = "last_requested_permission";
 //	private static final String SURVEY_QUESTION_IDS = "question_ids";
 
 	/*#################################################################################################
@@ -138,12 +138,12 @@ public class PersistentData {
 		putCommit(IS_REGISTERED, value);
 	}
 
-	public static void setLastRequestPermission(String value)  {
-		putCommit(LastRequestPermission, value);
+	public static void setLastRequestedPermission(String value)  {
+		putCommit(LastRequestedPermission, value);
 	}
 
-	public static String getLastRequestPermission() {
-		return pref.getString(LastRequestPermission, "");
+	public static String getLastRequestedPermission() {
+		return pref.getString(LastRequestedPermission, "");
 	}
 
 	/*######################################################################################
