@@ -1,12 +1,18 @@
 package org.beiwe.app;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
+import androidx.annotation.IntDef;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import org.beiwe.app.storage.PersistentData;
 
+import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -152,5 +158,25 @@ public class PermissionHandler {
 			}
 		}
 		return null;
+	}
+
+	//@Retention(RetentionPolicy.SOURCE)
+	@IntDef({GRANTED, DENIED, BLOCKED_OR_NEVER_ASKED })
+	public @interface PermissionStatus {}
+
+	public static final int GRANTED = 0;
+	public static final int DENIED = 1;
+	public static final int BLOCKED_OR_NEVER_ASKED = 2;
+
+	//utility function to determine if a user selected "do not ask me again" for a permission
+	@PermissionStatus
+	public static int getPermissionStatus(Activity activity, String androidPermissionName) {
+		if(ContextCompat.checkSelfPermission(activity, androidPermissionName) != PackageManager.PERMISSION_GRANTED) {
+			if(!ActivityCompat.shouldShowRequestPermissionRationale(activity, androidPermissionName)){
+				return BLOCKED_OR_NEVER_ASKED;
+			}
+			return DENIED;
+		}
+		return GRANTED;
 	}
 }

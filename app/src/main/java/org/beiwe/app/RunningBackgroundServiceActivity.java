@@ -240,18 +240,23 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 					return;
 				}
 				// Log.d("sessionActivity", "shouldShowRequestPermissionRationale "+ permission +": " + shouldShowRequestPermissionRationale( permission ) );
-				if (shouldShowRequestPermissionRationale( permission ) ) {
+				if(PermissionHandler.getPermissionStatus(this, permission) == PermissionHandler.BLOCKED_OR_NEVER_ASKED && PersistentData.getLastRequestPermission() == permission && (!prePromptActive && !postPromptActive )){
+					//in this case, the user has selected "don't ask me again" for a permission, and requests for permission in other ways will (silently) fail
+					showAlertForRedirectToSettings(this, permission, PermissionHandler.permissionMap.get(permission), PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()));
+				}
+				else if (shouldShowRequestPermissionRationale( permission ) ) {
 					if (!prePromptActive && !postPromptActive ) { showAlertThatForcesUserToGrantPermission(this, PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()),
 							PermissionHandler.permissionMap.get(permission) ); }
 				}
 				else if (!prePromptActive && !postPromptActive ) { showRegularPermissionAlert(this, PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
 						permission, PermissionHandler.permissionMap.get(permission)); }
+				PersistentData.setLastRequestPermission(permission);
 			}
 		}
 	}
 
 	/* Message Popping */
-	public static void showRegularPermissionAlert(final Activity activity, final String message, final String permission, final Integer permissionCallback) {
+	public static void showRegularPermissionAlert(final RunningBackgroundServiceActivity activity, final String message, final String permission, final Integer permissionCallback) {
 		// Log.i("sessionActivity", "showPreAlert");
 		if (prePromptActive) { return; }
 		prePromptActive = true;
@@ -316,6 +321,21 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 			powerPromptActive = false;
 		} } );
 		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
+		builder.create().show();
+	}
+
+	public static void showAlertForRedirectToSettings (final RunningBackgroundServiceActivity activity, final String permission, final Integer permissionCallback, final String message){
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(activity.getString(R.string.permissions_alert_title));
+		builder.setMessage(message);
+		builder.setPositiveButton(activity.getString(R.string.go_to_settings_button), new DialogInterface.OnClickListener() {
+			@Override public void onClick(DialogInterface dialog, int arg1) {
+				activity.goToSettings(permissionCallback);
+			}
+		});
+		builder.setNegativeButton(activity.getString(R.string.alert_cancel_button_text), new DialogInterface.OnClickListener() {
+			@Override public void onClick(DialogInterface dialog, int arg1) {}
+		});
 		builder.create().show();
 	}
 }
