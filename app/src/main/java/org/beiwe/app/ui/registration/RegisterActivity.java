@@ -1,3 +1,4 @@
+
 package org.beiwe.app.ui.registration;
 
 import android.Manifest;

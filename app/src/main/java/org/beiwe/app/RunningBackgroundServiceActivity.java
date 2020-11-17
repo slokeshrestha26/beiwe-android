@@ -2,7 +2,6 @@ package org.beiwe.app;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -167,7 +166,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		try {
 			startActivity(callIntent);
 		} catch (SecurityException e) {
-			showAlertThatEnablesUserToGrantPermission(this,
+			showMinimalAlertForRedirectToSettings(this,
 					getString(R.string.cant_make_a_phone_call_permissions_alert),
 					getString(R.string.cant_make_phone_call_alert_title),
 					0);
@@ -230,32 +229,42 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 			return;
 		}
 
-		if ( !thisResumeCausedByFalseActivityReturn ) {
+		if ( !thisResumeCausedByFalseActivityReturn )  {
 			String permission = PermissionHandler.getNextPermission( getApplicationContext(), this.isAudioRecorderActivity() );
-			if (permission == null) { return; }
+			if (permission == null || prePromptActive || postPromptActive ) { return; }
 
-			if (!prePromptActive && !postPromptActive && !powerPromptActive) {
-				if (permission == PermissionHandler.POWER_EXCEPTION_PERMISSION ) {
+			if (!powerPromptActive) {
+				if (permission.equals(PermissionHandler.POWER_EXCEPTION_PERMISSION)) {
 					showPowerManagementAlert(this, getString(R.string.power_management_exception_alert), 1000);
 					return;
 				}
 				// Log.d("sessionActivity", "shouldShowRequestPermissionRationale "+ permission +": " + shouldShowRequestPermissionRationale( permission ) );
-				if(PermissionHandler.getPermissionStatus(this, permission) == PermissionHandler.BLOCKED_OR_NEVER_ASKED && PersistentData.getLastRequestedPermission() == permission && (!prePromptActive && !postPromptActive )){
-					//in this case, the user has selected "don't ask me again" for a permission, and requests for permission in other ways will (silently) fail
-					showAlertForRedirectToSettings(this, permission, PermissionHandler.permissionMap.get(permission), PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()));
+
+				//if the user has declined this permission before, redirect them to the settings page instead of sending another request for the notification
+				if (PersistentData.getLastRequestedPermission().equals(permission) || shouldShowRequestPermissionRationale( permission ) ) {
+					showAlertThatForcesUserToGrantPermission(
+							this,
+							PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()),
+							PermissionHandler.permissionMap.get(permission)
+					);
 				}
-				else if (shouldShowRequestPermissionRationale( permission ) ) {
-					if (!prePromptActive && !postPromptActive ) { showAlertThatForcesUserToGrantPermission(this, PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()),
-							PermissionHandler.permissionMap.get(permission) ); }
+				else {
+					showRegularPermissionAlert(
+							this,
+							PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
+							permission,
+							PermissionHandler.permissionMap.get(permission)
+					);
 				}
-				else if (!prePromptActive && !postPromptActive ) { showRegularPermissionAlert(this, PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
-						permission, PermissionHandler.permissionMap.get(permission)); }
 				PersistentData.setLastRequestedPermission(permission);
 			}
 		}
 	}
 
-	/* Message Popping */
+
+	//the following 'alert' functions all send simple popup messages to the user related to getting necessary app permissions
+
+	//the showRegularPermissionAlert function prompts with a message, and then sends the system request for the permission
 	public static void showRegularPermissionAlert(final RunningBackgroundServiceActivity activity, final String message, final String permission, final Integer permissionCallback) {
 		// Log.i("sessionActivity", "showPreAlert");
 		if (prePromptActive) { return; }
@@ -271,6 +280,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		builder.create().show();
 	}
 
+	//the showAlertThatForcesUserToGrantPermission function assumes the user has already declined the permission, and redirects them to the system settings page for this app
 	public static void showAlertThatForcesUserToGrantPermission(final RunningBackgroundServiceActivity activity, final String message, final Integer permissionCallback) {
 		// Log.i("sessionActivity", "showPostAlert");
 		if (postPromptActive) { return; }
@@ -292,7 +302,8 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		builder.create().show();
 	}
 
-	public static void showAlertThatEnablesUserToGrantPermission(final RunningBackgroundServiceActivity activity, final String message, final String title, final Integer permissionCallback) {
+	//this is called inside of startPhoneCall function only and is used to direct users to the settings page without interfering with the checkPermissionLogic function
+	public static void showMinimalAlertForRedirectToSettings(final RunningBackgroundServiceActivity activity, final String message, final String title, final Integer permissionCallback) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		builder.setTitle(title);
 		builder.setMessage(message);
@@ -321,18 +332,6 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 			powerPromptActive = false;
 		} } );
 		builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text), new DialogInterface.OnClickListener() { @Override public void onClick(DialogInterface arg0, int arg1) {  } } ); //Okay button
-		builder.create().show();
-	}
-
-	public static void showAlertForRedirectToSettings (final RunningBackgroundServiceActivity activity, final String permission, final Integer permissionCallback, final String message){
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle(activity.getString(R.string.permissions_alert_title));
-		builder.setMessage(message);
-		builder.setPositiveButton(activity.getString(R.string.go_to_settings_button), new DialogInterface.OnClickListener() {
-			@Override public void onClick(DialogInterface dialog, int arg1) {
-				activity.goToSettings(permissionCallback);
-			}
-		});
 		builder.create().show();
 	}
 }
