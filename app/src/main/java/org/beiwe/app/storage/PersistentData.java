@@ -395,8 +395,8 @@ public class PersistentData {
 	public static void setStudyName(String studyName) {
 		putCommit(STUDY_NAME, studyName);
 	}
-	public static String getStudyID() { return pref.getString(STUDY_NAME, NULL_ID); }
-	public static String getStudyName() { return pref.getString(STUDY_ID, NULL_ID); }
+	public static String getStudyID() { return pref.getString(STUDY_ID, NULL_ID); }
+	public static String getStudyName() { return pref.getString(STUDY_NAME, NULL_ID); }
 
 	/*###########################################################################################
 	#################################### Contact Numbers ########################################
