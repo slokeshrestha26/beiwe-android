@@ -52,7 +52,10 @@ class CrashHandler(private val errorHandlerContext: Context) : Thread.UncaughtEx
         fun writeCrashlog(exception: Throwable?, context: Context?) {
             Sentry.getContext().addTag("user_id", PersistentData.getPatientID())
             Sentry.getContext().addTag("server_url", PostRequest.addWebsitePrefix(""))
-            Sentry.capture(exception)
+            Sentry.getContext().addTag("study_name", PersistentData.getStudyName())
+            Sentry.getContext().addTag("study_id", PersistentData.getStudyID())
+            Sentry.getContext().addTag("product_flavor", BuildConfig.FLAVOR)
+            Sentry.capture(exception);
         }
     }
 

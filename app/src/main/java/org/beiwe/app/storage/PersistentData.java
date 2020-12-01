@@ -36,7 +36,9 @@ public class PersistentData {
 	private static final String KEY_ID = "uid";
 	private static final String KEY_PASSWORD = "password";
 	private static final String IS_REGISTERED = "IsRegistered";
-
+	private static final String STUDY_NAME = "study_name";
+	private static final String STUDY_ID = "study_id";
+	
 	private static final String LOGIN_EXPIRATION = "loginExpirationTimestamp";
 	private static final String PCP_PHONE_KEY = "primary_care";
 	private static final String PASSWORD_RESET_NUMBER_KEY = "reset_number";
@@ -382,6 +384,20 @@ public class PersistentData {
 	public static String getPassword() { return pref.getString( KEY_PASSWORD, null ); }
 	public static String getPatientID() { return pref.getString(KEY_ID, NULL_ID); }
 
+
+	/*###########################################################################################
+	###################################### ERROR INFO #########################################
+	###########################################################################################*/
+
+	public static void setStudyID(String studyID) {
+		putCommit(STUDY_ID, studyID);
+	}
+	public static void setStudyName(String studyName) {
+		putCommit(STUDY_NAME, studyName);
+	}
+	public static String getStudyID() { return pref.getString(STUDY_ID, NULL_ID); }
+	public static String getStudyName() { return pref.getString(STUDY_NAME, NULL_ID); }
+
 	/*###########################################################################################
 	#################################### Contact Numbers ########################################
 	###########################################################################################*/
@@ -606,4 +622,3 @@ public class PersistentData {
 		putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled);
 	}
 }
-
