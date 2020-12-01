@@ -3,8 +3,6 @@ package org.beiwe.app;
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.provider.Settings;
 
 import org.beiwe.app.storage.EncryptionEngine;
@@ -111,13 +109,7 @@ public class DeviceInfo {
 	}
 	
 	public static String getBeiweVersion() {
-		try {
-			PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(),0);
-			return String.valueOf(info.versionCode) + "-" + BuildConfig.BUILD_TYPE;
-		} catch (PackageManager.NameNotFoundException e) {
-			e.printStackTrace();
-			return "unknown";
-		}
+		return BuildConfig.FLAVOR + "-" + BuildConfig.VERSION_NAME;
 	}
 	public static String getAndroidVersion() { return android.os.Build.VERSION.RELEASE; }
 	public static String getProduct() { return android.os.Build.PRODUCT; }
