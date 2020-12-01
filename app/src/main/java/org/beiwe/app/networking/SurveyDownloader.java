@@ -8,7 +8,6 @@ import org.beiwe.app.CrashHandler;
 import org.beiwe.app.JSONUtils;
 import org.beiwe.app.R;
 import org.beiwe.app.storage.PersistentData;
-import org.beiwe.app.storage.TextFileManager;
 import org.beiwe.app.survey.SurveyScheduler;
 import org.beiwe.app.ui.utils.SurveyNotifications;
 import org.json.JSONArray;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.beiwe.app.networking.PostRequest.addWebsitePrefix;
-import static org.beiwe.app.UtilsKt.printe;
 
 public class SurveyDownloader {
 
@@ -48,7 +46,7 @@ public class SurveyDownloader {
 		@Override
 		protected void onPostExecute(Void arg) {
 			responseCode = updateSurveys(appContext, jsonResponseString);
-			showSurveyNotifications(appContext, notificationSurveyIds);
+			SurveyNotifications.showSurveyNotifications(appContext, notificationSurveyIds);
 			super.onPostExecute(arg);
 		} }.execute();
 	}
@@ -149,21 +147,5 @@ public class SurveyDownloader {
 			}
 		}
 		return 200;
-	}
-
-	private static void showSurveyNotifications(Context appContext, List<String> surveyIds) {
-		if (surveyIds != null) {
-			List<String> idsOfStoredSurveys = JSONUtils.jsonArrayToStringList(PersistentData.getSurveyIdsJsonArray());
-			for (String surveyId : surveyIds) {
-				if (idsOfStoredSurveys.contains(surveyId)) {
-					SurveyNotifications.displaySurveyNotification(appContext, surveyId);
-				} else {
-					String errorMsg = "Tried to show notification for survey ID " + surveyId +
-							" but didn't have that survey stored in PersistentData.";
-					printe(errorMsg);
-					TextFileManager.writeDebugLogStatement(errorMsg);
-				}
-			}
-		}
 	}
 }

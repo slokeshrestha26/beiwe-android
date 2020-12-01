@@ -13,6 +13,7 @@ import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
+import org.beiwe.app.JSONUtils;
 import org.beiwe.app.R;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.TextFileManager;
@@ -22,13 +23,35 @@ import org.beiwe.app.survey.SurveyActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
+import static org.beiwe.app.UtilsKt.printe;
+
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
  * This is a STATIC method, and is called from the background service.
  * @author Eli Jones */
 //TODO: Low priority: Eli. Redoc.1
 public class SurveyNotifications {
 	private static final String CHANNEL_ID = "survey_notification_channel";
-	/**Creates a survey notification that transfers the user to the survey activity. 
+
+	/**Show notifications for each survey in surveyIds, as long as that survey exists in PersistentData. */
+	public static void showSurveyNotifications(Context appContext, List<String> surveyIds) {
+		if (surveyIds != null) {
+			List<String> idsOfStoredSurveys = JSONUtils.jsonArrayToStringList(PersistentData.getSurveyIdsJsonArray());
+			for (String surveyId : surveyIds) {
+				if (idsOfStoredSurveys.contains(surveyId)) {
+					displaySurveyNotification(appContext, surveyId);
+				} else {
+					String errorMsg = "Tried to show notification for survey ID " + surveyId +
+							" but didn't have that survey stored in PersistentData.";
+					printe(errorMsg);
+					TextFileManager.writeDebugLogStatement(errorMsg);
+				}
+			}
+		}
+	}
+
+	/**Creates a survey notification that transfers the user to the survey activity.
 	 * Note: the notification can only be dismissed through submitting the survey
 	 * @param appContext */
 	public static void displaySurveyNotification(Context appContext, String surveyId) {
