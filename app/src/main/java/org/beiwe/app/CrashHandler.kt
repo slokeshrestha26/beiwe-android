@@ -54,6 +54,7 @@ class CrashHandler(private val errorHandlerContext: Context) : Thread.UncaughtEx
             Sentry.getContext().addTag("server_url", PostRequest.addWebsitePrefix(""))
             Sentry.getContext().addTag("study_name", PersistentData.getStudyName())
             Sentry.getContext().addTag("study_id", PersistentData.getStudyID())
+            Sentry.getContext().addTag("product_flavor", BuildConfig.FLAVOR)
             Sentry.capture(exception);
         }
     }
