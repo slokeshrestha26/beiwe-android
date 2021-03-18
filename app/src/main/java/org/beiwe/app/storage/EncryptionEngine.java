@@ -25,7 +25,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -249,16 +248,33 @@ public class EncryptionEngine {
 		// setup seed and key generator
 		SecureRandom random = new SecureRandom();
 		KeyGenerator aesKeyGen = null;
-		try { aesKeyGen = KeyGenerator.getInstance("AES"); }
-		catch (NoSuchAlgorithmException e) { //seems unlikely
-			Log.e("Encryption Engine", "device does not know what AES is... instance 1" );
-			e.printStackTrace();
-			throw new NullPointerException("device does not know what AES is... instance 1"); }
-
-		aesKeyGen.init( 128, random );
-		//from key generator, generate a key!  yay...
-		SecretKey secretKey = aesKeyGen.generateKey();
-		return secretKey.getEncoded();
+		byte[] secretKey = null;
+		
+		while (true) {
+			try {
+				aesKeyGen = KeyGenerator.getInstance("AES");
+			} catch (NoSuchAlgorithmException e) { //seems unlikely
+				Log.e("Encryption Engine", "device does not know what AES is... instance 1");
+				e.printStackTrace();
+				throw new NullPointerException("device does not know what AES is... instance 1");
+			}
+			
+			//from key generator, generate a key!
+			aesKeyGen.init( 128, random );
+			secretKey = aesKeyGen.generateKey().getEncoded();
+			
+            // helper code for debugging 0 values
+			// byte[] ba = new byte[]{0};
+			// Log.w("encryption engine", "example byte 64: " + toBase64String(ba));
+			
+			// We discovered that key values starting with 0 value byte causes problems, so we have implemented a safety test.
+			// TODO: we need a better keying process, ECC and real key padding.  Substantial rework.
+			if (secretKey[0] != 0) {
+				// Log.e("encryption engine", "new key! = " + toBase64String(secretKey));
+				return secretKey;
+			}
+			// Log.e("encryption engine", "bad key! = " + toBase64String(secretKey));
+		}
 	}
 	
 	
