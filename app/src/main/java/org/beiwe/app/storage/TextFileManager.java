@@ -359,7 +359,8 @@ public class TextFileManager {
 			}
 			Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			// CrashHandler.writeCrashlog(e, appContext);
+			// removed to prevent sentry being flooded with errors
 			this.fileName = null;
 			return false;
 		} catch (InvalidKeyException e) {
@@ -425,7 +426,8 @@ public class TextFileManager {
 			}
 			Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			// removed to prevent excessive sentry errors
+			// CrashHandler.writeCrashlog(e, appContext);
 		}
 	}
 	
@@ -443,7 +445,7 @@ public class TextFileManager {
 				return;
 			}
 		}
-		
+
 		try {
 			this.safeWritePlaintext(EncryptionEngine.encryptAES(data, this.AESKey));
 		} catch (InvalidKeyException e) {
