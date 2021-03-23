@@ -348,19 +348,23 @@ public class TextFileManager {
 				this.unsafeWritePlaintext(EncryptionEngine.encryptAES(header, this.AESKey));
 			}
 		} catch (FileNotFoundException e) {
-			Log.e("TextFileManager", "could not find file to write to, " + this.fileName);
-			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			if (e.getMessage().toLowerCase().contains("enospc")) { // If the device is out of storage
+				Log.e("ENOSPC", "Out of storage space");
+			} else {
+				Log.e("TextFileManager", "could not find file to write to, " + this.fileName);
+				e.printStackTrace();
+				CrashHandler.writeCrashlog(e, appContext);
+			}
 			this.fileName = null;  // Set filename null so that the system tries to create the file again later
 			return false;
 		} catch (IOException e) {
-			if (e.getMessage().toLowerCase().contains("enospc")) { // If the device is out of storage, alert the user
+			if (e.getMessage().toLowerCase().contains("enospc")) { // If the device is out of storage
 				Log.e("ENOSPC", "Out of storage space");
+			} else {
+				Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
+				e.printStackTrace();
+				CrashHandler.writeCrashlog(e, appContext);
 			}
-			Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
-			e.printStackTrace();
-			// CrashHandler.writeCrashlog(e, appContext);
-			// removed to prevent sentry being flooded with errors
 			this.fileName = null;
 			return false;
 		} catch (InvalidKeyException e) {
