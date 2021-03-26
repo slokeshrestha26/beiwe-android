@@ -82,7 +82,8 @@ public class DeviceInfo {
 	 * 45: app version 3.0.1, Improves Sentry error logging (includes study name and study id, if
 	 *      available from the server), updates app logo, logs product flavor in identifiers.
 	 * 46: app version 3.0.2, Reduces logging of ENOSPC out-of-storage-space errors, and adds a fix
-	 *      for the sporadic invalid encryption key errors received on the backend. */
+	 *      for the sporadic invalid encryption key errors received on the backend.
+	 * 47: app version 3.0.3, Updates Sentry DSN */
 
 	private static String androidID;
 	private static String bluetoothMAC;
