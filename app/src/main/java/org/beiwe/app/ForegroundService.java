@@ -2,6 +2,9 @@ package org.beiwe.app;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -9,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -52,7 +56,7 @@ import io.sentry.dsn.InvalidDsnException;
 
 import static java.lang.Thread.sleep;
 
-public class BackgroundService extends Service {
+public class ForegroundService extends Service {
 	private Context appContext;
 	public GPSListener gpsListener;
 	public PowerStateListener powerStateListener;
@@ -66,7 +70,7 @@ public class BackgroundService extends Service {
 	//that code needs to be able to update the IntentFilters associated with timerReceiver.
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
 	//begin to run with an already fully instantiated background service.
-	private static BackgroundService localHandle;
+	private static ForegroundService localHandle;
 	
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
@@ -338,7 +342,7 @@ public class BackgroundService extends Service {
 		for (String surveyId : PersistentData.getSurveyIds() ) {
 			if ( !timer.alarmIsSet( new Intent(surveyId) ) ) { SurveyScheduler.scheduleSurvey(surveyId); } }
 
-		Intent restartServiceIntent = new Intent( getApplicationContext(), BackgroundService.class);
+		Intent restartServiceIntent = new Intent( getApplicationContext(), ForegroundService.class);
 		restartServiceIntent.setPackage( getPackageName() );
 		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, 0 );
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService( Context.ALARM_SERVICE );
@@ -518,8 +522,8 @@ public class BackgroundService extends Service {
 	 * Provides a (safe) handle to the background Service using the onStartCommand code
 	 * used in every RunningBackgroundServiceActivity */
 	public class BackgroundServiceBinder extends Binder {
-        public BackgroundService getService() {
-            return BackgroundService.this;
+        public ForegroundService getService() {
+            return ForegroundService.this;
         }
     }
 	
@@ -530,6 +534,28 @@ public class BackgroundService extends Service {
 	/** The BackgroundService is meant to be all the time, so we return START_STICKY */
 	@Override public int onStartCommand(Intent intent, int flags, int startId){ //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
+
+		String NOTIFICATION_CHANNEL_ID = "foreground_service_channel";
+		String channelName = "My Background Service";
+		NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+		chan.setLightColor(Color.BLUE);
+		chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		assert manager != null;
+		manager.createNotificationChannel(chan);
+
+		Context app_context = this.getApplicationContext();
+		Intent intent_to_start_foreground_service = new Intent(app_context, ForegroundService.class);
+		PendingIntent pendingIntent =
+				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
+		Notification notification =
+				new Notification.Builder(app_context, NOTIFICATION_CHANNEL_ID)
+						.setContentTitle("Beiwe App")
+						.setContentText("Beiwe data collection running")
+						.setContentIntent(pendingIntent)
+						.setTicker("ticker text test")
+						.build();
+		startForeground(1, notification);
 		return START_STICKY;
 		//we are testing out this restarting behavior for the service.  It is entirely unclear that this will have any observable effect.
 		//return START_REDELIVER_INTENT;

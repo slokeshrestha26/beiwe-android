@@ -297,7 +297,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun buttonStartTimer(view: View?) {
-        backgroundService.startTimers()
+        foregroundService.startTimers()
     }
 
     //file operations
@@ -348,11 +348,11 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun crashBackground(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
+        ForegroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
     }
 
     fun crashBackgroundInFive(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
+        ForegroundService.timer.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
     }
 
     fun enterANRUI(view: View?) {
@@ -364,11 +364,11 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun enterANRBackground(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
+        ForegroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
     }
 
     fun stopBackgroundService(view: View?) {
-        backgroundService.stop()
+        foregroundService.stop()
     }
 
     fun testManualErrorReport(view: View?) {

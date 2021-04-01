@@ -7,8 +7,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import org.beiwe.app.BackgroundService;
-import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
+import org.beiwe.app.ForegroundService;
+import org.beiwe.app.ForegroundService.BackgroundServiceBinder;
 import org.beiwe.app.BuildConfig;
 import org.beiwe.app.R;
 import org.beiwe.app.RunningBackgroundServiceActivity;
@@ -36,7 +36,7 @@ import io.sentry.dsn.InvalidDsnException;
 public class LoadingActivity extends RunningBackgroundServiceActivity {
 	
 	//TODO: Low priority.  Eli.  Why does this reimplement functionality in RunningBackgroundService? investigate.
-	protected BackgroundService backgroundService;
+	protected ForegroundService foregroundService;
 	protected boolean isBound = false;
 	
 	/**The ServiceConnection Class is our trigger for events that rely on the BackgroundService */
@@ -45,7 +45,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 	    public void onServiceConnected(ComponentName name, IBinder binder) {
 	        // Log.d("loading ServiceConnection", "Background Service Connected");
 	        BackgroundServiceBinder some_binder = (BackgroundServiceBinder) binder;
-	        backgroundService = some_binder.getService();
+	        foregroundService = some_binder.getService();
 	        isBound = true;
 	        loadingSequence();
 	    }
@@ -53,7 +53,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 	    @Override
 	    public void onServiceDisconnected(ComponentName name) {
 	        // Log.d("loading ServiceConnection", "Background Service Disconnected");
-	        backgroundService = null;
+	        foregroundService = null;
 	        isBound = false;
 	    }
 	};
@@ -77,7 +77,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 		setContentView(R.layout.activity_loading);
 				
 		if ( testHashing() ) {
-			Intent startingIntent = new Intent(this.getApplicationContext(), BackgroundService.class);
+			Intent startingIntent = new Intent(this.getApplicationContext(), ForegroundService.class);
 			startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
 			startService(startingIntent);
 			bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);

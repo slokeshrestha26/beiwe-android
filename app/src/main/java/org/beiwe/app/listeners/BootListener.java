@@ -1,10 +1,13 @@
 package org.beiwe.app.listeners;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.app.Service;
 
-import org.beiwe.app.BackgroundService;
+import org.beiwe.app.ForegroundService;
 
 /**The BootListener is never actually instantiated elsewhere in the app.  It's job is to sit
  * and wait for either the boot broadcast or the SD (external) applications available.
@@ -30,15 +33,25 @@ public class BootListener extends BroadcastReceiver {
 	
 	/** Does what it says, starts the background service running.
 	 *  called when SDcard available and on device startup. */	
-	private void startBackgroundService(Context externalContext){
-		Intent intent_to_start_background_service = new Intent(externalContext, BackgroundService.class);
-		intent_to_start_background_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
-	    externalContext.startService(intent_to_start_background_service);
+	private void startForegroundService(Context externalContext){
+		Intent intent_to_start_foreground_service = new Intent(externalContext, ForegroundService.class);
+//		PendingIntent pendingIntent =
+//				PendingIntent.getActivity(externalContext, 0, intent_to_start_foreground_service, 0);
+//		Notification notification =
+//				new Notification.Builder(externalContext, "foreground_service_channel")
+//						.setContentTitle("Beiwe App")
+//						.setContentText("Beiwe data collection running")
+//						.setContentIntent(pendingIntent)
+//						.setTicker("ticker")
+//						.build();
+//		Service.startForeground(1, notification);
+		 intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
+	     externalContext.startService(intent_to_start_foreground_service);
 	}
 	
 	@Override
 	public void onReceive(Context externalContext, Intent intent) {
 		// Device turned on or other intents (see manifest)
-		startBackgroundService(externalContext);
+		startForegroundService(externalContext);
 	}
 }

@@ -3,7 +3,7 @@ package org.beiwe.app.networking;
 import android.content.Context;
 import android.util.Log;
 
-import org.beiwe.app.BackgroundService;
+import org.beiwe.app.ForegroundService;
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.JSONUtils;
 import org.beiwe.app.R;
@@ -120,7 +120,7 @@ public class SurveyDownloader {
 //				Log.d("debugging survey update", "B) " + PersistentData.getSurveyTimes(surveyId) );
 				if ( ! PersistentData.getSurveyTimes(surveyId).equals(jsonTimingsString) ) {
 //					Log.i("SurveyDownloader.java", "The survey times, they are a changin!");
-					BackgroundService.cancelSurveyAlarm(surveyId);
+					ForegroundService.cancelSurveyAlarm(surveyId);
 					PersistentData.setSurveyTimes(surveyId, jsonTimingsString);
 					SurveyScheduler.scheduleSurvey(surveyId);
 				}
@@ -130,7 +130,7 @@ public class SurveyDownloader {
 				// Log.d("debugging survey update", "CREATE A SURVEY");
 				PersistentData.addSurveyId(surveyId);
 				PersistentData.createSurveyData(surveyId, jsonQuestionsString, jsonTimingsString, surveyType, jsonSettingsString);
-				BackgroundService.registerTimers(appContext); // We need to register the surveyId before we can schedule it
+				ForegroundService.registerTimers(appContext); // We need to register the surveyId before we can schedule it
 				SurveyScheduler.scheduleSurvey(surveyId);
 				SurveyScheduler.checkImmediateTriggerSurvey(appContext, surveyId);
 			}
@@ -143,7 +143,7 @@ public class SurveyDownloader {
 				//It is almost definitely not worth the effort to cancel any ongoing alarms for a survey. They are one-time, and there is de minimus value to actually cancelling it.
 				// also, that requires accessing the background service, which means using ugly hacks like we do with the survey scheduler (though it would be okay because this code can only actually run if the background service is already instantiated.
 				SurveyNotifications.dismissNotification(appContext, oldSurveyId);
-				BackgroundService.registerTimers(appContext);
+				ForegroundService.registerTimers(appContext);
 			}
 		}
 		return 200;

@@ -39,9 +39,9 @@ public class Timer {
 	
 	
 	// Constructor
-	public Timer(BackgroundService backgroundService) {
-		appContext = backgroundService.getApplicationContext();
-		alarmManager = (AlarmManager) (backgroundService.getSystemService(Context.ALARM_SERVICE));
+	public Timer(ForegroundService foregroundService) {
+		appContext = foregroundService.getApplicationContext();
+		alarmManager = (AlarmManager) (foregroundService.getSystemService(Context.ALARM_SERVICE));
 		
 		// double alarm intents
 		accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off));

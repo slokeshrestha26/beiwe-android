@@ -3,6 +3,9 @@ package org.beiwe.app;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -19,7 +22,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
+import org.beiwe.app.ForegroundService.BackgroundServiceBinder;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.ui.user.AboutActivityLoggedOut;
 
@@ -41,7 +44,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	 * We ensure the BackgroundService is running in the onResume call, and functionality that
 	 * relies on the BackgroundService is always tied to UI elements, reducing the chance of
 	 * a null backgroundService variable to essentially zero. */
-	protected BackgroundService backgroundService;
+	protected ForegroundService foregroundService;
 
 	//an unused variable for tracking whether the background Service is connected, uncomment if we ever need that.
 //	protected boolean isBound = false;
@@ -52,7 +55,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	    public void onServiceConnected(ComponentName name, IBinder binder) {
 	        // Log.d("ServiceConnection", "Background Service Connected");
 	        BackgroundServiceBinder some_binder = (BackgroundServiceBinder) binder;
-	        backgroundService = some_binder.getService();
+	        foregroundService = some_binder.getService();
 	        doBackgroundDependentTasks();
 //	        isBound = true;
 	    }
@@ -60,7 +63,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	    @Override
 	    public void onServiceDisconnected(ComponentName name) {
 	        Log.w("ServiceConnection", "Background Service Disconnected");
-	        backgroundService = null;
+	        foregroundService = null;
 //	        isBound = false;
 	    }
 	};
@@ -83,8 +86,20 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	 * actually running, we then bind to it so we can access program resources. */
 	protected void onResume() {
 		super.onResume();
-		
-		Intent startingIntent = new Intent(this.getApplicationContext(), BackgroundService.class);
+//		Context app_context = this.getApplicationContext();
+//		Intent intent_to_start_foreground_service = new Intent(app_context, ForegroundService.class);
+//		PendingIntent pendingIntent =
+//				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
+//		Notification notification =
+//				new Notification.Builder(app_context, "foreground_service_channel")
+//						.setContentTitle("Beiwe App")
+//						.setContentText("Beiwe data collection running")
+//						.setContentIntent(pendingIntent)
+//						.setTicker("ticker")
+//						.build();
+//		startForeground(1, notification);
+
+		Intent startingIntent = new Intent(this.getApplicationContext(), ForegroundService.class);
 		startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
 		startService(startingIntent);
         bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);

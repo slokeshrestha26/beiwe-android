@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.beiwe.app.BackgroundService;
+import org.beiwe.app.ForegroundService;
 import org.beiwe.app.R;
 import org.beiwe.app.RunningBackgroundServiceActivity;
 import org.beiwe.app.storage.PersistentData;
@@ -38,7 +38,7 @@ public class SessionActivity extends RunningBackgroundServiceActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (backgroundService != null) {
+		if (foregroundService != null) {
 			//If an activity is active there is a countdown to bump a user to a login screen after
 			// some amount of time (setting is pushed by study).  If we leave the session activity
 			// we need to cancel that action.
@@ -48,7 +48,7 @@ public class SessionActivity extends RunningBackgroundServiceActivity {
 			// has not started?) so a crash does at least reboot Beiwe into a functional state,
 			// but that obviously has its own problems.  Updated code should merely be bad UX as
 			// a user could possibly get bumped to the login screen from another app.
-			BackgroundService.clearAutomaticLogoutCountdownTimer(); }
+			ForegroundService.clearAutomaticLogoutCountdownTimer(); }
 		else { Log.w("SessionActivity bug","the background service was not running, could not cancel UI bump to login screen."); }
 	}
 	
@@ -62,7 +62,7 @@ public class SessionActivity extends RunningBackgroundServiceActivity {
 	/** If the user is NOT logged in, take them to the login page */
 	protected void authenticateAndLoginIfNecessary() {
 		if ( PersistentData.isLoggedIn() ) {
-			BackgroundService.startAutomaticLogoutCountdownTimer(); }
+			ForegroundService.startAutomaticLogoutCountdownTimer(); }
 		else {
 			startActivity(new Intent(this, LoginActivity.class) ); }
 	}

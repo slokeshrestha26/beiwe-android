@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.beiwe.app.BackgroundService;
+import org.beiwe.app.ForegroundService;
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.JSONUtils;
 import org.beiwe.app.R;
@@ -87,7 +87,7 @@ public class SurveyScheduler {
 		if (newAlarmTime == null) {
 //			Log.w("SurveyScheduler", "there were no times at all in the provided timings list.");
 			return; }
-		BackgroundService.setSurveyAlarm(surveyId, newAlarmTime);
+		ForegroundService.setSurveyAlarm(surveyId, newAlarmTime);
 	}
 	
 	private static Calendar findNextAlarmTime( ArrayList<ArrayList<Integer>> timesList) {
