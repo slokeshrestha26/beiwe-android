@@ -536,10 +536,10 @@ public class ForegroundService extends Service {
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
 
 		String NOTIFICATION_CHANNEL_ID = "foreground_service_channel";
-		String channelName = "My Background Service";
-		NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+		String channelName = "My Foreground Service";
+		NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
 		chan.setLightColor(Color.BLUE);
-		chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+		chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		assert manager != null;
 		manager.createNotificationChannel(chan);
@@ -552,8 +552,9 @@ public class ForegroundService extends Service {
 				new Notification.Builder(app_context, NOTIFICATION_CHANNEL_ID)
 						.setContentTitle("Beiwe App")
 						.setContentText("Beiwe data collection running")
+						.setSmallIcon(android.R.drawable.btn_plus)
 						.setContentIntent(pendingIntent)
-						.setTicker("ticker text test")
+						.setTicker("Beiwe data collection running in the background, no action required")
 						.build();
 		startForeground(1, notification);
 		return START_STICKY;
