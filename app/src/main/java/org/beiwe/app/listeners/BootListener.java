@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.core.content.ContextCompat;
+
 import org.beiwe.app.MainService;
 
 /**The BootListener is never actually instantiated elsewhere in the app.  It's job is to sit
@@ -32,9 +34,8 @@ public class BootListener extends BroadcastReceiver {
 	 *  called when SDcard available and on device startup. */	
 	private void startMainService(Context externalContext){
 		Intent intent_to_start_foreground_service = new Intent(externalContext, MainService.class);
-
-		 intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
-	     externalContext.startForegroundService(intent_to_start_foreground_service);
+		intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
+		ContextCompat.startForegroundService(externalContext, intent_to_start_foreground_service);
 	}
 	
 	@Override

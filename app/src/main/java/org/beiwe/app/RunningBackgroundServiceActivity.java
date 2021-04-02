@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import org.beiwe.app.MainService.BackgroundServiceBinder;
 import org.beiwe.app.storage.PersistentData;
@@ -87,7 +88,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 		startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
 		// this will only start a new service if it is not already running
-		startForegroundService(startingIntent);
+		ContextCompat.startForegroundService(this.getApplicationContext(), startingIntent);
         bindService( startingIntent, mainServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 

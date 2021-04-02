@@ -7,6 +7,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import androidx.core.content.ContextCompat;
+
 import org.beiwe.app.MainService;
 import org.beiwe.app.MainService.BackgroundServiceBinder;
 import org.beiwe.app.BuildConfig;
@@ -79,7 +81,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 		if ( testHashing() ) {
 			Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 			startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-			startForegroundService(startingIntent);
+			ContextCompat.startForegroundService(ctx, startingIntent);
 			bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 		else { failureExit(); }
