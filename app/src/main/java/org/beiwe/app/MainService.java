@@ -63,8 +63,8 @@ public class MainService extends Service {
 	public AccelerometerListener accelerometerListener;
 	public GyroscopeListener gyroscopeListener;
 	public BluetoothListener bluetoothListener;
-	public String notificationChannelId = "foreground_service_channel";
-	String channelName = "My Foreground Service";
+	public String notificationChannelId = "_service_channel";
+	String channelName = "Beiwe Data Collection"; // user facing name, seen if they hold press the notification
 	public static Timer timer;
 	
 	//localHandle is how static functions access the currently instantiated main service.
