@@ -35,6 +35,7 @@ public class BootListener extends BroadcastReceiver {
 	private void startMainService(Context externalContext){
 		Intent intent_to_start_foreground_service = new Intent(externalContext, MainService.class);
 		intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
+		// ContextCompat correctly handles old and new android APIs
 		ContextCompat.startForegroundService(externalContext, intent_to_start_foreground_service);
 	}
 	

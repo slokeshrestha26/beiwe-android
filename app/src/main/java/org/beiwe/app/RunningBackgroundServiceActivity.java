@@ -87,7 +87,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 
 		Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 		startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-		// this will only start a new service if it is not already running
+		// this will only start a new service if it is not already running, and check API version for appropriate version
 		ContextCompat.startForegroundService(this.getApplicationContext(), startingIntent);
         bindService( startingIntent, mainServiceConnection, Context.BIND_AUTO_CREATE);
 	}

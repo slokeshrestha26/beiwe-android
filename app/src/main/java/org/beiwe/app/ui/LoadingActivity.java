@@ -81,6 +81,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 		if ( testHashing() ) {
 			Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 			startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
+			// ContextCompat correctly handles old and new android APIs
 			ContextCompat.startForegroundService(ctx, startingIntent);
 			bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
 		}
