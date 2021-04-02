@@ -79,7 +79,7 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 		if ( testHashing() ) {
 			Intent startingIntent = new Intent(this.getApplicationContext(), ForegroundService.class);
 			startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-			startService(startingIntent);
+			startForegroundService(startingIntent);
 			bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 		else { failureExit(); }

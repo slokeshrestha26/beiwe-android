@@ -35,18 +35,9 @@ public class BootListener extends BroadcastReceiver {
 	 *  called when SDcard available and on device startup. */	
 	private void startForegroundService(Context externalContext){
 		Intent intent_to_start_foreground_service = new Intent(externalContext, ForegroundService.class);
-//		PendingIntent pendingIntent =
-//				PendingIntent.getActivity(externalContext, 0, intent_to_start_foreground_service, 0);
-//		Notification notification =
-//				new Notification.Builder(externalContext, "foreground_service_channel")
-//						.setContentTitle("Beiwe App")
-//						.setContentText("Beiwe data collection running")
-//						.setContentIntent(pendingIntent)
-//						.setTicker("ticker")
-//						.build();
-//		Service.startForeground(1, notification);
+
 		 intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
-	     externalContext.startService(intent_to_start_foreground_service);
+	     externalContext.startForegroundService(intent_to_start_foreground_service);
 	}
 	
 	@Override

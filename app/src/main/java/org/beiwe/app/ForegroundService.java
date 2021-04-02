@@ -63,6 +63,8 @@ public class ForegroundService extends Service {
 	public AccelerometerListener accelerometerListener;
 	public GyroscopeListener gyroscopeListener;
 	public BluetoothListener bluetoothListener;
+	public String notificationChannelId = "foreground_service_channel";
+	String channelName = "My Foreground Service";
 	public static Timer timer;
 	
 	//localHandle is how static functions access the currently instantiated background service.
@@ -95,7 +97,8 @@ public class ForegroundService extends Service {
 		PostRequest.initialize( appContext );
 		localHandle = this;  //yes yes, hacky, I know. This line needs to run before registerTimers()
 		registerTimers(appContext);
-		
+
+		createNotificationChannel();
 		doSetup();
 	}
 	
@@ -134,6 +137,16 @@ public class ForegroundService extends Service {
 			DeviceInfo.initialize(appContext); //if at registration this has already been initialized. (we don't care.)
 			startTimers();
 		}
+	}
+
+	private void createNotificationChannel() {
+		// setup the notification channel so the service can run in the foreground
+		NotificationChannel chan = new NotificationChannel(notificationChannelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+		chan.setLightColor(Color.BLUE);
+		chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		assert manager != null;
+		manager.createNotificationChannel(chan);
 	}
 	
 	/** Stops the BackgroundService instance. */
@@ -535,28 +548,21 @@ public class ForegroundService extends Service {
 	@Override public int onStartCommand(Intent intent, int flags, int startId){ //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
 
-		String NOTIFICATION_CHANNEL_ID = "foreground_service_channel";
-		String channelName = "My Foreground Service";
-		NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_LOW);
-		chan.setLightColor(Color.BLUE);
-		chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		assert manager != null;
-		manager.createNotificationChannel(chan);
-
 		Context app_context = this.getApplicationContext();
 		Intent intent_to_start_foreground_service = new Intent(app_context, ForegroundService.class);
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
 		Notification notification =
-				new Notification.Builder(app_context, NOTIFICATION_CHANNEL_ID)
+				new Notification.Builder(app_context, notificationChannelId)
 						.setContentTitle("Beiwe App")
 						.setContentText("Beiwe data collection running")
 						.setSmallIcon(android.R.drawable.btn_plus)
 						.setContentIntent(pendingIntent)
 						.setTicker("Beiwe data collection running in the background, no action required")
 						.build();
+		//multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
 		startForeground(1, notification);
+		// We want this service to continue running until it is explicitly stopped, so return sticky.
 		return START_STICKY;
 		//we are testing out this restarting behavior for the service.  It is entirely unclear that this will have any observable effect.
 		//return START_REDELIVER_INTENT;

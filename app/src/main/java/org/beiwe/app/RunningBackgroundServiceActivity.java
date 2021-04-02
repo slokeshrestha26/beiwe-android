@@ -86,22 +86,11 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	 * actually running, we then bind to it so we can access program resources. */
 	protected void onResume() {
 		super.onResume();
-//		Context app_context = this.getApplicationContext();
-//		Intent intent_to_start_foreground_service = new Intent(app_context, ForegroundService.class);
-//		PendingIntent pendingIntent =
-//				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
-//		Notification notification =
-//				new Notification.Builder(app_context, "foreground_service_channel")
-//						.setContentTitle("Beiwe App")
-//						.setContentText("Beiwe data collection running")
-//						.setContentIntent(pendingIntent)
-//						.setTicker("ticker")
-//						.build();
-//		startForeground(1, notification);
 
 		Intent startingIntent = new Intent(this.getApplicationContext(), ForegroundService.class);
 		startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-		startService(startingIntent);
+		// this will only start a new service if it is not already running
+		startForegroundService(startingIntent);
         bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
