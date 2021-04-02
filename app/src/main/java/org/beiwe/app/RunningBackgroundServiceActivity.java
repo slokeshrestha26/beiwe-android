@@ -3,9 +3,6 @@ package org.beiwe.app;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,7 +19,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.beiwe.app.ForegroundService.BackgroundServiceBinder;
+import org.beiwe.app.MainService.BackgroundServiceBinder;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.ui.user.AboutActivityLoggedOut;
 
@@ -44,26 +41,26 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	 * We ensure the BackgroundService is running in the onResume call, and functionality that
 	 * relies on the BackgroundService is always tied to UI elements, reducing the chance of
 	 * a null backgroundService variable to essentially zero. */
-	protected ForegroundService foregroundService;
+	protected MainService mainService;
 
-	//an unused variable for tracking whether the background Service is connected, uncomment if we ever need that.
+	//an unused variable for tracking whether the main Service is connected, uncomment if we ever need that.
 //	protected boolean isBound = false;
 	
 	/**The ServiceConnection Class is our trigger for events that rely on the BackgroundService */
-	protected ServiceConnection backgroundServiceConnection = new ServiceConnection() {
+	protected ServiceConnection mainServiceConnection = new ServiceConnection() {
 	    @Override
 	    public void onServiceConnected(ComponentName name, IBinder binder) {
-	        // Log.d("ServiceConnection", "Background Service Connected");
+	        // Log.d("ServiceConnection", "Main Service Connected");
 	        BackgroundServiceBinder some_binder = (BackgroundServiceBinder) binder;
-	        foregroundService = some_binder.getService();
+	        mainService = some_binder.getService();
 	        doBackgroundDependentTasks();
 //	        isBound = true;
 	    }
 	    
 	    @Override
 	    public void onServiceDisconnected(ComponentName name) {
-	        Log.w("ServiceConnection", "Background Service Disconnected");
-	        foregroundService = null;
+	        Log.w("ServiceConnection", "Main Service Disconnected");
+	        mainService = null;
 //	        isBound = false;
 	    }
 	};
@@ -78,7 +75,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 		PersistentData.initialize(getApplicationContext());
 	}
 	
-	/** Override this function to do tasks on creation, but only after the background Service has been initialized. */
+	/** Override this function to do tasks on creation, but only after the Main Service has been initialized. */
 	protected void doBackgroundDependentTasks() { /*Log.d("RunningBackgroundServiceActivity", "doBackgroundDependentTasks ran as default (do nothing)");*/ }
 	
 	@Override
@@ -87,11 +84,11 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 
-		Intent startingIntent = new Intent(this.getApplicationContext(), ForegroundService.class);
+		Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 		startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
 		// this will only start a new service if it is not already running
 		startForegroundService(startingIntent);
-        bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
+        bindService( startingIntent, mainServiceConnection, Context.BIND_AUTO_CREATE);
 	}
 
 
@@ -101,7 +98,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 	protected void onPause() {
 		super.onPause();
 		activityNotVisible = true;
-		unbindService(backgroundServiceConnection);
+		unbindService(mainServiceConnection);
 	}
 	
 	

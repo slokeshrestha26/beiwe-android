@@ -56,7 +56,7 @@ import io.sentry.dsn.InvalidDsnException;
 
 import static java.lang.Thread.sleep;
 
-public class ForegroundService extends Service {
+public class MainService extends Service {
 	private Context appContext;
 	public GPSListener gpsListener;
 	public PowerStateListener powerStateListener;
@@ -67,12 +67,12 @@ public class ForegroundService extends Service {
 	String channelName = "My Foreground Service";
 	public static Timer timer;
 	
-	//localHandle is how static functions access the currently instantiated background service.
-	//It is to be used ONLY to register new surveys with the running background service, because
+	//localHandle is how static functions access the currently instantiated main service.
+	//It is to be used ONLY to register new surveys with the running main service, because
 	//that code needs to be able to update the IntentFilters associated with timerReceiver.
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
-	//begin to run with an already fully instantiated background service.
-	private static ForegroundService localHandle;
+	//begin to run with an already fully instantiated main service.
+	private static MainService localHandle;
 	
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
@@ -165,17 +165,17 @@ public class ForegroundService extends Service {
 		if ( appContext.getPackageManager().hasSystemFeature( PackageManager.FEATURE_BLUETOOTH_LE ) && PersistentData.getBluetoothEnabled() ) {
 			this.bluetoothListener = new BluetoothListener();
 			if ( this.bluetoothListener.isBluetoothEnabled() ) {
-//				Log.i("Background Service", "success, actually doing bluetooth things.");
+//				Log.i("Main Service", "success, actually doing bluetooth things.");
 				registerReceiver(this.bluetoothListener, new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED") ); }
 			else {
 				//TODO: Low priority. Eli. Track down why this error log pops up, cleanup.  -- the above check should be for the (new) doesBluetoothCapabilityExist function instead of isBluetoothEnabled
-				Log.e("Background Service", "bluetooth Failure. Should not have gotten this far.");
+				Log.e("Main Service", "bluetooth Failure. Should not have gotten this far.");
 				TextFileManager.getDebugLogFile().writeEncrypted("bluetooth Failure, device should not have gotten to this line of code"); }
 		}
 		else {
 			if (PersistentData.getBluetoothEnabled()) {
 				TextFileManager.getDebugLogFile().writeEncrypted("Device does not support bluetooth LE, bluetooth features disabled.");
-				Log.w("BackgroundService bluetooth init", "Device does not support bluetooth LE, bluetooth features disabled."); }
+				Log.w("MainS bluetooth init", "Device does not support bluetooth LE, bluetooth features disabled."); }
 			// else { Log.d("BackgroundService bluetooth init", "Bluetooth not enabled for study."); }
 			this.bluetoothListener = null; }
 	}
@@ -355,7 +355,7 @@ public class ForegroundService extends Service {
 		for (String surveyId : PersistentData.getSurveyIds() ) {
 			if ( !timer.alarmIsSet( new Intent(surveyId) ) ) { SurveyScheduler.scheduleSurvey(surveyId); } }
 
-		Intent restartServiceIntent = new Intent( getApplicationContext(), ForegroundService.class);
+		Intent restartServiceIntent = new Intent( getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage( getPackageName() );
 		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, 0 );
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService( Context.ALARM_SERVICE );
@@ -497,7 +497,7 @@ public class ForegroundService extends Service {
 			}
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm
 			if ( PersistentData.getSurveyIds().contains( broadcastAction ) ) {
-//				Log.i("BACKGROUND SERVICE", "new notification: " + broadcastAction);
+//				Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
 				SurveyNotifications.displaySurveyNotification(appContext, broadcastAction);
 				SurveyScheduler.scheduleSurvey(broadcastAction);
 				return; }
@@ -532,11 +532,11 @@ public class ForegroundService extends Service {
 	public IBinder onBind(Intent arg0) { return new BackgroundServiceBinder(); }
 	
 	/**A public "Binder" class for Activities to access.
-	 * Provides a (safe) handle to the background Service using the onStartCommand code
+	 * Provides a (safe) handle to the Main Service using the onStartCommand code
 	 * used in every RunningBackgroundServiceActivity */
 	public class BackgroundServiceBinder extends Binder {
-        public ForegroundService getService() {
-            return ForegroundService.this;
+        public MainService getService() {
+            return MainService.this;
         }
     }
 	
@@ -549,7 +549,7 @@ public class ForegroundService extends Service {
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
 
 		Context app_context = this.getApplicationContext();
-		Intent intent_to_start_foreground_service = new Intent(app_context, ForegroundService.class);
+		Intent intent_to_start_foreground_service = new Intent(app_context, MainService.class);
 		PendingIntent pendingIntent =
 				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
 		Notification notification =
@@ -586,7 +586,7 @@ public class ForegroundService extends Service {
 	
 	/** Sets a timer that starts the service if it is not running in ten seconds. */
 	private void restartService(){
-		//how does this even...  Whatever, 10 seconds later the background service will start.
+		//how does this even...  Whatever, 10 seconds later the main service will start.
 		Intent restartServiceIntent = new Intent( getApplicationContext(), this.getClass() );
 	    restartServiceIntent.setPackage( getPackageName() );
 	    PendingIntent restartServicePendingIntent = PendingIntent.getService( getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT );

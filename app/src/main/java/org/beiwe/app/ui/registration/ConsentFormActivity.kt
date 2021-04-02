@@ -48,7 +48,7 @@ class ConsentFormActivity : RunningBackgroundServiceActivity() {
         TextFileManager.makeNewFilesForEverything()
 
         //This is important.  we need to start timers...
-        foregroundService.doSetup()
+        mainService.doSetup()
 
         // Start the Main Screen Activity, destroy this activity
         startActivity(Intent(applicationContext, LoadingActivity::class.java))

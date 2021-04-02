@@ -1,13 +1,10 @@
 package org.beiwe.app.listeners;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.app.Service;
 
-import org.beiwe.app.ForegroundService;
+import org.beiwe.app.MainService;
 
 /**The BootListener is never actually instantiated elsewhere in the app.  It's job is to sit
  * and wait for either the boot broadcast or the SD (external) applications available.
@@ -31,10 +28,10 @@ public class BootListener extends BroadcastReceiver {
 //			throw e; }
 //	}
 	
-	/** Does what it says, starts the background service running.
+	/** Does what it says, starts the main service running.
 	 *  called when SDcard available and on device startup. */	
-	private void startForegroundService(Context externalContext){
-		Intent intent_to_start_foreground_service = new Intent(externalContext, ForegroundService.class);
+	private void startMainService(Context externalContext){
+		Intent intent_to_start_foreground_service = new Intent(externalContext, MainService.class);
 
 		 intent_to_start_foreground_service.addFlags(Intent.FLAG_FROM_BACKGROUND);
 	     externalContext.startForegroundService(intent_to_start_foreground_service);
@@ -43,6 +40,6 @@ public class BootListener extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context externalContext, Intent intent) {
 		// Device turned on or other intents (see manifest)
-		startForegroundService(externalContext);
+		startMainService(externalContext);
 	}
 }

@@ -5,7 +5,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.beiwe.app.ForegroundService;
+import org.beiwe.app.MainService;
 import org.beiwe.app.R;
 import org.beiwe.app.RunningBackgroundServiceActivity;
 import org.beiwe.app.storage.PersistentData;
@@ -38,18 +38,18 @@ public class SessionActivity extends RunningBackgroundServiceActivity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (foregroundService != null) {
+		if (mainService != null) {
 			//If an activity is active there is a countdown to bump a user to a login screen after
 			// some amount of time (setting is pushed by study).  If we leave the session activity
 			// we need to cancel that action.
 			//This issue has occurred literally once ever (as of February 27 2016) but the prior
 			// behavior was broken and caused the app to crash.  Really, this state is incomprehensible
-			// (activity is open an mature enough that onPause can occur, yet the background service
+			// (activity is open an mature enough that onPause can occur, yet the main service
 			// has not started?) so a crash does at least reboot Beiwe into a functional state,
 			// but that obviously has its own problems.  Updated code should merely be bad UX as
 			// a user could possibly get bumped to the login screen from another app.
-			ForegroundService.clearAutomaticLogoutCountdownTimer(); }
-		else { Log.w("SessionActivity bug","the background service was not running, could not cancel UI bump to login screen."); }
+			MainService.clearAutomaticLogoutCountdownTimer(); }
+		else { Log.w("SessionActivity bug","the main service was not running, could not cancel UI bump to login screen."); }
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class SessionActivity extends RunningBackgroundServiceActivity {
 	/** If the user is NOT logged in, take them to the login page */
 	protected void authenticateAndLoginIfNecessary() {
 		if ( PersistentData.isLoggedIn() ) {
-			ForegroundService.startAutomaticLogoutCountdownTimer(); }
+			MainService.startAutomaticLogoutCountdownTimer(); }
 		else {
 			startActivity(new Intent(this, LoginActivity.class) ); }
 	}

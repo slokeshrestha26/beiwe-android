@@ -201,7 +201,7 @@ public class TextFileManager {
 	private static void checkAvailableWithTimeout (String textFile) {
 		if (!checkTextFileAvailable(textFile)) {
 			try {
-				// The Background Service should be getting restarted as we speak
+				// The Main Service should be getting restarted as we speak
 				for (int x = 0; x < 40; x++) {
 					// previously, flat 75 ms. Now 50ms over 40 iterations. If this still fails then we have bigger problems
 					Thread.sleep(GETTER_TIMEOUT);

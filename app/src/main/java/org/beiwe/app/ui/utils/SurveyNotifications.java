@@ -28,7 +28,7 @@ import java.util.List;
 import static org.beiwe.app.UtilsKt.printe;
 
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
- * This is a STATIC method, and is called from the background service.
+ * This is a STATIC method, and is called from the main service.
  * @author Eli Jones */
 //TODO: Low priority: Eli. Redoc.1
 public class SurveyNotifications {

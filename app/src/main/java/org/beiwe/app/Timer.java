@@ -39,9 +39,9 @@ public class Timer {
 	
 	
 	// Constructor
-	public Timer(ForegroundService foregroundService) {
-		appContext = foregroundService.getApplicationContext();
-		alarmManager = (AlarmManager) (foregroundService.getSystemService(Context.ALARM_SERVICE));
+	public Timer(MainService mainService) {
+		appContext = mainService.getApplicationContext();
+		alarmManager = (AlarmManager) (mainService.getSystemService(Context.ALARM_SERVICE));
 		
 		// double alarm intents
 		accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off));
@@ -68,7 +68,7 @@ public class Timer {
 	 * ############################ Common Code #############################
 	 * ####################################################################*/
 	
-	// Setup custom intents to be sent to the listeners running in the background service
+	// Setup custom intents to be sent to the listeners running in the main service
 	private static Intent setupIntent(String action) {
 		Intent newIntent = new Intent();
 		newIntent.setAction(action);
