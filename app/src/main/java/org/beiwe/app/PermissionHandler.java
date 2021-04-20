@@ -123,6 +123,7 @@ public class PermissionHandler {
 	public static boolean confirmTexts( Context context ) { return ( PersistentData.getTextsEnabled() && checkTextsPermissions(context) ); }
 	public static boolean confirmWifi( Context context ) { return ( PersistentData.getWifiEnabled() && checkWifiPermissions(context) && checkAccessFineLocation(context) && checkAccessCoarseLocation(context) ) ; }
 	public static boolean confirmBluetooth( Context context ) { return ( PersistentData.getBluetoothEnabled() && checkBluetoothPermissions(context)); }
+	public static boolean confirmBackgroundAudio ( Context context ) { return ( PersistentData.getBackgroundAudioEnabled() && checkAccessRecordAudio(context)); }
 	
 	public static String getNextPermission(Context context, Boolean includeRecording) {
 		if (PersistentData.getGpsEnabled()) {
@@ -144,7 +145,7 @@ public class PermissionHandler {
 			if ( !checkAccessReadSms(context)) return Manifest.permission.READ_SMS;
 			if ( !checkAccessReceiveMms(context)) return Manifest.permission.RECEIVE_MMS;
 			if ( !checkAccessReceiveSms(context)) return Manifest.permission.RECEIVE_SMS; }
-		if (includeRecording) {
+		if (includeRecording || PersistentData.getBackgroundAudioEnabled()) {
 			if ( !checkAccessRecordAudio(context)) { return Manifest.permission.RECORD_AUDIO; } }
 
 		//The phone call permission is invariant, it is required for all studies in order for the

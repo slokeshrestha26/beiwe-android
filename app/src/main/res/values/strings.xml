@@ -199,6 +199,7 @@
     <string name="run_wifi_log" translatable="false">Wifi Log</string>
     <string name="check_for_sms_enabled" translatable="false">Check SMS</string>
     <string name="check_for_calls_enabled" translatable="false">Check Calls</string>
+    <string name="check_for_recording_permission" translatable="false">Check Recording</string>
 
     <!-- Menu Items -->
     <string name="menu_sign_out">Sign Out</string>

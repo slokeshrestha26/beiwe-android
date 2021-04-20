@@ -31,6 +31,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.BackgroundAudioListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -41,6 +42,7 @@ import org.beiwe.app.listeners.SmsSentLogger;
 import org.beiwe.app.listeners.WifiListener;
 import org.beiwe.app.networking.PostRequest;
 import org.beiwe.app.networking.SurveyDownloader;
+import org.beiwe.app.storage.AudioFileManager;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.TextFileManager;
 import org.beiwe.app.survey.SurveyScheduler;
@@ -66,6 +68,7 @@ public class MainService extends Service {
 	public String notificationChannelId = "_service_channel";
 	String channelName = "Beiwe Data Collection"; // user facing name, seen if they hold press the notification
 	public static Timer timer;
+	public BackgroundAudioListener backgroundAudioListener = null;
 	
 	//localHandle is how static functions access the currently instantiated main service.
 	//It is to be used ONLY to register new surveys with the running main service, because
@@ -125,6 +128,14 @@ public class MainService extends Service {
 			startMmsSentLogger();
 		} else if (PersistentData.getTextsEnabled()) {
 			sendBroadcast(Timer.checkForSMSEnabled);
+		}
+
+		if (PermissionHandler.confirmBackgroundAudio(appContext)) {
+			// we have the os permission to record, and the study requires background recording
+			startBackgroundAudioCollection();
+		} else if (PersistentData.getBackgroundAudioEnabled()) {
+			// study requires recording, but no permission is present
+			sendBroadcast(Timer.checkForRecordingPermission);
 		}
 		
 		if (PermissionHandler.confirmCalls(appContext))
@@ -193,6 +204,11 @@ public class MainService extends Service {
 	private void startCallLogger() {
 		CallLogger callLogger = new CallLogger(new Handler(), appContext);
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
+
+	private void startBackgroundAudioCollection(){
+		backgroundAudioListener = new BackgroundAudioListener();
+	}
+
 	
 	/** Initializes the PowerStateListener. 
 	 * The PowerStateListener requires the ACTION_SCREEN_OFF and ACTION_SCREEN_ON intents
@@ -495,6 +511,11 @@ public class MainService extends Service {
 				if ( PermissionHandler.confirmCalls(appContext) ) { startCallLogger(); }
 				else if (PersistentData.getCallsEnabled() ) { timer.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabled); }
 			}
+
+			if (broadcastAction.equals( appContext.getString(R.string.check_for_recording_permission) ) ) {
+				if ( PermissionHandler.confirmBackgroundAudio(appContext) ) { startBackgroundAudioCollection(); }
+				else if (PersistentData.getBackgroundAudioEnabled() ) { timer.setupExactSingleAlarm(30000L, Timer.checkForRecordingPermission); }
+			}
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm
 			if ( PersistentData.getSurveyIds().contains( broadcastAction ) ) {
 //				Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
@@ -509,6 +530,8 @@ public class MainService extends Service {
 					return;
 				}
 			}
+
+
 
 			//this is a special action that will only run if the app device is in debug mode.
 			if (broadcastAction.equals("crashBeiwe") && BuildConfig.APP_IS_BETA) {

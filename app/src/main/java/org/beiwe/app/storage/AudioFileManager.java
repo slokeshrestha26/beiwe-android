@@ -18,12 +18,20 @@ public class AudioFileManager {
 
 	public static void delete(String fileName) { TextFileManager.delete(fileName); }
 	
-   /**Generates new file name variables. The name consists of the time the recording takes place. */
+   /**Generates new file name variables. The name consists of the time the recording takes place.
+	* This version of the function is intended for use with the audio survey feature**/
     public static String generateNewEncryptedAudioFileName(String surveyId) {
 		String timecode = ((Long)(System.currentTimeMillis() / 1000L)).toString();
 		return PersistentData.getPatientID() + "_voiceRecording_" + surveyId + "_" + timecode;
     }
-    
+
+	/**Generates new file name variables. The name consists of the time the recording takes place.
+	 * This version of the function is intended for use with the ambient audio collection feature*/
+	public static String generateNewEncryptedAudioFileName() {
+		String timecode = ((Long)(System.currentTimeMillis() / 1000L)).toString();
+		return PersistentData.getPatientID() + "_ambientAudio_" + timecode;
+	}
+
     /** Reads in the existing temporary audio file and encrypts it. Generates AES keys as needed.
      * Behavior is to spend as little time writing the file as possible, at the expense of memory.*/
 	public static void encryptAudioFile(String unencryptedTempAudioFilePath, String extension, String surveyId, Context appContext) {
@@ -41,6 +49,27 @@ public class AudioFileManager {
 	        catch (InvalidKeyException e) {
 	        	Log.e("AudioFileManager", "encrypted write operation to the audio file without an aes key? how is that even...");
 	        	CrashHandler.writeCrashlog(e, appContext); }
+			writePlaintext( encryptedRSA, fileName, appContext );
+			writePlaintext( encryptedAudio, fileName, appContext );
+		}
+	}
+
+	// for use with ambient audio collection
+	public static void encryptAudioFile(String unencryptedTempAudioFilePath, String extension, Context appContext) {
+		if (unencryptedTempAudioFilePath != null) {
+			// If the audio file has been written to, encrypt the audio file
+			String fileName = generateNewEncryptedAudioFileName() + extension;
+			byte[] aesKey = EncryptionEngine.newAESKey();
+			String encryptedRSA = null;
+			String encryptedAudio = null;
+			try{encryptedRSA = EncryptionEngine.encryptRSA( aesKey );
+				encryptedAudio = EncryptionEngine.encryptAES( readInAudioFile(unencryptedTempAudioFilePath, appContext), aesKey ); }
+			catch (InvalidKeySpecException e) {
+				Log.e("AudioFileManager", "encrypted write operation to the audio file without a keyFile.");
+				CrashHandler.writeCrashlog(e, appContext); }
+			catch (InvalidKeyException e) {
+				Log.e("AudioFileManager", "encrypted write operation to the audio file without an aes key? how is that even...");
+				CrashHandler.writeCrashlog(e, appContext); }
 			writePlaintext( encryptedRSA, fileName, appContext );
 			writePlaintext( encryptedAudio, fileName, appContext );
 		}

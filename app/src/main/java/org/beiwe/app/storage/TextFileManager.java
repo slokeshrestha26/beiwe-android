@@ -58,6 +58,7 @@ public class TextFileManager {
 	private static TextFileManager surveyTimings;
 	private static TextFileManager surveyAnswers;
 	private static TextFileManager wifiLog;
+	private static AudioFileManager backgroundAudio;
 	
 	private static TextFileManager keyFile;
 	
