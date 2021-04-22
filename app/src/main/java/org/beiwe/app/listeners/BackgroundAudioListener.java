@@ -5,6 +5,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,9 +19,10 @@ import org.beiwe.app.storage.AudioFileManager;
 import java.io.IOException;
 import java.util.Date;
 
-public class BackgroundAudioListener extends AppCompatActivity {
+public class BackgroundAudioListener{
 
     static String unencryptedFileName = "currentlyRecordingFile";
+    String unencryptedRawAudioFilePath;
     static int format = MediaRecorder.OutputFormat.MPEG_4;
     static BackgroundAudioListener instance;
 
@@ -26,31 +30,32 @@ public class BackgroundAudioListener extends AppCompatActivity {
     AudioFileManager fileManager = new AudioFileManager();
     int BIT_RATE = 6400;
     static long fileRefreshInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
+    Context context = null;
 
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public BackgroundAudioListener(Context c){
+        context = c;
         instance = this;
+        unencryptedRawAudioFilePath = context.getFilesDir().getAbsolutePath() + "/" + unencryptedFileName;
         startRecording();
         Log.e("background audio", "inside on create function");
         // begins a process to create a new recording file every time interval
         initializeFileRefreshAlarms();
     }
 
+
     //ensure that if the activity ends, any recording is ended and encrypted
-    @Override
-    public void onDestroy() {
-        if (isFinishing()) { // If the activity is being finished()...
-            if (recorder != null) { endRecording(); }
-        }
-        super.onDestroy();
-    }
+//    public void onDestroy() {
+//        if (isFinishing()) { // If the activity is being finished()...
+//            if (recorder != null) { endRecording(); }
+//        }
+//        super.onDestroy();
+//    }
 
     private void startRecording() {
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(format);
-        recorder.setOutputFile(unencryptedFileName);
+        recorder.setOutputFile(unencryptedRawAudioFilePath);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         recorder.setAudioChannels(1);
         recorder.setAudioSamplingRate(44100);
@@ -72,7 +77,7 @@ public class BackgroundAudioListener extends AppCompatActivity {
         recorder.release();
         recorder = null;
 
-        fileManager.encryptAudioFile(unencryptedFileName, ".mp3", getApplicationContext());
+        fileManager.encryptAudioFile(unencryptedRawAudioFilePath, ".mp3", context);
     }
 
     void startNewRecordingFile(){
@@ -82,9 +87,8 @@ public class BackgroundAudioListener extends AppCompatActivity {
 
     void initializeFileRefreshAlarms(){
         Date when = new Date(System.currentTimeMillis());
-        Context context = getApplicationContext();
         try {
-            Intent someIntent = new Intent(getApplicationContext(), audioFileRefreshTimer.class); // intent to be launched
+            Intent someIntent = new Intent(context, audioFileRefreshTimer.class); // intent to be launched
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     context,

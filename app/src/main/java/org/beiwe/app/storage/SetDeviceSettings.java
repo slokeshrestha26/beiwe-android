@@ -1,10 +1,13 @@
 package org.beiwe.app.storage;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SetDeviceSettings {
 	public static void writeDeviceSettings(JSONObject deviceSettings) throws JSONException {
+		Log.e("debug", "writing device settings");
 		// Write data stream booleans
 		Boolean accelerometerEnabled = deviceSettings.getBoolean("accelerometer");
 		PersistentData.setAccelerometerEnabled(accelerometerEnabled);

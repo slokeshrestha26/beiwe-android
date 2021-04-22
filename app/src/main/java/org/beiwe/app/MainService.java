@@ -130,11 +130,11 @@ public class MainService extends Service {
 			sendBroadcast(Timer.checkForSMSEnabled);
 		}
 
+		// if we have the os permission to record, and the study requires background recording
 		if (PermissionHandler.confirmBackgroundAudio(appContext)) {
-			// we have the os permission to record, and the study requires background recording
-			startBackgroundAudioCollection();
+			Log.e("debug", "starting audio collection");
+			startBackgroundAudioCollection();// study requires recording, but no permission is present
 		} else if (PersistentData.getBackgroundAudioEnabled()) {
-			// study requires recording, but no permission is present
 			sendBroadcast(Timer.checkForRecordingPermission);
 		}
 		
@@ -206,8 +206,7 @@ public class MainService extends Service {
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
 
 	private void startBackgroundAudioCollection(){
-		Intent intent = new Intent(this, BackgroundAudioListener.class);
-		startActivity(intent);
+		backgroundAudioListener = new BackgroundAudioListener(appContext);
 	}
 
 	
