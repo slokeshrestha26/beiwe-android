@@ -9,7 +9,7 @@ public class audioFileRefreshTimer extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent)
     {
-        Log.e("audio file refresh", "recived new file signal");
+        Log.e("audio file refresh", "received new file signal");
         BackgroundAudioListener.instance.startNewRecordingFile();
     }
 }

@@ -8,26 +8,35 @@ import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.beiwe.app.CrashHandler;
 import org.beiwe.app.storage.AudioFileManager;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 
+import javax.xml.transform.ErrorListener;
+
 public class BackgroundAudioListener{
 
-    static String unencryptedFileName = "currentlyRecordingFile";
+    static String unencryptedFileName = "currentlyRecordingFile.mp3";
+    private int BUFFER_SIZE = 0; //constant set in onCreate
     String unencryptedRawAudioFilePath;
     static int format = MediaRecorder.OutputFormat.MPEG_4;
     static BackgroundAudioListener instance;
 
-    MediaRecorder recorder;
-    AudioFileManager fileManager = new AudioFileManager();
+    MediaRecorder recorder = null;
+    //AudioFileManager fileManager = new AudioFileManager();
     int BIT_RATE = 6400;
     static long fileRefreshInterval = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
     Context context = null;
@@ -35,9 +44,13 @@ public class BackgroundAudioListener{
     public BackgroundAudioListener(Context c){
         context = c;
         instance = this;
-        unencryptedRawAudioFilePath = context.getFilesDir().getAbsolutePath() + "/" + unencryptedFileName;
+        Log.e("previous path", context.getFilesDir().getAbsolutePath() + "/" + unencryptedFileName);
+        File outputFile = new File(context.getFilesDir().getAbsolutePath() + "/" + unencryptedFileName);
+        unencryptedRawAudioFilePath = outputFile.getAbsolutePath();
+        Log.e("new file path", unencryptedRawAudioFilePath);
+
         startRecording();
-        Log.e("background audio", "inside on create function");
+        Log.e("background audio", "inside constructor, recording started");
         // begins a process to create a new recording file every time interval
         initializeFileRefreshAlarms();
     }
@@ -55,13 +68,29 @@ public class BackgroundAudioListener{
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(format);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         recorder.setOutputFile(unencryptedRawAudioFilePath);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recorder.setAudioChannels(1);
-        recorder.setAudioSamplingRate(44100);
-        recorder.setAudioEncodingBitRate(BIT_RATE);
+//        recorder.setAudioSamplingRate(44100);
+//        recorder.setAudioEncodingBitRate(BIT_RATE);
         // may require experimentation
         //recorder.setWakeMode()
+        // timeout handler?
+
+        recorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+            @Override
+            public void onError(MediaRecorder mr, int errCode, int extra) {
+                Log.e("media recorder error", String.valueOf(errCode));
+                Log.e("media recorder extra", String.valueOf(extra));
+            }
+        });
+
+        recorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+            @Override
+            public void onInfo(MediaRecorder mr, int what, int extra) {
+                Log.e("media recorder info", String.valueOf(what));
+                Log.e("media recorder extra", String.valueOf(extra));
+            }
+        });
 
         try {
             recorder.prepare();
@@ -76,13 +105,12 @@ public class BackgroundAudioListener{
         recorder.stop();
         recorder.release();
         recorder = null;
-
-        fileManager.encryptAudioFile(unencryptedRawAudioFilePath, ".mp3", context);
+        AudioFileManager.encryptAudioFile(unencryptedRawAudioFilePath, ".mp3", context);
     }
 
-    void startNewRecordingFile(){
-        startRecording();
+    public void startNewRecordingFile(){
         endRecording();
+        startRecording();
     }
 
     void initializeFileRefreshAlarms(){
@@ -111,4 +139,24 @@ public class BackgroundAudioListener{
             e.printStackTrace();
         }
     }
+
+    // only for audio recorder
+//    private void writeAudioDataToFile() {
+//        int recordingStatus = 0;
+//        byte data[] = new byte[BUFFER_SIZE];
+//        FileOutputStream rawAudioFile = null;
+//        //setup file.
+//        try { rawAudioFile = new FileOutputStream( unencryptedRawAudioFilePath ); }
+//        catch (FileNotFoundException e) { CrashHandler.writeCrashlog(e, context ); return; }
+//        //while recording get audio data chunks.
+//        while ( currentlyRecording ) {
+//            recordingStatus = recorder.read(data, 0, BUFFER_SIZE);
+//            if ( recordingStatus != AudioRecord.ERROR_INVALID_OPERATION ) {
+//                try { rawAudioFile.write(data); }
+//                catch (IOException e) { e.printStackTrace(); } //swallow error.
+//            }
+//        }
+//        try { rawAudioFile.close(); }
+//        catch (IOException e) { e.printStackTrace(); }
+//    }
 }
