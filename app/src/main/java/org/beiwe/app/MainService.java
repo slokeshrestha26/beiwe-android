@@ -49,8 +49,10 @@ import org.beiwe.app.survey.SurveyScheduler;
 import org.beiwe.app.ui.user.LoginActivity;
 import org.beiwe.app.ui.utils.SurveyNotifications;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
@@ -251,6 +253,7 @@ public class MainService extends Service {
 		filter.addAction( appContext.getString( R.string.signout_intent ) );
 		filter.addAction( appContext.getString( R.string.voice_recording ) );
 		filter.addAction( appContext.getString( R.string.run_wifi_log ) );
+		filter.addAction( "PrintFilesToLogCat" );  // TODO: comment this out, or remove all references to "PrintFilesToLogCat" and Timer.fileLoggerIntent
 		filter.addAction( appContext.getString( R.string.upload_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.create_new_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_new_surveys_intent ) );
@@ -350,6 +353,10 @@ public class MainService extends Service {
 		if ( PersistentData.getMostRecentAlarmTime( getString(R.string.run_wifi_log)) < now || //the most recent wifi log time is in the past or
 				!timer.alarmIsSet(Timer.wifiLogIntent) ) {
 			sendBroadcast( Timer.wifiLogIntent ); }
+
+		if (PersistentData.getMostRecentAlarmTime("PrintFilesToLogCat") < now || !timer.alarmIsSet(Timer.fileLoggerIntent)) {
+			sendBroadcast(Timer.fileLoggerIntent);
+		}
 		
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
 		//(Bluetooth needs to run at absolute points in time, it should not be started if a scheduled event is missed.)
@@ -463,7 +470,21 @@ public class MainService extends Service {
 				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getWifiLogFrequencyMilliseconds(), Timer.wifiLogIntent);
 				PersistentData.setMostRecentAlarmTime( getString(R.string.run_wifi_log), alarmTime );
 				return; }
-			
+
+			if (broadcastAction.equals("PrintFilesToLogCat")) {
+				long FILE_LOGGING_FREQUENCY_MILLISECONDS = 5000;
+				Log.w("filelist", "*\n");
+				Log.w("filelist", "******  Listing files from MainService");
+				String[] currentFilesList = appContext.getFilesDir().list();
+				for (int i = 0; i < currentFilesList.length; i++) {
+					File file = new File(appContext.getFilesDir(), currentFilesList[i]);
+					Log.w("filelist", currentFilesList[i] + "    " + Objects.toString(file.length()));
+				}
+				Log.w("filelist", "*\n");
+				long alarmTime = timer.setupExactSingleAlarm(FILE_LOGGING_FREQUENCY_MILLISECONDS, Timer.fileLoggerIntent);
+				PersistentData.setMostRecentAlarmTime("PrintFilesToLogCat", alarmTime);
+			}
+
 			/** Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.
 			 * The Bluetooth-on action sets the corresponding Bluetooth-off timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
 			if (broadcastAction.equals( appContext.getString(R.string.turn_bluetooth_on) ) ) {
