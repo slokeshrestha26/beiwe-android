@@ -259,6 +259,7 @@ public class MainService extends Service {
 		filter.addAction( appContext.getString( R.string.check_for_new_surveys_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_sms_enabled ) );
 		filter.addAction( appContext.getString( R.string.check_for_calls_enabled ) );
+		filter.addAction( appContext.getString( R.string.check_for_recording_permission ) );
 		filter.addAction( ConnectivityManager.CONNECTIVITY_ACTION );
 		filter.addAction("crashBeiwe");
 		filter.addAction("enterANR");
