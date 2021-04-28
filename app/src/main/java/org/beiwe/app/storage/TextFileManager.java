@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import org.beiwe.app.CrashHandler;
-import org.beiwe.app.MainService;
 import org.beiwe.app.listeners.AccelerometerListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
@@ -552,7 +551,6 @@ public class TextFileManager {
 		textsLog.newFile();
 		bluetoothLog.newFile();
 		debugLogFile.newFile();
-		MainService.localHandle.backgroundAudioListener.startNewRecordingFile();
 	}
 	
 	/** Very simple function, exists to make any function that needs to grab all extant files thread-safe.

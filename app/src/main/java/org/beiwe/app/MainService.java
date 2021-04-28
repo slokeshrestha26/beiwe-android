@@ -75,7 +75,7 @@ public class MainService extends Service {
 	//that code needs to be able to update the IntentFilters associated with timerReceiver.
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
 	//begin to run with an already fully instantiated main service.
-	public static MainService localHandle;
+	private static MainService localHandle;
 	
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
