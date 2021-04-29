@@ -105,7 +105,7 @@ public class BackgroundAudioListener{
         recorder.stop();
         recorder.release();
         recorder = null;
-        AudioFileManager.encryptAudioFile(unencryptedRawAudioFilePath, ".mp3", context);
+        AudioFileManager.encryptAudioFile(unencryptedRawAudioFilePath, ".mp3", null, context);
     }
 
     public void startNewRecordingFile(){
