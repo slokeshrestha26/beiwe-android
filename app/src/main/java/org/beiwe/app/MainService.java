@@ -31,7 +31,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import org.beiwe.app.listeners.AccelerometerListener;
-import org.beiwe.app.listeners.BackgroundAudioListener;
+import org.beiwe.app.listeners.AmbientAudioListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -42,7 +42,6 @@ import org.beiwe.app.listeners.SmsSentLogger;
 import org.beiwe.app.listeners.WifiListener;
 import org.beiwe.app.networking.PostRequest;
 import org.beiwe.app.networking.SurveyDownloader;
-import org.beiwe.app.storage.AudioFileManager;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.TextFileManager;
 import org.beiwe.app.survey.SurveyScheduler;
@@ -70,8 +69,7 @@ public class MainService extends Service {
 	public String notificationChannelId = "_service_channel";
 	String channelName = "Beiwe Data Collection"; // user facing name, seen if they hold press the notification
 	public static Timer timer;
-	public BackgroundAudioListener backgroundAudioListener = null;
-	
+
 	//localHandle is how static functions access the currently instantiated main service.
 	//It is to be used ONLY to register new surveys with the running main service, because
 	//that code needs to be able to update the IntentFilters associated with timerReceiver.
@@ -134,7 +132,6 @@ public class MainService extends Service {
 
 		// if we have the os permission to record, and the study requires background recording
 		if (PermissionHandler.confirmBackgroundAudio(appContext)) {
-			Log.e("debug", "starting audio collection");
 			startBackgroundAudioCollection();// study requires recording, but no permission is present
 		} else if (PersistentData.getBackgroundAudioEnabled()) {
 			sendBroadcast(Timer.checkForRecordingPermission);
@@ -208,7 +205,7 @@ public class MainService extends Service {
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
 
 	private void startBackgroundAudioCollection(){
-		backgroundAudioListener = new BackgroundAudioListener(appContext);
+		AmbientAudioListener.startRecording(appContext);
 	}
 
 	
