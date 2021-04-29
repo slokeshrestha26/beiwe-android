@@ -471,14 +471,14 @@ public class MainService extends Service {
 
 			if (broadcastAction.equals("PrintFilesToLogCat")) {
 				long FILE_LOGGING_FREQUENCY_MILLISECONDS = 5000;
-				Log.w("filelist", "*\n");
-				Log.w("filelist", "******  Listing files from MainService");
+				Log.w("ambient", "*\n");
+				Log.w("ambient", "******  Listing files from MainService");
 				String[] currentFilesList = appContext.getFilesDir().list();
 				for (int i = 0; i < currentFilesList.length; i++) {
 					File file = new File(appContext.getFilesDir(), currentFilesList[i]);
-					Log.w("filelist", currentFilesList[i] + "    " + Objects.toString(file.length()));
+					Log.w("ambient", currentFilesList[i] + "    " + Objects.toString(file.length()));
 				}
-				Log.w("filelist", "*\n");
+				Log.w("ambient", "*\n");
 				long alarmTime = timer.setupExactSingleAlarm(FILE_LOGGING_FREQUENCY_MILLISECONDS, Timer.fileLoggerIntent);
 				PersistentData.setMostRecentAlarmTime("PrintFilesToLogCat", alarmTime);
 			}
