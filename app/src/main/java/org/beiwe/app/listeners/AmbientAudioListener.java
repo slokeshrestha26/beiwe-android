@@ -17,12 +17,13 @@ public class AmbientAudioListener {
     private static Context appContext;
     private static MediaRecorder mRecorder;
     private static String filenameExtension = ".mp4";
-    public static final String unencryptedAudioFilename = "tempUnencryptedAmbientAudioFile";
+    public static final String unencryptedTempAudioFilename = "tempUnencryptedAmbientAudioFile";
+    public static String currentlyBeingWrittenEncryptedFilename = null;
 
     private AmbientAudioListener() {};
 
     private static String getUnencryptedAudioFilepath() {
-        return appContext.getFilesDir().getAbsolutePath() + "/" + unencryptedAudioFilename;
+        return appContext.getFilesDir().getAbsolutePath() + "/" + unencryptedTempAudioFilename;
     }
 
     public static synchronized void startRecording(Context applicationContext) {
@@ -69,25 +70,26 @@ public class AmbientAudioListener {
 
 
     // TODO: is there a problem with EncryptAmbientAudioFileTask being static?
+    // TODO: make sure this can only be called once at a time
     private static class EncryptAmbientAudioFileTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             Log.e("ambient", "encrypt audio file, onPreExecute()");
-            // TODO: set the filename, and blacklist it from being uploaded
+            currentlyBeingWrittenEncryptedFilename = AudioFileManager.generateNewEncryptedAudioFileName(null, filenameExtension);
         }
 
         @Override
         protected Void doInBackground(Void... params) {
             Log.e("ambient", "encrypt audio file, doing in background...");
-            AudioFileManager.encryptAudioFile(getUnencryptedAudioFilepath(), filenameExtension, null, appContext);
+            AudioFileManager.encryptAudioFile(getUnencryptedAudioFilepath(), currentlyBeingWrittenEncryptedFilename, appContext);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void arg) {
             Log.e("ambient", "encrypt audio file, onPostExecute()");
+            currentlyBeingWrittenEncryptedFilename = null;
             // TODO: delete the unencrypted audio file
-            // TODO: remove the filename from the blacklist, and allow it to be uploaded
             // TODO: resume recording, to a new unencrypted audio file
         }
     }

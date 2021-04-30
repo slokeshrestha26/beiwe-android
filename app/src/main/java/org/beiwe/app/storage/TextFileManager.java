@@ -572,7 +572,7 @@ public class TextFileManager {
 		files.remove(AudioRecorderActivity.unencryptedTempAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedRawAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedTempAudioFileName); //should be identical to regular audiorecording file, but keep in case it changes.
-		files.remove(AmbientAudioListener.unencryptedAudioFilename);
+		files.remove(AmbientAudioListener.unencryptedTempAudioFilename);
 		
 		// These files are currently being written to, so they shouldn't be uploaded now
 		files.remove(TextFileManager.getGPSFile().fileName);
@@ -583,6 +583,7 @@ public class TextFileManager {
 		files.remove(TextFileManager.getTextsLogFile().fileName);
 		files.remove(TextFileManager.getDebugLogFile().fileName);
 		files.remove(TextFileManager.getBluetoothLogFile().fileName);
+		files.remove(AmbientAudioListener.currentlyBeingWrittenEncryptedFilename);
 		
 		// These files are only occasionally open, but they may be currently open. If they are, don't upload them
 		files.remove(TextFileManager.getSurveyAnswersFile().fileName);

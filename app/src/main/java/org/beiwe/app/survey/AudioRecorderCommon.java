@@ -284,7 +284,8 @@ public class AudioRecorderCommon extends SessionActivity {
 		}
 		@Override
 		protected Void doInBackground(Void... params) {
-			AudioFileManager.encryptAudioFile(unencryptedTempAudioFilePath, getFileExtension(), surveyId, getApplicationContext() );
+			String filename = AudioFileManager.generateNewEncryptedAudioFileName(surveyId, getFileExtension());
+			AudioFileManager.encryptAudioFile(unencryptedTempAudioFilePath, filename, getApplicationContext());
 			return null;
 		}
 		@Override
