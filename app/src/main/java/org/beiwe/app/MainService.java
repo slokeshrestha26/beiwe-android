@@ -583,7 +583,7 @@ public class MainService extends Service {
 				new Notification.Builder(app_context, notificationChannelId)
 						.setContentTitle("Beiwe App")
 						.setContentText("Beiwe data collection running")
-						.setSmallIcon(android.R.drawable.btn_plus)
+						.setSmallIcon(R.mipmap.ic_launcher)
 						.setContentIntent(pendingIntent)
 						.setTicker("Beiwe data collection running in the background, no action required")
 						.build();
