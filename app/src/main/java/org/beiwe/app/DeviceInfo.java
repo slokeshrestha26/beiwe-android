@@ -83,7 +83,10 @@ public class DeviceInfo {
 	 *      available from the server), updates app logo, logs product flavor in identifiers.
 	 * 46: app version 3.0.2, Reduces logging of ENOSPC out-of-storage-space errors, and adds a fix
 	 *      for the sporadic invalid encryption key errors received on the backend.
-	 * 47: app version 3.0.3, Updates Sentry DSN */
+	 * 47: app version 3.0.3, Updates Sentry DSN
+	 * 48: app version 3.1.0, Adds foreground service, and optional ambient audio collection feature
+	 *      (ambient audio can be enabled or disabled at the study level. It's disabled by default.)
+	 * */
 
 	private static String androidID;
 	private static String bluetoothMAC;
