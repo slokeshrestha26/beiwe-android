@@ -132,7 +132,7 @@ public class MainService extends Service {
 
 		// if we have the os permission to record, and the study requires background recording
 		if (PermissionHandler.confirmBackgroundAudio(appContext)) {
-			startBackgroundAudioCollection();// study requires recording, but no permission is present
+			AmbientAudioListener.startRecording(appContext);
 		} else if (PersistentData.getBackgroundAudioEnabled()) {
 			sendBroadcast(Timer.checkForRecordingPermission);
 		}
@@ -204,10 +204,6 @@ public class MainService extends Service {
 		CallLogger callLogger = new CallLogger(new Handler(), appContext);
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
 
-	private void startBackgroundAudioCollection(){
-		AmbientAudioListener.startRecording(appContext);
-	}
-
 	
 	/** Initializes the PowerStateListener. 
 	 * The PowerStateListener requires the ACTION_SCREEN_OFF and ACTION_SCREEN_ON intents
@@ -250,6 +246,7 @@ public class MainService extends Service {
 		filter.addAction( appContext.getString( R.string.signout_intent ) );
 		filter.addAction( appContext.getString( R.string.voice_recording ) );
 		filter.addAction( appContext.getString( R.string.run_wifi_log ) );
+		filter.addAction( appContext.getString( R.string.encrypt_ambient_audio_file) );
 		filter.addAction( "PrintFilesToLogCat" );  // TODO: comment this out, or remove all references to "PrintFilesToLogCat" and Timer.fileLoggerIntent
 		filter.addAction( appContext.getString( R.string.upload_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.create_new_data_files_intent ) );
@@ -351,6 +348,11 @@ public class MainService extends Service {
 		if ( PersistentData.getMostRecentAlarmTime( getString(R.string.run_wifi_log)) < now || //the most recent wifi log time is in the past or
 				!timer.alarmIsSet(Timer.wifiLogIntent) ) {
 			sendBroadcast( Timer.wifiLogIntent ); }
+
+		if (PersistentData.getMostRecentAlarmTime(getString(R.string.encrypt_ambient_audio_file)) < now ||
+				!timer.alarmIsSet(Timer.encryptAmbientAudioIntent)) {
+			sendBroadcast(Timer.encryptAmbientAudioIntent);
+		}
 
 		if (PersistentData.getMostRecentAlarmTime("PrintFilesToLogCat") < now || !timer.alarmIsSet(Timer.fileLoggerIntent)) {
 			sendBroadcast(Timer.fileLoggerIntent);
@@ -469,6 +471,13 @@ public class MainService extends Service {
 				PersistentData.setMostRecentAlarmTime( getString(R.string.run_wifi_log), alarmTime );
 				return; }
 
+			// Encrypt the current ambient audio file
+			if (broadcastAction.equals(appContext.getString(R.string.encrypt_ambient_audio_file))) {
+				Log.e("ambient", "got the broadcast to encrypt the ambient audio file");
+				AmbientAudioListener.encryptAmbientAudioFile();
+				return;
+			}
+
 			if (broadcastAction.equals("PrintFilesToLogCat")) {
 				long FILE_LOGGING_FREQUENCY_MILLISECONDS = 5000;
 				Log.w("ambient", "*\n");
@@ -532,9 +541,10 @@ public class MainService extends Service {
 			}
 
 			if (broadcastAction.equals( appContext.getString(R.string.check_for_recording_permission) ) ) {
-				if ( PermissionHandler.confirmBackgroundAudio(appContext) ) { startBackgroundAudioCollection(); }
-				else if (PersistentData.getBackgroundAudioEnabled() ) { timer.setupExactSingleAlarm(30000L, Timer.checkForRecordingPermission); }
+				if ( PermissionHandler.confirmBackgroundAudio(appContext) ) { AmbientAudioListener.startRecording(appContext); }
+				else if (PersistentData.getBackgroundAudioEnabled() ) { timer.setupExactSingleAlarm(10000L, Timer.checkForRecordingPermission); }
 			}
+
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm
 			if ( PersistentData.getSurveyIds().contains( broadcastAction ) ) {
 //				Log.i("MAIN SERVICE", "new notification: " + broadcastAction);

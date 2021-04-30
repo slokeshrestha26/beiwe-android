@@ -5,7 +5,11 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.beiwe.app.MainService;
+import org.beiwe.app.R;
+import org.beiwe.app.Timer;
 import org.beiwe.app.storage.AudioFileManager;
+import org.beiwe.app.storage.PersistentData;
 
 import java.io.IOException;
 
@@ -51,12 +55,14 @@ public class AmbientAudioListener {
                 // TODO: print a line to the app log file
             }
             mRecorder.start();
+            // Set a timer for how long this should run before calling encryptAmbientAudioFile()
+            long alarmTime = MainService.timer.setupExactSingleAlarm((long) 15000, Timer.encryptAmbientAudioIntent);
+            PersistentData.setMostRecentAlarmTime(appContext.getString(R.string.encrypt_ambient_audio_file), alarmTime);
         }
     }
 
 
     public static synchronized void encryptAmbientAudioFile() {
-        // TODO: add a timer to call this
         Log.e("ambient", "called encryptAmbientAudioFile");
         if (ambientAudioListenerInstance != null && mRecorder != null) {
             // If the audio recorder exists, stop recording and start encrypting the file
@@ -68,8 +74,6 @@ public class AmbientAudioListener {
     }
 
 
-    // TODO: is there a problem with EncryptAmbientAudioFileTask being static?
-    // TODO: make sure this can only be called once at a time
     private static class EncryptAmbientAudioFileTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
