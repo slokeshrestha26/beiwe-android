@@ -11,7 +11,6 @@ import org.beiwe.app.Timer;
 import org.beiwe.app.storage.AudioFileManager;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.TextFileManager;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 
