@@ -10,6 +10,8 @@ import org.beiwe.app.R;
 import org.beiwe.app.Timer;
 import org.beiwe.app.storage.AudioFileManager;
 import org.beiwe.app.storage.PersistentData;
+import org.beiwe.app.storage.TextFileManager;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -20,7 +22,8 @@ public class AmbientAudioListener {
     private static AmbientAudioListener ambientAudioListenerInstance = null;
     private static Context appContext;
     private static MediaRecorder mRecorder;
-    private static String filenameExtension = ".mp4";
+    private static final String filenameExtension = ".mp4";
+    private static final long fileDurationInMilliseconds = 15 * 60 * 1000;
     public static final String unencryptedTempAudioFilename = "tempUnencryptedAmbientAudioFile";
     public static String currentlyBeingWrittenEncryptedFilename = null;
 
@@ -31,9 +34,9 @@ public class AmbientAudioListener {
     }
 
     public static synchronized void startRecording(Context applicationContext) {
+        TextFileManager.writeDebugLogStatement("AmbientAudioListener.startRecording()");
         if (ambientAudioListenerInstance == null) {
             // Instantiate the AmbientAudioRecorder only if it has not yet been instantiated
-            Log.e("ambient", "startRecording!");
             ambientAudioListenerInstance = new AmbientAudioListener();
             appContext = applicationContext;
         }
@@ -51,19 +54,20 @@ public class AmbientAudioListener {
             try {
                 mRecorder.prepare();
             } catch (IOException e) {
-                Log.e("ambient", "MediaRecorder.prepare() failed");
-                // TODO: print a line to the app log file
+                Log.e("AmbientAudioListener", "MediaRecorder.prepare() failed");
+                TextFileManager.writeDebugLogStatement("AmbientAudioListener MediaRecorder.prepare() failed");
+                TextFileManager.writeDebugLogStatement(e.getMessage());
             }
             mRecorder.start();
             // Set a timer for how long this should run before calling encryptAmbientAudioFile()
-            long alarmTime = MainService.timer.setupExactSingleAlarm((long) 15000, Timer.encryptAmbientAudioIntent);
+            long alarmTime = MainService.timer.setupExactSingleAlarm(fileDurationInMilliseconds, Timer.encryptAmbientAudioIntent);
             PersistentData.setMostRecentAlarmTime(appContext.getString(R.string.encrypt_ambient_audio_file), alarmTime);
         }
     }
 
 
     public static synchronized void encryptAmbientAudioFile() {
-        Log.e("ambient", "called encryptAmbientAudioFile");
+        TextFileManager.writeDebugLogStatement("AmbientAudioListener.encryptAmbientAudioFile()");
         if (ambientAudioListenerInstance != null && mRecorder != null) {
             // If the audio recorder exists, stop recording and start encrypting the file
             mRecorder.stop();
