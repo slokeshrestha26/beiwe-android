@@ -27,13 +27,14 @@ public class AmbientAudioListener {
     }
 
     public static synchronized void startRecording(Context applicationContext) {
-        // Only instantiate the AmbientAudioRecorder if it has not yet been instantiated!
         if (ambientAudioListenerInstance == null) {
+            // Instantiate the AmbientAudioRecorder only if it has not yet been instantiated
             Log.e("ambient", "startRecording!");
-            // Instantiate the AmbientAudioListener itself
             ambientAudioListenerInstance = new AmbientAudioListener();
             appContext = applicationContext;
-            // Start the Media Recorder
+        }
+        if (mRecorder == null) {
+            // Start the Media Recorder only if it is not currently running
             mRecorder = new MediaRecorder();
             mRecorder.reset();
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -55,15 +56,13 @@ public class AmbientAudioListener {
 
 
     public static synchronized void encryptAmbientAudioFile() {
+        // TODO: add a timer to call this
         Log.e("ambient", "called encryptAmbientAudioFile");
-        // First, check if the audio recorder exists
-        if (ambientAudioListenerInstance != null) {
-            Log.e("ambient", "preparing to halt ambient audio collection");
-            // TODO: check if mRecorder is currently recording
+        if (ambientAudioListenerInstance != null && mRecorder != null) {
+            // If the audio recorder exists, stop recording and start encrypting the file
             mRecorder.stop();
             mRecorder.reset();
             mRecorder.release();
-            mRecorder = null; // TODO: is this necessary? Or can we just resume it later?
             new EncryptAmbientAudioFileTask().execute();
         }
     }
@@ -74,23 +73,27 @@ public class AmbientAudioListener {
     private static class EncryptAmbientAudioFileTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
-            Log.e("ambient", "encrypt audio file, onPreExecute()");
+            // Before doing anything else, set the filename of the encrypted file. This tells
+            // TextFileManager.getAllUploadableFiles NOT to upload it until it's finished writing.
             currentlyBeingWrittenEncryptedFilename = AudioFileManager.generateNewEncryptedAudioFileName(null, filenameExtension);
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Log.e("ambient", "encrypt audio file, doing in background...");
             AudioFileManager.encryptAudioFile(getUnencryptedAudioFilepath(), currentlyBeingWrittenEncryptedFilename, appContext);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void arg) {
-            Log.e("ambient", "encrypt audio file, onPostExecute()");
+            // Clear the filename, so TextFileManager.getAllUploadableFiles can now upload it
             currentlyBeingWrittenEncryptedFilename = null;
-            // TODO: delete the unencrypted audio file
-            // TODO: resume recording, to a new unencrypted audio file
+            // Set the Media Recorder back to null to free it up to run again
+            mRecorder = null;
+            // Delete the unencrypted temp audio file
+            AudioFileManager.delete(unencryptedTempAudioFilename);
+            // Restart recording
+            startRecording(appContext);
         }
     }
 }
