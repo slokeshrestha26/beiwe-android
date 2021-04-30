@@ -2,19 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.beiwe.app">
 
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <!-- GPS and network-location service -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!-- voice recording -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- network and upload -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- starting the background service at boot. -->
+    <!-- starting the main service at boot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- bluetooth proximity -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -112,9 +111,9 @@
         <!-- SERVICE -->
 
         <service
-            android:name=".BackgroundService"
+            android:name=".MainService"
             android:exported="false"
-            android:label="BackgroundService-thing" />
+            android:label="ForegroundService-thing" />
 
         <service
             android:name=".networking.FCMService"

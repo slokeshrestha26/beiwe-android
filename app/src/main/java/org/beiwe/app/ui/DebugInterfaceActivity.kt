@@ -7,6 +7,7 @@ import android.view.View
 import kotlinx.android.synthetic.main.activity_debug_interface.*
 import org.beiwe.app.*
 import org.beiwe.app.Timer
+import org.beiwe.app.listeners.AmbientAudioListener
 import org.beiwe.app.networking.PostRequest
 import org.beiwe.app.networking.SurveyDownloader
 import org.beiwe.app.session.SessionActivity
@@ -297,7 +298,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun buttonStartTimer(view: View?) {
-        backgroundService.startTimers()
+        mainService.startTimers()
     }
 
     //file operations
@@ -331,6 +332,14 @@ class DebugInterfaceActivity : SessionActivity() {
             printi("files...", file)
     }
 
+    fun startAmbientAudioRecording(view: View?) {
+        AmbientAudioListener.startRecording(appContext)
+    }
+
+    fun encryptAmbientAudioFile(view: View?) {
+        AmbientAudioListener.encryptAmbientAudioFile()
+    }
+
     //ui operations
     fun loadMainMenu(view: View?) {
         startActivity(Intent(appContext, MainMenuActivity::class.java))
@@ -348,11 +357,11 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun crashBackground(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
+        MainService.timer.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
     }
 
     fun crashBackgroundInFive(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
+        MainService.timer.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
     }
 
     fun enterANRUI(view: View?) {
@@ -364,11 +373,11 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun enterANRBackground(view: View?) {
-        BackgroundService.timer.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
+        MainService.timer.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
     }
 
     fun stopBackgroundService(view: View?) {
-        backgroundService.stop()
+        mainService.stop()
     }
 
     fun testManualErrorReport(view: View?) {

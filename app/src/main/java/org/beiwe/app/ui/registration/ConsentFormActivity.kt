@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_consent_form.*
 import org.beiwe.app.R
 import org.beiwe.app.RunningBackgroundServiceActivity
@@ -49,7 +48,7 @@ class ConsentFormActivity : RunningBackgroundServiceActivity() {
         TextFileManager.makeNewFilesForEverything()
 
         //This is important.  we need to start timers...
-        backgroundService.doSetup()
+        mainService.doSetup()
 
         // Start the Main Screen Activity, destroy this activity
         startActivity(Intent(applicationContext, LoadingActivity::class.java))

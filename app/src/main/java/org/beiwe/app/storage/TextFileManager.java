@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.AmbientAudioListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -58,7 +59,7 @@ public class TextFileManager {
 	private static TextFileManager surveyTimings;
 	private static TextFileManager surveyAnswers;
 	private static TextFileManager wifiLog;
-	
+
 	private static TextFileManager keyFile;
 	
 	//"global" static variables
@@ -201,7 +202,7 @@ public class TextFileManager {
 	private static void checkAvailableWithTimeout (String textFile) {
 		if (!checkTextFileAvailable(textFile)) {
 			try {
-				// The Background Service should be getting restarted as we speak
+				// The Main Service should be getting restarted as we speak
 				for (int x = 0; x < 40; x++) {
 					// previously, flat 75 ms. Now 50ms over 40 iterations. If this still fails then we have bigger problems
 					Thread.sleep(GETTER_TIMEOUT);
@@ -570,6 +571,7 @@ public class TextFileManager {
 		files.remove(AudioRecorderActivity.unencryptedTempAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedRawAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedTempAudioFileName); //should be identical to regular audiorecording file, but keep in case it changes.
+		files.remove(AmbientAudioListener.unencryptedTempAudioFilename);
 		
 		// These files are currently being written to, so they shouldn't be uploaded now
 		files.remove(TextFileManager.getGPSFile().fileName);
@@ -580,6 +582,7 @@ public class TextFileManager {
 		files.remove(TextFileManager.getTextsLogFile().fileName);
 		files.remove(TextFileManager.getDebugLogFile().fileName);
 		files.remove(TextFileManager.getBluetoothLogFile().fileName);
+		files.remove(AmbientAudioListener.currentlyBeingWrittenEncryptedFilename);
 		
 		// These files are only occasionally open, but they may be currently open. If they are, don't upload them
 		files.remove(TextFileManager.getSurveyAnswersFile().fileName);

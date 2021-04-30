@@ -31,17 +31,19 @@ public class Timer {
 	//	public static Intent voiceRecordingIntent;
 //	public static Intent weeklySurveyIntent;
 	public static Intent wifiLogIntent;
+	public static Intent encryptAmbientAudioIntent;
 	public static Intent uploadDatafilesIntent;
 	public static Intent createNewDataFilesIntent;
 	public static Intent checkForNewSurveysIntent;
 	public static Intent checkForSMSEnabled;
 	public static Intent checkForCallsEnabled;
+	public static Intent checkIfAmbientAudioRecordingIsEnabled;
 	
 	
 	// Constructor
-	public Timer(BackgroundService backgroundService) {
-		appContext = backgroundService.getApplicationContext();
-		alarmManager = (AlarmManager) (backgroundService.getSystemService(Context.ALARM_SERVICE));
+	public Timer(MainService mainService) {
+		appContext = mainService.getApplicationContext();
+		alarmManager = (AlarmManager) (mainService.getSystemService(Context.ALARM_SERVICE));
 		
 		// double alarm intents
 		accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off));
@@ -56,19 +58,21 @@ public class Timer {
 		// Set up event triggering alarm intents
 		signoutIntent = setupIntent(appContext.getString(R.string.signout_intent));
 		wifiLogIntent = setupIntent(appContext.getString(R.string.run_wifi_log));
+		encryptAmbientAudioIntent = setupIntent(appContext.getString(R.string.encrypt_ambient_audio_file));
 		uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent));
 		createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent));
 		checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent));
 		
 		checkForSMSEnabled = setupIntent(appContext.getString(R.string.check_for_sms_enabled));
 		checkForCallsEnabled = setupIntent(appContext.getString(R.string.check_for_calls_enabled));
+		checkIfAmbientAudioRecordingIsEnabled = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled));
 	}
 	
 	/* ######################################################################
 	 * ############################ Common Code #############################
 	 * ####################################################################*/
 	
-	// Setup custom intents to be sent to the listeners running in the background service
+	// Setup custom intents to be sent to the listeners running in the main service
 	private static Intent setupIntent(String action) {
 		Intent newIntent = new Intent();
 		newIntent.setAction(action);

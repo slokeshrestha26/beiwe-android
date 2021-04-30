@@ -33,7 +33,7 @@ class CrashHandler(private val errorHandlerContext: Context) : Thread.UncaughtEx
         //printi("inside crashlog", "does this line happen")
 
         //setup to restart service
-        val restartServiceIntent = Intent(errorHandlerContext, BackgroundService::class.java)
+        val restartServiceIntent = Intent(errorHandlerContext, MainService::class.java)
         restartServiceIntent.setPackage(errorHandlerContext.packageName)
         val restartServicePendingIntent = PendingIntent.getService(errorHandlerContext, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT)
         val alarmService = errorHandlerContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager

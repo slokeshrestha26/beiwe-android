@@ -2,6 +2,9 @@ package org.beiwe.app;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -9,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -27,6 +31,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import org.beiwe.app.listeners.AccelerometerListener;
+import org.beiwe.app.listeners.AmbientAudioListener;
 import org.beiwe.app.listeners.BluetoothListener;
 import org.beiwe.app.listeners.CallLogger;
 import org.beiwe.app.listeners.GPSListener;
@@ -52,21 +57,23 @@ import io.sentry.dsn.InvalidDsnException;
 
 import static java.lang.Thread.sleep;
 
-public class BackgroundService extends Service {
+public class MainService extends Service {
 	private Context appContext;
 	public GPSListener gpsListener;
 	public PowerStateListener powerStateListener;
 	public AccelerometerListener accelerometerListener;
 	public GyroscopeListener gyroscopeListener;
 	public BluetoothListener bluetoothListener;
+	public String notificationChannelId = "_service_channel";
+	String channelName = "Beiwe Data Collection"; // user facing name, seen if they hold press the notification
 	public static Timer timer;
-	
-	//localHandle is how static functions access the currently instantiated background service.
-	//It is to be used ONLY to register new surveys with the running background service, because
+
+	//localHandle is how static functions access the currently instantiated main service.
+	//It is to be used ONLY to register new surveys with the running main service, because
 	//that code needs to be able to update the IntentFilters associated with timerReceiver.
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
-	//begin to run with an already fully instantiated background service.
-	private static BackgroundService localHandle;
+	//begin to run with an already fully instantiated main service.
+	private static MainService localHandle;
 	
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
@@ -91,7 +98,8 @@ public class BackgroundService extends Service {
 		PostRequest.initialize( appContext );
 		localHandle = this;  //yes yes, hacky, I know. This line needs to run before registerTimers()
 		registerTimers(appContext);
-		
+
+		createNotificationChannel();
 		doSetup();
 	}
 	
@@ -119,6 +127,13 @@ public class BackgroundService extends Service {
 		} else if (PersistentData.getTextsEnabled()) {
 			sendBroadcast(Timer.checkForSMSEnabled);
 		}
+
+		// If we have the os permission to record, and the study requires ambient audio recording
+		if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
+			AmbientAudioListener.startRecording(appContext);
+		} else if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
+			sendBroadcast(Timer.checkIfAmbientAudioRecordingIsEnabled);
+		}
 		
 		if (PermissionHandler.confirmCalls(appContext))
 			startCallLogger();
@@ -130,6 +145,16 @@ public class BackgroundService extends Service {
 			DeviceInfo.initialize(appContext); //if at registration this has already been initialized. (we don't care.)
 			startTimers();
 		}
+	}
+
+	private void createNotificationChannel() {
+		// setup the notification channel so the service can run in the foreground
+		NotificationChannel chan = new NotificationChannel(notificationChannelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+		chan.setLightColor(Color.BLUE);
+		chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		assert manager != null;
+		manager.createNotificationChannel(chan);
 	}
 	
 	/** Stops the BackgroundService instance. */
@@ -148,17 +173,17 @@ public class BackgroundService extends Service {
 		if ( appContext.getPackageManager().hasSystemFeature( PackageManager.FEATURE_BLUETOOTH_LE ) && PersistentData.getBluetoothEnabled() ) {
 			this.bluetoothListener = new BluetoothListener();
 			if ( this.bluetoothListener.isBluetoothEnabled() ) {
-//				Log.i("Background Service", "success, actually doing bluetooth things.");
+//				Log.i("Main Service", "success, actually doing bluetooth things.");
 				registerReceiver(this.bluetoothListener, new IntentFilter("android.bluetooth.adapter.action.STATE_CHANGED") ); }
 			else {
 				//TODO: Low priority. Eli. Track down why this error log pops up, cleanup.  -- the above check should be for the (new) doesBluetoothCapabilityExist function instead of isBluetoothEnabled
-				Log.e("Background Service", "bluetooth Failure. Should not have gotten this far.");
+				Log.e("Main Service", "bluetooth Failure. Should not have gotten this far.");
 				TextFileManager.getDebugLogFile().writeEncrypted("bluetooth Failure, device should not have gotten to this line of code"); }
 		}
 		else {
 			if (PersistentData.getBluetoothEnabled()) {
 				TextFileManager.getDebugLogFile().writeEncrypted("Device does not support bluetooth LE, bluetooth features disabled.");
-				Log.w("BackgroundService bluetooth init", "Device does not support bluetooth LE, bluetooth features disabled."); }
+				Log.w("MainS bluetooth init", "Device does not support bluetooth LE, bluetooth features disabled."); }
 			// else { Log.d("BackgroundService bluetooth init", "Bluetooth not enabled for study."); }
 			this.bluetoothListener = null; }
 	}
@@ -218,11 +243,13 @@ public class BackgroundService extends Service {
 		filter.addAction( appContext.getString( R.string.signout_intent ) );
 		filter.addAction( appContext.getString( R.string.voice_recording ) );
 		filter.addAction( appContext.getString( R.string.run_wifi_log ) );
+		filter.addAction( appContext.getString( R.string.encrypt_ambient_audio_file) );
 		filter.addAction( appContext.getString( R.string.upload_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.create_new_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_new_surveys_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_sms_enabled ) );
 		filter.addAction( appContext.getString( R.string.check_for_calls_enabled ) );
+		filter.addAction( appContext.getString( R.string.check_if_ambient_audio_recording_is_enabled) );
 		filter.addAction( ConnectivityManager.CONNECTIVITY_ACTION );
 		filter.addAction("crashBeiwe");
 		filter.addAction("enterANR");
@@ -317,7 +344,12 @@ public class BackgroundService extends Service {
 		if ( PersistentData.getMostRecentAlarmTime( getString(R.string.run_wifi_log)) < now || //the most recent wifi log time is in the past or
 				!timer.alarmIsSet(Timer.wifiLogIntent) ) {
 			sendBroadcast( Timer.wifiLogIntent ); }
-		
+
+		if (PersistentData.getMostRecentAlarmTime(getString(R.string.encrypt_ambient_audio_file)) < now ||
+				!timer.alarmIsSet(Timer.encryptAmbientAudioIntent)) {
+			sendBroadcast(Timer.encryptAmbientAudioIntent);
+		}
+
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
 		//(Bluetooth needs to run at absolute points in time, it should not be started if a scheduled event is missed.)
 		if ( PermissionHandler.confirmBluetooth(appContext) && !timer.alarmIsSet(Timer.bluetoothOnIntent)) {
@@ -338,7 +370,7 @@ public class BackgroundService extends Service {
 		for (String surveyId : PersistentData.getSurveyIds() ) {
 			if ( !timer.alarmIsSet( new Intent(surveyId) ) ) { SurveyScheduler.scheduleSurvey(surveyId); } }
 
-		Intent restartServiceIntent = new Intent( getApplicationContext(), BackgroundService.class);
+		Intent restartServiceIntent = new Intent( getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage( getPackageName() );
 		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, 0 );
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService( Context.ALARM_SERVICE );
@@ -430,7 +462,13 @@ public class BackgroundService extends Service {
 				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getWifiLogFrequencyMilliseconds(), Timer.wifiLogIntent);
 				PersistentData.setMostRecentAlarmTime( getString(R.string.run_wifi_log), alarmTime );
 				return; }
-			
+
+			// Encrypt the current ambient audio file
+			if (broadcastAction.equals(appContext.getString(R.string.encrypt_ambient_audio_file))) {
+				AmbientAudioListener.encryptAmbientAudioFile();
+				return;
+			}
+
 			/** Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.
 			 * The Bluetooth-on action sets the corresponding Bluetooth-off timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
 			if (broadcastAction.equals( appContext.getString(R.string.turn_bluetooth_on) ) ) {
@@ -478,9 +516,15 @@ public class BackgroundService extends Service {
 				if ( PermissionHandler.confirmCalls(appContext) ) { startCallLogger(); }
 				else if (PersistentData.getCallsEnabled() ) { timer.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabled); }
 			}
+
+			if (broadcastAction.equals( appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled) ) ) {
+				if ( PermissionHandler.confirmAmbientAudioCollection(appContext) ) { AmbientAudioListener.startRecording(appContext); }
+				else if (PersistentData.getAmbientAudioCollectionIsEnabled() ) { timer.setupExactSingleAlarm(10000L, Timer.checkIfAmbientAudioRecordingIsEnabled); }
+			}
+
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm
 			if ( PersistentData.getSurveyIds().contains( broadcastAction ) ) {
-//				Log.i("BACKGROUND SERVICE", "new notification: " + broadcastAction);
+//				Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
 				SurveyNotifications.displaySurveyNotification(appContext, broadcastAction);
 				SurveyScheduler.scheduleSurvey(broadcastAction);
 				return; }
@@ -515,11 +559,11 @@ public class BackgroundService extends Service {
 	public IBinder onBind(Intent arg0) { return new BackgroundServiceBinder(); }
 	
 	/**A public "Binder" class for Activities to access.
-	 * Provides a (safe) handle to the background Service using the onStartCommand code
+	 * Provides a (safe) handle to the Main Service using the onStartCommand code
 	 * used in every RunningBackgroundServiceActivity */
 	public class BackgroundServiceBinder extends Binder {
-        public BackgroundService getService() {
-            return BackgroundService.this;
+        public MainService getService() {
+            return MainService.this;
         }
     }
 	
@@ -530,6 +574,22 @@ public class BackgroundService extends Service {
 	/** The BackgroundService is meant to be all the time, so we return START_STICKY */
 	@Override public int onStartCommand(Intent intent, int flags, int startId){ //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis()+" "+"started with flag " + flags);
+
+		Context app_context = this.getApplicationContext();
+		Intent intent_to_start_foreground_service = new Intent(app_context, MainService.class);
+		PendingIntent pendingIntent =
+				PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
+		Notification notification =
+				new Notification.Builder(app_context, notificationChannelId)
+						.setContentTitle("Beiwe App")
+						.setContentText("Beiwe data collection running")
+						.setSmallIcon(R.mipmap.ic_launcher)
+						.setContentIntent(pendingIntent)
+						.setTicker("Beiwe data collection running in the background, no action required")
+						.build();
+		//multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
+		startForeground(1, notification);
+		// We want this service to continue running until it is explicitly stopped, so return sticky.
 		return START_STICKY;
 		//we are testing out this restarting behavior for the service.  It is entirely unclear that this will have any observable effect.
 		//return START_REDELIVER_INTENT;
@@ -553,7 +613,7 @@ public class BackgroundService extends Service {
 	
 	/** Sets a timer that starts the service if it is not running in ten seconds. */
 	private void restartService(){
-		//how does this even...  Whatever, 10 seconds later the background service will start.
+		//how does this even...  Whatever, 10 seconds later the main service will start.
 		Intent restartServiceIntent = new Intent( getApplicationContext(), this.getClass() );
 	    restartServiceIntent.setPackage( getPackageName() );
 	    PendingIntent restartServicePendingIntent = PendingIntent.getService( getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT );

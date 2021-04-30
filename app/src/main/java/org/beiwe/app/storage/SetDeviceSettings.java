@@ -22,7 +22,13 @@ public class SetDeviceSettings {
 		PersistentData.setBluetoothEnabled(bluetoothEnabled);
 		Boolean powerStateEnabled = deviceSettings.getBoolean("power_state");
 		PersistentData.setPowerStateEnabled(powerStateEnabled);
-		
+
+		// Ambient audio collection. This key was added late, and if the server is old it may not be present.
+		boolean ambientAudioCollectionIsEnabled;
+		try { ambientAudioCollectionIsEnabled = deviceSettings.getBoolean("ambient_audio"); }
+		catch (JSONException e) { ambientAudioCollectionIsEnabled = false; }
+		PersistentData.setAmbientAudioCollectionIsEnabled(ambientAudioCollectionIsEnabled);
+
 		Boolean allowUploadOverCellularData; // This key was added late, and if the server is old it may not be present
 		try { allowUploadOverCellularData = deviceSettings.getBoolean("allow_upload_over_cellular_data");}
 		catch (JSONException e) { allowUploadOverCellularData = false; }

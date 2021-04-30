@@ -73,7 +73,7 @@ public class BluetoothListener extends BroadcastReceiver {
 			/* It would be nice to insert the following check, but constructors for BroadcastReceivers must have 0 arguments,
 			  or else android os will not be able to instantiate it when it receives a broadcast.
 			  The PackageManager.FEATURE_BLUETOOTH_LE requires a Context that we do not have access to here,
-			  so the check is run before instantiation in the background service.
+			  so the check is run before instantiation in the main service.
 			  the check: !appContext.getPackageManager().hasSystemFeature( PackageManager.FEATURE_BLUETOOTH_LE) */ 
 			this.bluetoothExists = false;
 			return; }

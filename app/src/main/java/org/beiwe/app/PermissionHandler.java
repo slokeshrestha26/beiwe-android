@@ -1,18 +1,12 @@
 package org.beiwe.app;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.PowerManager;
 
-import androidx.annotation.IntDef;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import org.beiwe.app.storage.PersistentData;
 
-import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +117,8 @@ public class PermissionHandler {
 	public static boolean confirmTexts( Context context ) { return ( PersistentData.getTextsEnabled() && checkTextsPermissions(context) ); }
 	public static boolean confirmWifi( Context context ) { return ( PersistentData.getWifiEnabled() && checkWifiPermissions(context) && checkAccessFineLocation(context) && checkAccessCoarseLocation(context) ) ; }
 	public static boolean confirmBluetooth( Context context ) { return ( PersistentData.getBluetoothEnabled() && checkBluetoothPermissions(context)); }
-	
+	public static boolean confirmAmbientAudioCollection(Context context ) { return ( PersistentData.getAmbientAudioCollectionIsEnabled() && checkAccessRecordAudio(context)); }
+
 	public static String getNextPermission(Context context, Boolean includeRecording) {
 		if (PersistentData.getGpsEnabled()) {
 			if ( !checkAccessFineLocation(context) ) return Manifest.permission.ACCESS_FINE_LOCATION;
@@ -144,7 +139,7 @@ public class PermissionHandler {
 			if ( !checkAccessReadSms(context)) return Manifest.permission.READ_SMS;
 			if ( !checkAccessReceiveMms(context)) return Manifest.permission.RECEIVE_MMS;
 			if ( !checkAccessReceiveSms(context)) return Manifest.permission.RECEIVE_SMS; }
-		if (includeRecording) {
+		if (includeRecording || PersistentData.getAmbientAudioCollectionIsEnabled()) {
 			if ( !checkAccessRecordAudio(context)) { return Manifest.permission.RECORD_AUDIO; } }
 
 		//The phone call permission is invariant, it is required for all studies in order for the

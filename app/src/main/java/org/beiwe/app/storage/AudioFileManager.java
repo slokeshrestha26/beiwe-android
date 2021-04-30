@@ -18,18 +18,24 @@ public class AudioFileManager {
 
 	public static void delete(String fileName) { TextFileManager.delete(fileName); }
 	
-   /**Generates new file name variables. The name consists of the time the recording takes place. */
-    public static String generateNewEncryptedAudioFileName(String surveyId) {
+    /** Filename includes the time the recording is encrypted. */
+    public static String generateNewEncryptedAudioFileName(String surveyId, String filenameExtension) {
 		String timecode = ((Long)(System.currentTimeMillis() / 1000L)).toString();
-		return PersistentData.getPatientID() + "_voiceRecording_" + surveyId + "_" + timecode;
+		String patientId = PersistentData.getPatientID();
+		if (surveyId == null) {
+			// It's an ambient audio file
+			return patientId + "_ambientAudio_" + timecode + filenameExtension;
+		} else {
+			// It's an audio survey file
+			return patientId + "_voiceRecording_" + surveyId + "_" + timecode + filenameExtension;
+		}
     }
-    
+
     /** Reads in the existing temporary audio file and encrypts it. Generates AES keys as needed.
      * Behavior is to spend as little time writing the file as possible, at the expense of memory.*/
-	public static void encryptAudioFile(String unencryptedTempAudioFilePath, String extension, String surveyId, Context appContext) {
+	public static void encryptAudioFile(String unencryptedTempAudioFilePath, String filename, Context appContext) {
 		if (unencryptedTempAudioFilePath != null) {
 			// If the audio file has been written to, encrypt the audio file
-			String fileName = generateNewEncryptedAudioFileName(surveyId) + extension;
 			byte[] aesKey = EncryptionEngine.newAESKey();
 			String encryptedRSA = null;
 			String encryptedAudio = null;
@@ -41,8 +47,8 @@ public class AudioFileManager {
 	        catch (InvalidKeyException e) {
 	        	Log.e("AudioFileManager", "encrypted write operation to the audio file without an aes key? how is that even...");
 	        	CrashHandler.writeCrashlog(e, appContext); }
-			writePlaintext( encryptedRSA, fileName, appContext );
-			writePlaintext( encryptedAudio, fileName, appContext );
+			writePlaintext( encryptedRSA, filename, appContext );
+			writePlaintext( encryptedAudio, filename, appContext );
 		}
 	}
 

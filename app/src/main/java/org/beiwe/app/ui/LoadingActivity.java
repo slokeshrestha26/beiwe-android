@@ -7,8 +7,10 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import org.beiwe.app.BackgroundService;
-import org.beiwe.app.BackgroundService.BackgroundServiceBinder;
+import androidx.core.content.ContextCompat;
+
+import org.beiwe.app.MainService;
+import org.beiwe.app.MainService.BackgroundServiceBinder;
 import org.beiwe.app.BuildConfig;
 import org.beiwe.app.R;
 import org.beiwe.app.RunningBackgroundServiceActivity;
@@ -36,24 +38,24 @@ import io.sentry.dsn.InvalidDsnException;
 public class LoadingActivity extends RunningBackgroundServiceActivity {
 	
 	//TODO: Low priority.  Eli.  Why does this reimplement functionality in RunningBackgroundService? investigate.
-	protected BackgroundService backgroundService;
+	protected MainService mainService;
 	protected boolean isBound = false;
 	
 	/**The ServiceConnection Class is our trigger for events that rely on the BackgroundService */
 	protected ServiceConnection backgroundServiceConnection = new ServiceConnection() {
 	    @Override
 	    public void onServiceConnected(ComponentName name, IBinder binder) {
-	        // Log.d("loading ServiceConnection", "Background Service Connected");
+	        // Log.d("loading ServiceConnection", "Main Service Connected");
 	        BackgroundServiceBinder some_binder = (BackgroundServiceBinder) binder;
-	        backgroundService = some_binder.getService();
+	        mainService = some_binder.getService();
 	        isBound = true;
 	        loadingSequence();
 	    }
 
 	    @Override
 	    public void onServiceDisconnected(ComponentName name) {
-	        // Log.d("loading ServiceConnection", "Background Service Disconnected");
-	        backgroundService = null;
+	        // Log.d("loading ServiceConnection", "Main Service Disconnected");
+	        mainService = null;
 	        isBound = false;
 	    }
 	};
@@ -77,14 +79,15 @@ public class LoadingActivity extends RunningBackgroundServiceActivity {
 		setContentView(R.layout.activity_loading);
 				
 		if ( testHashing() ) {
-			Intent startingIntent = new Intent(this.getApplicationContext(), BackgroundService.class);
+			Intent startingIntent = new Intent(this.getApplicationContext(), MainService.class);
 			startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
-			startService(startingIntent);
+			// ContextCompat correctly handles old and new android APIs
+			ContextCompat.startForegroundService(ctx, startingIntent);
 			bindService( startingIntent, backgroundServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 		else { failureExit(); }
 		
-		/* In order to have additional compatibility tests we need to guarantee that the background service is already running,
+		/* In order to have additional compatibility tests we need to guarantee that the main service is already running,
 		this is complex, and all compatibility documentation for android indicates that the encryption we use are implemented for all 
 		versions of android.  is currently a very low priority problem.  The following lines of code tends to crash the app.
 		LoginManager.initialize( getApplicationContext() ); // probably fixed when we moved the LoginManager initialization to an earlier point in the activity cycle.

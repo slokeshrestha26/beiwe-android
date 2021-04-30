@@ -197,8 +197,10 @@
     <string name="create_new_data_files_intent" translatable="false">Create new data files</string>
     <string name="check_for_new_surveys_intent" translatable="false">Check for new surveys</string>
     <string name="run_wifi_log" translatable="false">Wifi Log</string>
+    <string name="encrypt_ambient_audio_file" translatable="false">Encrypt and restart ambient audio recording</string>
     <string name="check_for_sms_enabled" translatable="false">Check SMS</string>
     <string name="check_for_calls_enabled" translatable="false">Check Calls</string>
+    <string name="check_if_ambient_audio_recording_is_enabled" translatable="false">Check if ambient audio recording is enabled</string>
 
     <!-- Menu Items -->
     <string name="menu_sign_out">Sign Out</string>
