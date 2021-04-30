@@ -247,7 +247,6 @@ public class MainService extends Service {
 		filter.addAction( appContext.getString( R.string.voice_recording ) );
 		filter.addAction( appContext.getString( R.string.run_wifi_log ) );
 		filter.addAction( appContext.getString( R.string.encrypt_ambient_audio_file) );
-		filter.addAction( "PrintFilesToLogCat" );  // TODO: comment this out, or remove all references to "PrintFilesToLogCat" and Timer.fileLoggerIntent
 		filter.addAction( appContext.getString( R.string.upload_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.create_new_data_files_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_new_surveys_intent ) );
@@ -354,10 +353,6 @@ public class MainService extends Service {
 			sendBroadcast(Timer.encryptAmbientAudioIntent);
 		}
 
-		if (PersistentData.getMostRecentAlarmTime("PrintFilesToLogCat") < now || !timer.alarmIsSet(Timer.fileLoggerIntent)) {
-			sendBroadcast(Timer.fileLoggerIntent);
-		}
-		
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
 		//(Bluetooth needs to run at absolute points in time, it should not be started if a scheduled event is missed.)
 		if ( PermissionHandler.confirmBluetooth(appContext) && !timer.alarmIsSet(Timer.bluetoothOnIntent)) {
@@ -473,23 +468,8 @@ public class MainService extends Service {
 
 			// Encrypt the current ambient audio file
 			if (broadcastAction.equals(appContext.getString(R.string.encrypt_ambient_audio_file))) {
-				Log.e("ambient", "got the broadcast to encrypt the ambient audio file");
 				AmbientAudioListener.encryptAmbientAudioFile();
 				return;
-			}
-
-			if (broadcastAction.equals("PrintFilesToLogCat")) {
-				long FILE_LOGGING_FREQUENCY_MILLISECONDS = 5000;
-				Log.w("ambient", "*\n");
-				Log.w("ambient", "******  Listing files from MainService");
-				String[] currentFilesList = appContext.getFilesDir().list();
-				for (int i = 0; i < currentFilesList.length; i++) {
-					File file = new File(appContext.getFilesDir(), currentFilesList[i]);
-					Log.w("ambient", currentFilesList[i] + "    " + Objects.toString(file.length()));
-				}
-				Log.w("ambient", "*\n");
-				long alarmTime = timer.setupExactSingleAlarm(FILE_LOGGING_FREQUENCY_MILLISECONDS, Timer.fileLoggerIntent);
-				PersistentData.setMostRecentAlarmTime("PrintFilesToLogCat", alarmTime);
 			}
 
 			/** Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.

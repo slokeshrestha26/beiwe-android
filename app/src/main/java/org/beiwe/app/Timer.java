@@ -32,7 +32,6 @@ public class Timer {
 //	public static Intent weeklySurveyIntent;
 	public static Intent wifiLogIntent;
 	public static Intent encryptAmbientAudioIntent;
-	public static Intent fileLoggerIntent;
 	public static Intent uploadDatafilesIntent;
 	public static Intent createNewDataFilesIntent;
 	public static Intent checkForNewSurveysIntent;
@@ -60,7 +59,6 @@ public class Timer {
 		signoutIntent = setupIntent(appContext.getString(R.string.signout_intent));
 		wifiLogIntent = setupIntent(appContext.getString(R.string.run_wifi_log));
 		encryptAmbientAudioIntent = setupIntent(appContext.getString(R.string.encrypt_ambient_audio_file));
-		fileLoggerIntent = setupIntent("PrintFilesToLogCat");
 		uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent));
 		createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent));
 		checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent));
