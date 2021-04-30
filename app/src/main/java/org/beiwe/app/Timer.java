@@ -37,7 +37,7 @@ public class Timer {
 	public static Intent checkForNewSurveysIntent;
 	public static Intent checkForSMSEnabled;
 	public static Intent checkForCallsEnabled;
-	public static Intent checkForRecordingPermission;
+	public static Intent checkIfAmbientAudioRecordingIsEnabled;
 	
 	
 	// Constructor
@@ -65,7 +65,7 @@ public class Timer {
 		
 		checkForSMSEnabled = setupIntent(appContext.getString(R.string.check_for_sms_enabled));
 		checkForCallsEnabled = setupIntent(appContext.getString(R.string.check_for_calls_enabled));
-		checkForRecordingPermission = setupIntent(appContext.getString(R.string.check_for_recording_permission));
+		checkIfAmbientAudioRecordingIsEnabled = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled));
 	}
 	
 	/* ######################################################################

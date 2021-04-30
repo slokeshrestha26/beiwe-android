@@ -54,7 +54,7 @@ public class PersistentData {
 	private static final String BLUETOOTH = "bluetooth";
 	private static final String POWER_STATE = "power_state";
 	private static final String ALLOW_UPLOAD_OVER_CELLULAR_DATA = "allow_upload_over_cellular_data";
-	private static final String BACKGROUND_AUDIO = "background_audio";
+	private static final String AMBIENT_AUDIO = "ambient_audio";
 
 	private static final String ACCELEROMETER_OFF_DURATION_SECONDS = "accelerometer_off_duration_seconds";
 	private static final String ACCELEROMETER_ON_DURATION_SECONDS = "accelerometer_on_duration_seconds";
@@ -203,7 +203,7 @@ public class PersistentData {
 	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH, false); }
 	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE, false); }
 	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
-	public static boolean getBackgroundAudioEnabled(){ return pref.getBoolean(BACKGROUND_AUDIO, false); }
+	public static boolean getAmbientAudioCollectionIsEnabled(){ return pref.getBoolean(AMBIENT_AUDIO, false); }
 	
 	public static void setAccelerometerEnabled(boolean enabled) {
 		putCommit(ACCELEROMETER, enabled);
@@ -232,8 +232,8 @@ public class PersistentData {
 	public static void setAllowUploadOverCellularData(boolean enabled) {
 		putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled);
 	}
-	public static void setBackgroundAudioEnabled(boolean enabled) {
-		putCommit(BACKGROUND_AUDIO, enabled);
+	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) {
+		putCommit(AMBIENT_AUDIO, enabled);
 	}
 	
 	/*#####################################################################################

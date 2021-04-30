@@ -48,10 +48,8 @@ import org.beiwe.app.survey.SurveyScheduler;
 import org.beiwe.app.ui.user.LoginActivity;
 import org.beiwe.app.ui.utils.SurveyNotifications;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 import io.sentry.Sentry;
 import io.sentry.android.AndroidSentryClientFactory;
@@ -131,10 +129,10 @@ public class MainService extends Service {
 		}
 
 		// if we have the os permission to record, and the study requires background recording
-		if (PermissionHandler.confirmBackgroundAudio(appContext)) {
+		if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
 			AmbientAudioListener.startRecording(appContext);
-		} else if (PersistentData.getBackgroundAudioEnabled()) {
-			sendBroadcast(Timer.checkForRecordingPermission);
+		} else if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
+			sendBroadcast(Timer.checkIfAmbientAudioRecordingIsEnabled);
 		}
 		
 		if (PermissionHandler.confirmCalls(appContext))
@@ -251,7 +249,7 @@ public class MainService extends Service {
 		filter.addAction( appContext.getString( R.string.check_for_new_surveys_intent ) );
 		filter.addAction( appContext.getString( R.string.check_for_sms_enabled ) );
 		filter.addAction( appContext.getString( R.string.check_for_calls_enabled ) );
-		filter.addAction( appContext.getString( R.string.check_for_recording_permission ) );
+		filter.addAction( appContext.getString( R.string.check_if_ambient_audio_recording_is_enabled) );
 		filter.addAction( ConnectivityManager.CONNECTIVITY_ACTION );
 		filter.addAction("crashBeiwe");
 		filter.addAction("enterANR");
@@ -519,9 +517,9 @@ public class MainService extends Service {
 				else if (PersistentData.getCallsEnabled() ) { timer.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabled); }
 			}
 
-			if (broadcastAction.equals( appContext.getString(R.string.check_for_recording_permission) ) ) {
-				if ( PermissionHandler.confirmBackgroundAudio(appContext) ) { AmbientAudioListener.startRecording(appContext); }
-				else if (PersistentData.getBackgroundAudioEnabled() ) { timer.setupExactSingleAlarm(10000L, Timer.checkForRecordingPermission); }
+			if (broadcastAction.equals( appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled) ) ) {
+				if ( PermissionHandler.confirmAmbientAudioCollection(appContext) ) { AmbientAudioListener.startRecording(appContext); }
+				else if (PersistentData.getAmbientAudioCollectionIsEnabled() ) { timer.setupExactSingleAlarm(10000L, Timer.checkIfAmbientAudioRecordingIsEnabled); }
 			}
 
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm

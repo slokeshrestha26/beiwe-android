@@ -1,13 +1,10 @@
 package org.beiwe.app.storage;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SetDeviceSettings {
 	public static void writeDeviceSettings(JSONObject deviceSettings) throws JSONException {
-		Log.e("debug", "writing device settings");
 		// Write data stream booleans
 		Boolean accelerometerEnabled = deviceSettings.getBoolean("accelerometer");
 		PersistentData.setAccelerometerEnabled(accelerometerEnabled);
@@ -27,10 +24,10 @@ public class SetDeviceSettings {
 		PersistentData.setPowerStateEnabled(powerStateEnabled);
 
 		//background audio collection. This key was added late, and if the server is old it may not be present
-		boolean collectBackgroundAudio;
-		try { collectBackgroundAudio = deviceSettings.getBoolean("background_audio"); }
-		catch (JSONException e) { collectBackgroundAudio = false; }
-		PersistentData.setBackgroundAudioEnabled(collectBackgroundAudio);
+		boolean ambientAudioCollectionIsEnabled;
+		try { ambientAudioCollectionIsEnabled = deviceSettings.getBoolean("ambient_audio"); }
+		catch (JSONException e) { ambientAudioCollectionIsEnabled = false; }
+		PersistentData.setAmbientAudioCollectionIsEnabled(ambientAudioCollectionIsEnabled);
 
 		Boolean allowUploadOverCellularData; // This key was added late, and if the server is old it may not be present
 		try { allowUploadOverCellularData = deviceSettings.getBoolean("allow_upload_over_cellular_data");}
