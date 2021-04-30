@@ -23,7 +23,7 @@ public class SetDeviceSettings {
 		Boolean powerStateEnabled = deviceSettings.getBoolean("power_state");
 		PersistentData.setPowerStateEnabled(powerStateEnabled);
 
-		//background audio collection. This key was added late, and if the server is old it may not be present
+		// Ambient audio collection. This key was added late, and if the server is old it may not be present.
 		boolean ambientAudioCollectionIsEnabled;
 		try { ambientAudioCollectionIsEnabled = deviceSettings.getBoolean("ambient_audio"); }
 		catch (JSONException e) { ambientAudioCollectionIsEnabled = false; }

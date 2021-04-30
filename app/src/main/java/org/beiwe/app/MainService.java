@@ -128,7 +128,7 @@ public class MainService extends Service {
 			sendBroadcast(Timer.checkForSMSEnabled);
 		}
 
-		// if we have the os permission to record, and the study requires background recording
+		// If we have the os permission to record, and the study requires ambient audio recording
 		if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
 			AmbientAudioListener.startRecording(appContext);
 		} else if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
