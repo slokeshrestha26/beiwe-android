@@ -203,7 +203,6 @@ public class MainService extends Service {
 	private void startCallLogger() {
 		CallLogger callLogger = new CallLogger(new Handler(), appContext);
 		this.getContentResolver().registerContentObserver(Uri.parse("content://call_log/calls/"), true, callLogger); }
-
 	
 	/** Initializes the PowerStateListener. 
 	 * The PowerStateListener requires the ACTION_SCREEN_OFF and ACTION_SCREEN_ON intents
@@ -539,8 +538,6 @@ public class MainService extends Service {
 					return;
 				}
 			}
-
-
 
 			//this is a special action that will only run if the app device is in debug mode.
 			if (broadcastAction.equals("crashBeiwe") && BuildConfig.APP_IS_BETA) {
