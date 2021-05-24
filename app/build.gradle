@@ -15,6 +15,10 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     compileSdkVersion 29
     defaultConfig {
         applicationId "org.beiwe.app"
