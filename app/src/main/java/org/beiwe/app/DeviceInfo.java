@@ -86,6 +86,7 @@ public class DeviceInfo {
 	 * 47: app version 3.0.3, Updates Sentry DSN
 	 * 48: app version 3.1.0, Adds foreground service, and optional ambient audio collection feature
 	 *      (ambient audio can be enabled or disabled at the study level. It's disabled by default.)
+	 * 49: app version 3.1.1, Fixes background location permission for Android 11 and above
 	 * */
 
 	private static String androidID;
