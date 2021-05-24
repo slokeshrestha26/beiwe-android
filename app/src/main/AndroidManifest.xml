@@ -5,8 +5,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <!-- GPS and network-location service -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!-- voice recording -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- network and upload -->
@@ -112,6 +113,7 @@
 
         <service
             android:name=".MainService"
+            android:foregroundServiceType="location"
             android:exported="false"
             android:label="ForegroundService-thing" />
 
