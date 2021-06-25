@@ -87,6 +87,8 @@ public class DeviceInfo {
 	 * 48: app version 3.1.0, Adds foreground service, and optional ambient audio collection feature
 	 *      (ambient audio can be enabled or disabled at the study level. It's disabled by default.)
 	 * 49: app version 3.1.1, Fixes background location permission for Android 11 and above
+	 * 50: app version 3.1.2, Only prompts for background location permission in onnelaLabServer and
+	 *      commStatsCustomUrl versions; not in googlePlayStore version
 	 * */
 
 	private static String androidID;
