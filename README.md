@@ -25,20 +25,20 @@ To receive push notifications, add Firebase to your Android Project following [t
 
 
 ### Build Variants and Product Flavors
-There are three Build Variants and three Product Flavors of the Android app, specified in the `buildTypes` section of `app/build.gradle`.  To select which Build Variant the app compiles as, go to **Build** > **Select Build Variant** in the menu bar [(see the documentation)](https://developer.android.com/studio/run/index.html#changing-variant).
+When you build the Android app, you choose one of the Build Variants and one of the Product Flavors.  There are three of each, specified in the `buildTypes` section of `app/build.gradle`.  To select which Build Variant the app compiles as, go to **Build** > **Select Build Variant** in the menu bar [(see the documentation)](https://developer.android.com/studio/run/index.html#changing-variant).
 
-The three Build Variants are:
+#### The three Build Variants are:
 
-* **release**- Does *NOT* have the Debug Interface.  The app is named "Beiwe" when installed on the phone.
+| Build Variant | App name | Password requirements | Debug interface |
+| --- | --- | --- | --- |
+| **release** | "Beiwe" or "Beiwe2" | At least 6 characters | No |
+| **beta** | "Beiwe-beta" or "Beiwe2-beta" | At least 1 character | Yes |
+| **development** | "Beiwe-development" or "Beiwe2-development" | At least 1 character | Yes, plus extra buttons only useful for develpers, like buttons to crash the app.  Also includes some extra logging statements that write to LogCat, but not to app log files that get uploaded. |
 
-* **beta**- *DOES* have the Debug Interface, and allows passwords as short as 1 character.  The app is named "Beiwe-beta" when installed on the phone.
+#### The three Product Flavors are:
 
-* **development**- *DOES* have the Debug Interface, and allows passwords as short as 1 character.  The Debug Interface also has some extra buttons that are only useful for developers, like buttons to crash the app.  Also includes some extra logging statements (that are printed to Android Monitor if the phone is plugged into a debugger, but are not printed to Beiwe log files).  The app is named "Beiwe-development" when installed on the phone.
-
-The three Product Flavors are:
-
-* **onnelaLabServer**- Does *NOT* allow the participant to specify the study server URL at registration (`release` points to studies.beiwe.org, while `beta` and `development` point to staging.beiwe.org).  *DOES* record text message and call log statistics.
-
-* **googlePlayStore**- *DOES* allow the participant to specify the study server URL at registration.  Does *NOT* record text message and phone call statistics.
-
-* **commStatsCustomUrl**- *DOES* allow the participant to specify the study server URL at registration.  *DOES* record text message and phone call statistics.
+| Product Flavor | App Name | Intended for | Server URL | Record text message and call log stats | Request background location permission |
+| --- | --- | --- | --- | --- | --- |
+| **googlePlayStore** | Beiwe2 | Distribution via Google Play Store | Customizable at registration | No (forbidden by Play Store policies) | No (forbidden by Play Store policies) |
+| **onnelaLabServer** | Beiwe | Download APK from studies.beiwe.org/download | Hardcoded to studies.beiwe.org | Yes | Yes |
+| **commStatsCustomUrl** | Beiwe | Download APK from `/download` link on other Beiwe deployments | Customizable at registration | Yes | Yes |

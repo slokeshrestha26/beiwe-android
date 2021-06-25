@@ -247,7 +247,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 					showAlertThatForcesUserToGrantPermission(
 							this,
 							PermissionHandler.getBumpingPermissionMessage(permission, getApplicationContext()),
-							PermissionHandler.permissionMap.get(permission)
+							PermissionHandler.permissionMessages.get(permission)
 					);
 				}
 				else {
@@ -255,7 +255,7 @@ public class RunningBackgroundServiceActivity extends AppCompatActivity {
 							this,
 							PermissionHandler.getNormalPermissionMessage(permission, getApplicationContext()),
 							permission,
-							PermissionHandler.permissionMap.get(permission)
+							PermissionHandler.permissionMessages.get(permission)
 					);
 				}
 				PersistentData.setLastRequestedPermission(permission);

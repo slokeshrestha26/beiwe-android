@@ -16,45 +16,27 @@ public class PermissionHandler {
 	public static int PERMISSION_DENIED = PackageManager.PERMISSION_DENIED;
 	public static String POWER_EXCEPTION_PERMISSION = "POWER_EXCEPTION_PERMISSION";
 	
-	public static Map <String, Integer> permissionMap = new HashMap <String, Integer> ();	  
-	static {permissionMap.put( Manifest.permission.ACCESS_FINE_LOCATION, 1 );
-			permissionMap.put( Manifest.permission.ACCESS_NETWORK_STATE, 2 );
-			permissionMap.put( Manifest.permission.ACCESS_WIFI_STATE, 3 );
-			permissionMap.put( Manifest.permission.READ_SMS, 4 );
-			permissionMap.put( Manifest.permission.BLUETOOTH, 5 );
-			permissionMap.put( Manifest.permission.BLUETOOTH_ADMIN, 6 );
-			permissionMap.put( Manifest.permission.CALL_PHONE, 8 );
-			permissionMap.put( Manifest.permission.INTERNET, 9 );
-			permissionMap.put( Manifest.permission.READ_CALL_LOG, 10 );
-			permissionMap.put( Manifest.permission.READ_CONTACTS, 11 );
-			permissionMap.put( Manifest.permission.READ_PHONE_STATE, 12 );
-			permissionMap.put( Manifest.permission.RECEIVE_BOOT_COMPLETED, 13 );
-			permissionMap.put( Manifest.permission.RECORD_AUDIO, 14 );
-			permissionMap.put( Manifest.permission.ACCESS_COARSE_LOCATION, 15);
-			permissionMap.put( Manifest.permission.RECEIVE_MMS, 16);
-			permissionMap.put( Manifest.permission.RECEIVE_SMS, 17);
-			permissionMap.put( Manifest.permission.ACCESS_BACKGROUND_LOCATION, 18);
-			permissionMap = Collections.unmodifiableMap(permissionMap); }
-	
-	private static Map <String, Integer> permissionMessages = new HashMap <> ();
-	static {permissionMessages.put( Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_access_fine_location );
-			permissionMessages.put( Manifest.permission.ACCESS_NETWORK_STATE, R.string.permission_access_network_state );
-			permissionMessages.put( Manifest.permission.ACCESS_WIFI_STATE, R.string.permission_access_wifi_state );
-			permissionMessages.put( Manifest.permission.READ_SMS, R.string.permission_read_sms );
-			permissionMessages.put( Manifest.permission.BLUETOOTH, R.string.permission_bluetooth );
-			permissionMessages.put( Manifest.permission.BLUETOOTH_ADMIN, R.string.permission_bluetooth_admin );
-			permissionMessages.put( Manifest.permission.CALL_PHONE, R.string.permission_call_phone );
-			permissionMessages.put( Manifest.permission.INTERNET, R.string.permission_internet );
-			permissionMessages.put( Manifest.permission.READ_CALL_LOG, R.string.permission_read_call_log );
-			permissionMessages.put( Manifest.permission.READ_CONTACTS, R.string.permission_read_contacts );
-			permissionMessages.put( Manifest.permission.READ_PHONE_STATE, R.string.permission_read_phone_state );
-			permissionMessages.put( Manifest.permission.RECEIVE_BOOT_COMPLETED, R.string.permission_receive_boot_completed );
-			permissionMessages.put( Manifest.permission.RECORD_AUDIO, R.string.permission_record_audio );
-			permissionMessages.put( Manifest.permission.ACCESS_COARSE_LOCATION, R.string.permission_access_coarse_location );
-			permissionMessages.put( Manifest.permission.RECEIVE_MMS, R.string.permission_receive_mms);
-			permissionMessages.put( Manifest.permission.RECEIVE_SMS, R.string.permission_receive_sms);
-			permissionMessages.put( Manifest.permission.ACCESS_BACKGROUND_LOCATION, R.string.permission_access_background_location);
-			permissionMessages = Collections.unmodifiableMap(permissionMessages); }
+	public static Map <String, Integer> permissionMessages = new HashMap <> ();
+	static {
+		permissionMessages.put(Manifest.permission.ACCESS_FINE_LOCATION, R.string.permission_access_fine_location);
+		permissionMessages.put(Manifest.permission.ACCESS_NETWORK_STATE, R.string.permission_access_network_state);
+		permissionMessages.put(Manifest.permission.ACCESS_WIFI_STATE, R.string.permission_access_wifi_state);
+		permissionMessages.put(Manifest.permission.READ_SMS, R.string.permission_read_sms);
+		permissionMessages.put(Manifest.permission.BLUETOOTH, R.string.permission_bluetooth);
+		permissionMessages.put(Manifest.permission.BLUETOOTH_ADMIN, R.string.permission_bluetooth_admin);
+		permissionMessages.put(Manifest.permission.CALL_PHONE, R.string.permission_call_phone);
+		permissionMessages.put(Manifest.permission.INTERNET, R.string.permission_internet);
+		permissionMessages.put(Manifest.permission.READ_CALL_LOG, R.string.permission_read_call_log);
+		permissionMessages.put(Manifest.permission.READ_CONTACTS, R.string.permission_read_contacts);
+		permissionMessages.put(Manifest.permission.READ_PHONE_STATE, R.string.permission_read_phone_state);
+		permissionMessages.put(Manifest.permission.RECEIVE_BOOT_COMPLETED, R.string.permission_receive_boot_completed);
+		permissionMessages.put(Manifest.permission.RECORD_AUDIO, R.string.permission_record_audio);
+		permissionMessages.put(Manifest.permission.ACCESS_COARSE_LOCATION, R.string.permission_access_coarse_location);
+		permissionMessages.put(Manifest.permission.RECEIVE_MMS, R.string.permission_receive_mms);
+		permissionMessages.put(Manifest.permission.RECEIVE_SMS, R.string.permission_receive_sms);
+		permissionMessages.put(Manifest.permission.ACCESS_BACKGROUND_LOCATION, R.string.permission_access_background_location);
+		permissionMessages = Collections.unmodifiableMap(permissionMessages);
+	}
 
 	public static String getNormalPermissionMessage(String permission, Context appContext) {
 		return String.format(appContext.getString(R.string.permission_normal_request_template),
@@ -122,7 +104,7 @@ public class PermissionHandler {
 	public static String getNextPermission(Context context, Boolean includeRecording) {
 		if (PersistentData.getGpsEnabled()) {
 			if ( !checkAccessFineLocation(context) ) return Manifest.permission.ACCESS_FINE_LOCATION;
-			if ( !checkAccessBackgroundLocation(context) ) return Manifest.permission.ACCESS_BACKGROUND_LOCATION; }
+			if ( !checkAccessBackgroundLocation(context) && BuildConfig.READ_TEXTS_CALLS_BACKGROUND_LOCATION ) return Manifest.permission.ACCESS_BACKGROUND_LOCATION; }
 		if (PersistentData.getWifiEnabled()) {
 			if ( !checkAccessWifiState(context)) return Manifest.permission.ACCESS_WIFI_STATE;
 			if ( !checkAccessNetworkState(context)) return Manifest.permission.ACCESS_NETWORK_STATE;
@@ -131,10 +113,10 @@ public class PermissionHandler {
 		if (PersistentData.getBluetoothEnabled()) {
 			if ( !checkAccessBluetooth(context)) return Manifest.permission.BLUETOOTH;
 			if ( !checkAccessBluetoothAdmin(context)) return Manifest.permission.BLUETOOTH_ADMIN; }
-		if (PersistentData.getCallsEnabled() && BuildConfig.READ_TEXT_AND_CALL_LOGS) {
+		if (PersistentData.getCallsEnabled() && BuildConfig.READ_TEXTS_CALLS_BACKGROUND_LOCATION) {
 			if ( !checkAccessReadPhoneState(context)) return Manifest.permission.READ_PHONE_STATE;  
 			if ( !checkAccessReadCallLog(context)) return Manifest.permission.READ_CALL_LOG; }
-		if (PersistentData.getTextsEnabled() && BuildConfig.READ_TEXT_AND_CALL_LOGS) {
+		if (PersistentData.getTextsEnabled() && BuildConfig.READ_TEXTS_CALLS_BACKGROUND_LOCATION) {
 			if ( !checkAccessReadContacts(context)) return Manifest.permission.READ_CONTACTS;  
 			if ( !checkAccessReadSms(context)) return Manifest.permission.READ_SMS;
 			if ( !checkAccessReceiveMms(context)) return Manifest.permission.RECEIVE_MMS;
