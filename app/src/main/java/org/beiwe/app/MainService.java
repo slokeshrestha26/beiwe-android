@@ -152,6 +152,7 @@ public class MainService extends Service {
 		NotificationChannel chan = new NotificationChannel(notificationChannelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
 		chan.setLightColor(Color.BLUE);
 		chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+		chan.setSound(null, null);
 		NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		assert manager != null;
 		manager.createNotificationChannel(chan);
