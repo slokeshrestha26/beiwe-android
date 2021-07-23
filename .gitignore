@@ -57,3 +57,7 @@ private/*
 
 # Firebase generated file
 app/google-services.json
+
+# Some Fastlane files
+fastlane/README.md
+fastlane/report.xml

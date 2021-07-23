@@ -7,5 +7,44 @@ jobs:
   build-and-distribute:
     runs-on: ubuntu-latest
     steps:
-      - name: my-step
-        run: echo "Hello World!"
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+          bundler-cache: true
+
+      - name: Create and configure Android Signing Keystore
+        env:
+          KEYSTORE_FILEPATH: "private/signing_keystore.jks"
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_KEYSTORE_BASE64_ENCODED: ${{ secrets.SIGNING_KEYSTORE_BASE64_ENCODED }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          mkdir private
+          echo "$SIGNING_KEYSTORE_BASE64_ENCODED" > private/signing_keystore.jks.b64
+          base64 -d -i private/signing_keystore.jks.b64 > private/signing_keystore.jks
+          echo "storeFile=/home/runner/work/beiwe-android/beiwe-android/private/signing_keystore.jks" >> private/keystore.properties
+          echo "keyAlias=$KEY_ALIAS" >> private/keystore.properties
+          echo "storePassword=$KEYSTORE_PASSWORD" >> private/keystore.properties
+          echo "keyPassword=$KEY_PASSWORD" >> private/keystore.properties
+          echo "releaseDSN=$SENTRY_DSN" >> private/keystore.properties
+
+      - name: Create Google Play Service Account credentials file
+        env:
+          GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED }}
+        run: |
+          echo "$GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED" > private/google_service_acct_key.json.b64
+          base64 -d -i private/google_service_acct_key.json.b64 > private/google_service_acct_key.json
+
+      - name: Generate signed app bundle and push to Google Play Alpha track
+        run: |
+          bundle exec fastlane buildAAB
+
+      - name: Build signed APKs and push to Amazon S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          bundle exec fastlane buildAPKs

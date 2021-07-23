@@ -1,0 +1,69 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+
+  desc "Build and sign googlePlayStore variant of the app; upload it to Alpha track on Google Play"
+  lane :buildAAB do
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      flavor: "googlePlayStore",
+    )
+    upload_to_play_store(
+      skip_upload_apk: true,
+      track: "alpha"
+    )
+  end
+
+  desc "Build and sign onnelaLabServer and commStatsCustomUrl APK files, and upload them to AWS S3"
+  lane :buildAPKs do
+    s3_client = Aws::S3::Client.new(region: 'us-east-1')
+    buildSignAndUploadAPKFile("onnelaLabServer", s3_client)
+    buildSignAndUploadAPKFile("commStatsCustomUrl", s3_client)
+  end
+
+  def buildSignAndUploadAPKFile(product_flavor, s3_client)
+    gradle(
+      task: "assemble",
+      build_type: "Release",
+      flavor: product_flavor,
+    )
+    apk_filepath = lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    # Upload file to "LATEST" download link (overwrite current "LATEST" file)
+    uploadAPKFile(s3_client, apk_filepath, "Beiwe-LATEST-#{product_flavor}.apk")
+    # Upload file to download link that contains its version number
+    uploadAPKFile(s3_client, apk_filepath, nil)
+  end
+
+  def uploadAPKFile(s3_client, apk_filepath, s3_key)
+    apk_filename = File.basename(apk_filepath)
+    if s3_key.nil?
+      s3_key = apk_filename
+    end
+    File.open(apk_filepath, 'rb') do |apk_file|
+      s3_client.put_object(
+        body: apk_file,
+        bucket: 'beiwe-app-backups',
+        key: 'release/' + s3_key,
+        content_disposition: "attachment; filename=\"#{apk_filename}\"",
+        content_type: 'application/vnd.android.package-archive',
+      )
+    end
+  end
+
+end
