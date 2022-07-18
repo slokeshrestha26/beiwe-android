@@ -90,6 +90,8 @@ public class DeviceInfo {
 	 * 50: app version 3.1.2, Only prompts for background location permission in onnelaLabServer and
 	 *      commStatsCustomUrl versions; not in googlePlayStore version
 	 * 51: app version 3.1.3, Silences the persistent data collection notification
+	 * 58: app version 3.2.0, Italian & German translations, remove background location permission,
+	 *      target SDK 30, fix androidx core dependency
 	 * */
 
 	private static String androidID;
