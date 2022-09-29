@@ -41,23 +41,38 @@ public class AmbientAudioListener {
         }
         if (mRecorder == null) {
             // Start the Media Recorder only if it is not currently running
-            mRecorder = new MediaRecorder();
-            mRecorder.reset();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mRecorder.setOutputFile(getUnencryptedAudioFilepath());
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mRecorder.setAudioChannels(1);
-            mRecorder.setAudioSamplingRate(44100);
-            mRecorder.setAudioEncodingBitRate(64000);
+            MediaRecorder mRecorder = null;
+            
+            try {
+                mRecorder = new MediaRecorder();
+                mRecorder.reset();
+                mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                mRecorder.setOutputFile(getUnencryptedAudioFilepath());
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                mRecorder.setAudioChannels(1);
+                mRecorder.setAudioSamplingRate(44100);
+                mRecorder.setAudioEncodingBitRate(64000);
+            } catch (java.lang.RuntimeException e) {
+                Log.e("AmbientAudioListener", "AmbientAudioListener device setup failed");
+                e.printStackTrace();
+                TextFileManager.writeDebugLogStatement("AmbientAudioListener device setup failed");
+                TextFileManager.writeDebugLogStatement(e.getMessage());
+                mRecorder = null;
+                ambientAudioListenerInstance = null;
+                return;
+            }
+            
             try {
                 mRecorder.prepare();
             } catch (IOException e) {
                 Log.e("AmbientAudioListener", "MediaRecorder.prepare() failed");
+                e.printStackTrace();
                 TextFileManager.writeDebugLogStatement("AmbientAudioListener MediaRecorder.prepare() failed");
                 TextFileManager.writeDebugLogStatement(e.getMessage());
             }
             mRecorder.start();
+        
             // Set a timer for how long this should run before calling encryptAmbientAudioFile()
             long alarmTime = MainService.timer.setupExactSingleAlarm(fileDurationInMilliseconds, Timer.encryptAmbientAudioIntent);
             PersistentData.setMostRecentAlarmTime(appContext.getString(R.string.encrypt_ambient_audio_file), alarmTime);
