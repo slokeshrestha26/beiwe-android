@@ -219,6 +219,13 @@
 			android:text="(dev) Encrypt Ambient Audio File"/>
 
 		<Button
+			android:id="@+id/buttonCheckAmbientAudioRunning"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="checkAmbientAudioRunning"
+			android:text="(dev) Is Ambient Audio Running"/>
+
+		<Button
 			android:id="@+id/buttonStartTimer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

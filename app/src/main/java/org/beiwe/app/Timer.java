@@ -36,8 +36,8 @@ public class Timer {
 	public static Intent createNewDataFilesIntent;
 	public static Intent checkForNewSurveysIntent;
 	public static Intent checkForSMSEnabled;
-	public static Intent checkForCallsEnabled;
 	public static Intent checkIfAmbientAudioRecordingIsEnabled;
+	public static Intent checkForCallsEnabled;
 	
 	
 	// Constructor

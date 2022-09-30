@@ -1,5 +1,7 @@
 package org.beiwe.app;
 
+import static org.beiwe.app.UtilsKt.printe;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -125,13 +127,6 @@ public class MainService extends Service {
 			startMmsSentLogger();
 		} else if (PersistentData.getTextsEnabled()) {
 			sendBroadcast(Timer.checkForSMSEnabled);
-		}
-		
-		// If we have the os permission to record, and the study requires ambient audio recording
-		if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
-			AmbientAudioListener.startRecording(appContext);
-		} else if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
-			sendBroadcast(Timer.checkIfAmbientAudioRecordingIsEnabled);
 		}
 		
 		if (PermissionHandler.confirmCalls(appContext))
@@ -355,9 +350,9 @@ public class MainService extends Service {
 			sendBroadcast(Timer.wifiLogIntent);
 		}
 		
-		if (PersistentData.getMostRecentAlarmTime(getString(R.string.encrypt_ambient_audio_file)) < now ||
-			!timer.alarmIsSet(Timer.encryptAmbientAudioIntent)) {
-			sendBroadcast(Timer.encryptAmbientAudioIntent);
+		// The logic for actually enabling the ambient audio needs to occur inside the broadcast loop
+		if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
+			sendBroadcast(Timer.checkIfAmbientAudioRecordingIsEnabled);
 		}
 		
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
@@ -589,10 +584,11 @@ public class MainService extends Service {
 			}
 			
 			if (broadcastAction.equals(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))) {
+				if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
+					timer.setupExactSingleAlarm(30000L, Timer.checkIfAmbientAudioRecordingIsEnabled);
+				}
 				if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
 					AmbientAudioListener.startRecording(appContext);
-				} else if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
-					timer.setupExactSingleAlarm(10000L, Timer.checkIfAmbientAudioRecordingIsEnabled);
 				}
 			}
 			

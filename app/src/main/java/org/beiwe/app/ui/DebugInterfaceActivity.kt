@@ -19,6 +19,7 @@ import org.beiwe.app.ui.user.MainMenuActivity
 import org.beiwe.app.ui.utils.SurveyNotifications
 import org.json.JSONArray
 import org.json.JSONException
+import java.io.File
 import java.security.spec.InvalidKeySpecException
 import java.util.*
 
@@ -321,15 +322,19 @@ class DebugInterfaceActivity : SessionActivity() {
         var files = TextFileManager.getAllUploadableFiles()
         Arrays.sort(files)
 
-        for (file in files)
-            printi("files...", file)
+        for (file in files) {
+            var len = appContext!!.getFileStreamPath(file).length()
+            printi("files...", "${file} ${len}B")
+        }
 
         printw("files...", "ALL FILES")
         files = TextFileManager.getAllFiles()
         Arrays.sort(files)
 
-        for (file in files)
-            printi("files...", file)
+        for (file in files) {
+            var len = appContext!!.getFileStreamPath(file).length()
+            printi("files...", "${file} ${len}B")
+        }
     }
 
     fun startAmbientAudioRecording(view: View?) {
@@ -338,6 +343,11 @@ class DebugInterfaceActivity : SessionActivity() {
 
     fun encryptAmbientAudioFile(view: View?) {
         AmbientAudioListener.encryptAmbientAudioFile()
+    }
+
+    fun checkAmbientAudioRunning(view: View?) {
+        printi("Ambient Audio Enabled", PersistentData.getAmbientAudioCollectionIsEnabled())
+        printi("Ambient Audio Running", AmbientAudioListener.isCurrentlyRunning())
     }
 
     //ui operations
