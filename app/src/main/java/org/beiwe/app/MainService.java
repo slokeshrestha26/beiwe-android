@@ -324,7 +324,7 @@ public class MainService extends Service {
 				sendBroadcast(Timer.accelerometerOnIntent); // start accelerometer timers (immediately runs accelerometer recording session).
 				//note: when there is no accelerometer-off timer that means we are in-between scans.  This state is fine, so we don't check for it.
 			} else if (timer.alarmIsSet(Timer.accelerometerOffIntent)
-				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_accelerometer_on)) - PersistentData.getAccelerometerOffDurationMilliseconds() + 1000 > now) {
+				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_accelerometer_on)) - PersistentData.getAccelerometerOffDuration() + 1000 > now) {
 				accelerometerListener.turn_on();
 			}
 		}
@@ -334,14 +334,14 @@ public class MainService extends Service {
 				sendBroadcast(Timer.gyroscopeOnIntent); // start gyroscope timers (immediately runs gyroscope recording session).
 				//note: when there is no gyroscope-off timer that means we are in-between scans.  This state is fine, so we don't check for it.
 			} else if (timer.alarmIsSet(Timer.gyroscopeOffIntent)
-				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on)) - PersistentData.getGyroscopeOffDurationMilliseconds() + 1000 > now) {
+				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on)) - PersistentData.getGyroscopeOffDuration() + 1000 > now) {
 				gyroscopeListener.turn_on();
 			}
 		}
 		if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) < now || !timer.alarmIsSet(Timer.gpsOnIntent)) {
 			sendBroadcast(Timer.gpsOnIntent);
 		} else if (PersistentData.getGpsEnabled() && timer.alarmIsSet(Timer.gpsOffIntent)
-			&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) - PersistentData.getGpsOffDurationMilliseconds() + 1000 > now) {
+			&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) - PersistentData.getGpsOffDuration() + 1000 > now) {
 			gpsListener.turn_on();
 		}
 		
@@ -358,18 +358,18 @@ public class MainService extends Service {
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
 		//(Bluetooth needs to run at absolute points in time, it should not be started if a scheduled event is missed.)
 		if (PermissionHandler.confirmBluetooth(appContext) && !timer.alarmIsSet(Timer.bluetoothOnIntent)) {
-			timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDurationMilliseconds(), PersistentData.getBluetoothGlobalOffsetMilliseconds(), Timer.bluetoothOnIntent);
+			timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDuration(), PersistentData.getBluetoothGlobalOffset(), Timer.bluetoothOnIntent);
 		}
 		
 		// Functionality timers. We don't need aggressive checking for if these timers have been missed, as long as they run eventually it is fine.
 		if (!timer.alarmIsSet(Timer.uploadDatafilesIntent)) {
-			timer.setupExactSingleAlarm(PersistentData.getUploadDataFilesFrequencyMilliseconds(), Timer.uploadDatafilesIntent);
+			timer.setupExactSingleAlarm(PersistentData.getUploadDataFilesFrequency(), Timer.uploadDatafilesIntent);
 		}
 		if (!timer.alarmIsSet(Timer.createNewDataFilesIntent)) {
-			timer.setupExactSingleAlarm(PersistentData.getCreateNewDataFilesFrequencyMilliseconds(), Timer.createNewDataFilesIntent);
+			timer.setupExactSingleAlarm(PersistentData.getCreateNewDataFilesFrequency(), Timer.createNewDataFilesIntent);
 		}
 		if (!timer.alarmIsSet(Timer.checkForNewSurveysIntent)) {
-			timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequencyMilliseconds(), Timer.checkForNewSurveysIntent);
+			timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequency(), Timer.checkForNewSurveysIntent);
 		}
 		
 		//checks for the current expected state for survey notifications,
@@ -404,7 +404,7 @@ public class MainService extends Service {
 			Log.e("bacgroundService", "timer is null, BackgroundService may be about to crash, the Timer was null when the BackgroundService was supposed to be fully instantiated.");
 			TextFileManager.getDebugLogFile().writeEncrypted("our not-quite-race-condition encountered, Timer was null when the BackgroundService was supposed to be fully instantiated");
 		}
-		timer.setupExactSingleAlarm(PersistentData.getMillisecondsBeforeAutoLogout(), Timer.signoutIntent);
+		timer.setupExactSingleAlarm(PersistentData.getTimeBeforeAutoLogout(), Timer.signoutIntent);
 		PersistentData.loginOrRefreshLogin();
 	}
 	
@@ -462,8 +462,8 @@ public class MainService extends Service {
 				}
 				accelerometerListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
-				timer.setupExactSingleAlarm(PersistentData.getAccelerometerOnDurationMilliseconds(), Timer.accelerometerOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getAccelerometerOffDurationMilliseconds() + PersistentData.getAccelerometerOnDurationMilliseconds(), Timer.accelerometerOnIntent);
+				timer.setupExactSingleAlarm(PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOffIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getAccelerometerOffDuration() + PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOnIntent);
 				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash. 
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_accelerometer_on), alarmTime);
 				return;
@@ -476,8 +476,8 @@ public class MainService extends Service {
 				}
 				gyroscopeListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
-				timer.setupExactSingleAlarm(PersistentData.getGyroscopeOnDurationMilliseconds(), Timer.gyroscopeOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGyroscopeOffDurationMilliseconds() + PersistentData.getGyroscopeOnDurationMilliseconds(), Timer.gyroscopeOnIntent);
+				timer.setupExactSingleAlarm(PersistentData.getGyroscopeOnDuration(), Timer.gyroscopeOffIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGyroscopeOffDuration() + PersistentData.getGyroscopeOnDuration(), Timer.gyroscopeOnIntent);
 				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash.
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gyroscope_on), alarmTime);
 				return;
@@ -489,8 +489,8 @@ public class MainService extends Service {
 					return;
 				}
 				gpsListener.turn_on();
-				timer.setupExactSingleAlarm(PersistentData.getGpsOnDurationMilliseconds(), Timer.gpsOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGpsOnDurationMilliseconds() + PersistentData.getGpsOffDurationMilliseconds(), Timer.gpsOnIntent);
+				timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration(), Timer.gpsOffIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration() + PersistentData.getGpsOffDuration(), Timer.gpsOnIntent);
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gps_on), alarmTime);
 				return;
 			}
@@ -505,7 +505,7 @@ public class MainService extends Service {
 				} else {
 					TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " user has not provided permission for Wifi.");
 				}
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getWifiLogFrequencyMilliseconds(), Timer.wifiLogIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getWifiLogFrequency(), Timer.wifiLogIntent);
 				PersistentData.setMostRecentAlarmTime(getString(R.string.run_wifi_log), alarmTime);
 				return;
 			}
@@ -528,34 +528,34 @@ public class MainService extends Service {
 				} else {
 					TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " user has not provided permission for Bluetooth.");
 				}
-				timer.setupExactSingleAlarm(PersistentData.getBluetoothOnDurationMilliseconds(), Timer.bluetoothOffIntent);
+				timer.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent);
 				return;
 			}
 			if (broadcastAction.equals(appContext.getString(R.string.turn_bluetooth_off))) {
 				if (PermissionHandler.checkBluetoothPermissions(appContext)) {
 					if (bluetoothListener != null) bluetoothListener.disableBLEScan();
 				}
-				timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDurationMilliseconds(), PersistentData.getBluetoothGlobalOffsetMilliseconds(), Timer.bluetoothOnIntent);
+				timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDuration(), PersistentData.getBluetoothGlobalOffset(), Timer.bluetoothOnIntent);
 				return;
 			}
 			
 			//starts a data upload attempt.
 			if (broadcastAction.equals(appContext.getString(R.string.upload_data_files_intent))) {
 				PostRequest.uploadAllFiles();
-				timer.setupExactSingleAlarm(PersistentData.getUploadDataFilesFrequencyMilliseconds(), Timer.uploadDatafilesIntent);
+				timer.setupExactSingleAlarm(PersistentData.getUploadDataFilesFrequency(), Timer.uploadDatafilesIntent);
 				return;
 			}
 			//creates new data files
 			if (broadcastAction.equals(appContext.getString(R.string.create_new_data_files_intent))) {
 				TextFileManager.makeNewFilesForEverything();
-				timer.setupExactSingleAlarm(PersistentData.getCreateNewDataFilesFrequencyMilliseconds(), Timer.createNewDataFilesIntent);
+				timer.setupExactSingleAlarm(PersistentData.getCreateNewDataFilesFrequency(), Timer.createNewDataFilesIntent);
 				PostRequest.uploadAllFiles();
 				return;
 			}
 			//Downloads the most recent survey questions and schedules the surveys.
 			if (broadcastAction.equals(appContext.getString(R.string.check_for_new_surveys_intent))) {
 				SurveyDownloader.downloadSurveys(getApplicationContext(), null);
-				timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequencyMilliseconds(), Timer.checkForNewSurveysIntent);
+				timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequency(), Timer.checkForNewSurveysIntent);
 				return;
 			}
 			// Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 

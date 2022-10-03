@@ -36,40 +36,40 @@ public class SetDeviceSettings {
 		
 		// Write timer settings
 		int accelerometerOffDuration = deviceSettings.getInt("accelerometer_off_duration_seconds");
-		PersistentData.setAccelerometerOffDurationSeconds(accelerometerOffDuration);
+		PersistentData.setAccelerometerOffDuration(accelerometerOffDuration);
 		int accelerometerOnDuration = deviceSettings.getInt("accelerometer_on_duration_seconds");
-		PersistentData.setAccelerometerOnDurationSeconds(accelerometerOnDuration);
+		PersistentData.setAccelerometerOnDuration(accelerometerOnDuration);
 		int gyroscopeOffDuration = deviceSettings.getInt("gyro_off_duration_seconds");
-		PersistentData.setGyroscopeOffDurationSeconds(gyroscopeOffDuration);
+		PersistentData.setGyroscopeOffDuration(gyroscopeOffDuration);
 		int gyroscopeOnDuration = deviceSettings.getInt("gyro_on_duration_seconds");
-		PersistentData.setGyroscopeOnDurationSeconds(gyroscopeOnDuration);
+		PersistentData.setGyroscopeOnDuration(gyroscopeOnDuration);
 		int bluetoothOnDurationSeconds = deviceSettings.getInt("bluetooth_on_duration_seconds");
-		PersistentData.setBluetoothOnDurationSeconds(bluetoothOnDurationSeconds);
+		PersistentData.setBluetoothOnDuration(bluetoothOnDurationSeconds);
 		int bluetoothTotalDurationSeconds = deviceSettings.getInt("bluetooth_total_duration_seconds");
-		PersistentData.setBluetoothTotalDurationSeconds(bluetoothTotalDurationSeconds);
+		PersistentData.setBluetoothTotalDuration(bluetoothTotalDurationSeconds);
 		int bluetoothGlobalOffsetSeconds = deviceSettings.getInt("bluetooth_global_offset_seconds");
-		PersistentData.setBluetoothGlobalOffsetSeconds(bluetoothGlobalOffsetSeconds);
+		PersistentData.setBluetoothGlobalOffset(bluetoothGlobalOffsetSeconds);
 		int checkForNewSurveysSeconds = deviceSettings.getInt("check_for_new_surveys_frequency_seconds");
-		PersistentData.setCheckForNewSurveysFrequencySeconds(checkForNewSurveysSeconds);
+		PersistentData.setCheckForNewSurveysFrequency(checkForNewSurveysSeconds);
 		int createNewDataFilesFrequencySeconds = deviceSettings.getInt("create_new_data_files_frequency_seconds");
-		PersistentData.setCreateNewDataFilesFrequencySeconds(createNewDataFilesFrequencySeconds);
+		PersistentData.setCreateNewDataFilesFrequency(createNewDataFilesFrequencySeconds);
 		int gpsOffDurationSeconds = deviceSettings.getInt("gps_off_duration_seconds");
-		PersistentData.setGpsOffDurationSeconds(gpsOffDurationSeconds);
+		PersistentData.setGpsOffDuration(gpsOffDurationSeconds);
 		int gpsOnDurationSeconds = deviceSettings.getInt("gps_on_duration_seconds");
-		PersistentData.setGpsOnDurationSeconds(gpsOnDurationSeconds);
+		PersistentData.setGpsOnDuration(gpsOnDurationSeconds);
 		int secondsBeforeAutoLogout = deviceSettings.getInt("seconds_before_auto_logout");
-		PersistentData.setSecondsBeforeAutoLogout(secondsBeforeAutoLogout);
+		PersistentData.setTimeBeforeAutoLogout(secondsBeforeAutoLogout);
 		int uploadDataFilesFrequencySeconds = deviceSettings.getInt("upload_data_files_frequency_seconds");
-		PersistentData.setUploadDataFilesFrequencySeconds(uploadDataFilesFrequencySeconds);
+		PersistentData.setUploadDataFilesFrequency(uploadDataFilesFrequencySeconds);
 		int voiceRecordingMaxTimeLengthSeconds = deviceSettings.getInt("voice_recording_max_time_length_seconds");
-		PersistentData.setVoiceRecordingMaxTimeLengthSeconds(voiceRecordingMaxTimeLengthSeconds);
+		PersistentData.setVoiceRecordingMaxTimeLength(voiceRecordingMaxTimeLengthSeconds);
 
 		// wifi periodicity needs to have a minimum because it creates a new file every week
 		int wifiLogFrequencySeconds = deviceSettings.getInt("wifi_log_frequency_seconds");
 		if (wifiLogFrequencySeconds < 10){
 			wifiLogFrequencySeconds = 10;
 		}
-		PersistentData.setWifiLogFrequencySeconds(wifiLogFrequencySeconds);
+		PersistentData.setWifiLogFrequency(wifiLogFrequencySeconds);
 		
 		// Write text strings
 		String aboutPageText = deviceSettings.getString("about_page_text");

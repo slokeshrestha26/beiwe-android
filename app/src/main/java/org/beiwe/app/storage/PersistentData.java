@@ -20,8 +20,7 @@ import java.util.Random;
 public class PersistentData {
 	public static String NULL_ID = "NULLID";
 	private static final long MAX_LONG = 9223372036854775807L;
-
-	private static int PRIVATE_MODE = 0;
+	
 	private static boolean isInitialized = false;
 	
 	
@@ -83,7 +82,7 @@ public class PersistentData {
 	public static void initialize( Context context ) {
 		if ( isInitialized ) { return; }
 		appContext = context;
-		pref = appContext.getSharedPreferences(PREF_NAME, PRIVATE_MODE); //sets Shared Preferences private mode
+		pref = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
 		editor = pref.edit();
 		editor.commit();
 		isInitialized = true;
@@ -123,7 +122,7 @@ public class PersistentData {
 
 	/** Set the login session to expire a fixed amount of time in the future */
 	public static void loginOrRefreshLogin() {
-		putCommit(LOGIN_EXPIRATION, System.currentTimeMillis() + getMillisecondsBeforeAutoLogout());
+		putCommit(LOGIN_EXPIRATION, System.currentTimeMillis() + getTimeBeforeAutoLogout());
 	}
 
 	/** Set the login session to "expired" */
@@ -257,72 +256,54 @@ public class PersistentData {
 	private static final long DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH = 4 * 60;
 	private static final long DEFAULT_WIFI_LOG_FREQUENCY = 5 * 60;
 	
-	public static long getGyroscopeOffDurationMilliseconds() { return 1000L * pref.getLong(GYROSCOPE_OFF_DURATION_SECONDS, DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION); }
-	public static long getGyroscopeOnDurationMilliseconds() { return 1000L * pref.getLong(GYROSCOPE_ON_DURATION_SECONDS, DEFAULT_GYROSCOPE_ON_DURATION); }
-	public static long getAccelerometerOffDurationMilliseconds() { return 1000L * pref.getLong(ACCELEROMETER_OFF_DURATION_SECONDS, DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION); }
-	public static long getAccelerometerOnDurationMilliseconds() { return 1000L * pref.getLong(ACCELEROMETER_ON_DURATION_SECONDS, DEFAULT_ACCELEROMETER_ON_DURATION); }
-	public static long getBluetoothOnDurationMilliseconds() { return 1000L * pref.getLong(BLUETOOTH_ON_DURATION_SECONDS, DEFAULT_BLUETOOTH_ON_DURATION); }
-	public static long getBluetoothTotalDurationMilliseconds() { return 1000L * pref.getLong(BLUETOOTH_TOTAL_DURATION_SECONDS, DEFAULT_BLUETOOTH_TOTAL_DURATION); }
-	public static long getBluetoothGlobalOffsetMilliseconds() { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, DEFAULT_BLUETOOTH_GLOBAL_OFFSET); }
-	public static long getCheckForNewSurveysFrequencyMilliseconds() { return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, DEFAULT_CHECK_FOR_NEW_SURVEYS_PERIOD); }
-	public static long getCreateNewDataFilesFrequencyMilliseconds() { return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_CREATE_NEW_DATA_FILES_PERIOD); }
-	public static long getGpsOffDurationMilliseconds() { return 1000L * pref.getLong(GPS_OFF_DURATION_SECONDS, DEFAULT_GPS_OFF_MINIMUM_DURATION); }
-	public static long getGpsOnDurationMilliseconds() { return 1000L * pref.getLong(GPS_ON_DURATION_SECONDS, DEFAULT_GPS_ON_DURATION); }
-	public static long getMillisecondsBeforeAutoLogout() { return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, DEFAULT_SECONDS_BEFORE_AUTO_LOGOUT); }
-	public static long getUploadDataFilesFrequencyMilliseconds() { return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_UPLOAD_DATA_FILES_PERIOD); }
-	public static long getVoiceRecordingMaxTimeLengthMilliseconds() { return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH); }
-	public static long getWifiLogFrequencyMilliseconds() { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, DEFAULT_WIFI_LOG_FREQUENCY); }
-
-	public static void setAccelerometerOffDurationSeconds(long seconds) {
-		putCommit(ACCELEROMETER_OFF_DURATION_SECONDS, seconds);
-	}
-	public static void setAccelerometerOnDurationSeconds(long seconds) {
-		putCommit(ACCELEROMETER_ON_DURATION_SECONDS, seconds);
-	}
-	public static void setGyroscopeOffDurationSeconds(long seconds) {
-		putCommit(GYROSCOPE_OFF_DURATION_SECONDS, seconds);
-	}
-	public static void setGyroscopeOnDurationSeconds(long seconds) {
-		putCommit(GYROSCOPE_ON_DURATION_SECONDS, seconds);
-	}
-	public static void setBluetoothOnDurationSeconds(long seconds) {
-		putCommit(BLUETOOTH_ON_DURATION_SECONDS, seconds);
-	}
-	public static void setBluetoothTotalDurationSeconds(long seconds) {
-		putCommit(BLUETOOTH_TOTAL_DURATION_SECONDS, seconds);
-	}
-	public static void setBluetoothGlobalOffsetSeconds(long seconds) {
-		putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds);
-	}
-	public static void setCheckForNewSurveysFrequencySeconds(long seconds) {
-		putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds);
-	}
-	public static void setCreateNewDataFilesFrequencySeconds(long seconds) {
-		putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds);
-	}
-	public static void setGpsOffDurationSeconds(long seconds) {
-		putCommit(GPS_OFF_DURATION_SECONDS, seconds);
-	}
-	public static void setGpsOnDurationSeconds(long seconds) {
-		putCommit(GPS_ON_DURATION_SECONDS, seconds);
-	}
-	public static void setSecondsBeforeAutoLogout(long seconds) {
-		putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds);
-	}
-	public static void setUploadDataFilesFrequencySeconds(long seconds) {
-		putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds);
-	}
-	public static void setVoiceRecordingMaxTimeLengthSeconds(long seconds) {
-		putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds);
-	}
-	public static void setWifiLogFrequencySeconds(long seconds) {
-		putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds);
-	}
+	
+	public static long getAccelerometerOffDuration () { return 1000L * pref.getLong(ACCELEROMETER_OFF_DURATION_SECONDS, DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION); }
+	public static void setAccelerometerOffDuration (long seconds) { putCommit(ACCELEROMETER_OFF_DURATION_SECONDS, seconds); }
+	
+	public static long getAccelerometerOnDuration () { return 1000L * pref.getLong(ACCELEROMETER_ON_DURATION_SECONDS, DEFAULT_ACCELEROMETER_ON_DURATION); }
+	public static void setAccelerometerOnDuration (long seconds) { putCommit(ACCELEROMETER_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getBluetoothGlobalOffset () { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, DEFAULT_BLUETOOTH_GLOBAL_OFFSET); }
+	public static void setBluetoothGlobalOffset (long seconds) { putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds); }
+	
+	public static long getBluetoothOnDuration () { return 1000L * pref.getLong(BLUETOOTH_ON_DURATION_SECONDS, DEFAULT_BLUETOOTH_ON_DURATION); }
+	public static void setBluetoothOnDuration (long seconds) { putCommit(BLUETOOTH_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getBluetoothTotalDuration () { return 1000L * pref.getLong(BLUETOOTH_TOTAL_DURATION_SECONDS, DEFAULT_BLUETOOTH_TOTAL_DURATION); }
+	public static void setBluetoothTotalDuration (long seconds) { putCommit(BLUETOOTH_TOTAL_DURATION_SECONDS, seconds); }
+	
+	public static long getCheckForNewSurveysFrequency () { return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, DEFAULT_CHECK_FOR_NEW_SURVEYS_PERIOD); }
+	public static void setCheckForNewSurveysFrequency (long seconds) { putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds); }
+	
+	public static long getCreateNewDataFilesFrequency () { return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_CREATE_NEW_DATA_FILES_PERIOD); }
+	public static void setCreateNewDataFilesFrequency (long seconds) { putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds); }
+	
+	public static long getGpsOffDuration () { return 1000L * pref.getLong(GPS_OFF_DURATION_SECONDS, DEFAULT_GPS_OFF_MINIMUM_DURATION); }
+	public static void setGpsOffDuration (long seconds) { putCommit(GPS_OFF_DURATION_SECONDS, seconds); }
+	
+	public static long getGpsOnDuration () { return 1000L * pref.getLong(GPS_ON_DURATION_SECONDS, DEFAULT_GPS_ON_DURATION); }
+	public static void setGpsOnDuration (long seconds) { putCommit(GPS_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getGyroscopeOffDuration () { return 1000L * pref.getLong(GYROSCOPE_OFF_DURATION_SECONDS, DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION); }
+	public static void setGyroscopeOffDuration (long seconds) { putCommit(GYROSCOPE_OFF_DURATION_SECONDS, seconds); }
+	
+	public static long getGyroscopeOnDuration () { return 1000L * pref.getLong(GYROSCOPE_ON_DURATION_SECONDS, DEFAULT_GYROSCOPE_ON_DURATION); }
+	public static void setGyroscopeOnDuration (long seconds) { putCommit(GYROSCOPE_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getTimeBeforeAutoLogout () { return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, DEFAULT_SECONDS_BEFORE_AUTO_LOGOUT); }
+	public static void setTimeBeforeAutoLogout (long seconds) { putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds); }
+	
+	public static void setUploadDataFilesFrequency (long seconds) { putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds); }
+	public static long getUploadDataFilesFrequency () { return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_UPLOAD_DATA_FILES_PERIOD); }
+	
+	public static long getVoiceRecordingMaxTimeLength () { return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH); }
+	public static void setVoiceRecordingMaxTimeLength (long seconds) { putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds); }
+	
+	public static long getWifiLogFrequency () { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, DEFAULT_WIFI_LOG_FREQUENCY); }
+	public static void setWifiLogFrequency (long seconds) { putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds); }
 	
 	//accelerometer, gyroscope bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
-	public static void setMostRecentAlarmTime(String identifier, long time) {
-		putCommit(identifier + "-prior_alarm", time);
-	}
+	public static void setMostRecentAlarmTime(String identifier, long time) { putCommit(identifier + "-prior_alarm", time); }
 	public static long getMostRecentAlarmTime(String identifier) { return pref.getLong( identifier + "-prior_alarm", 0); }
 	//we want default to be 0 so that checks "is this value less than the current expected value" (eg "did this timer event pass already")
 	

@@ -148,14 +148,14 @@ public class AudioRecorderCommon extends SessionActivity {
 				showTimeoutToast();
 				stopRecording();
 			}
-		}, PersistentData.getVoiceRecordingMaxTimeLengthMilliseconds());
+		}, PersistentData.getVoiceRecordingMaxTimeLength());
     }
 
     /** Show a Toast with message "the recording timed out after n minutes" */
     protected void showTimeoutToast() {
     	Resources resources = getApplicationContext().getResources();
     	String msg = (String) resources.getText(R.string.timeout_msg_1st_half);
-    	msg += ((float) PersistentData.getVoiceRecordingMaxTimeLengthMilliseconds() / 60 / 1000);
+    	msg += ((float) PersistentData.getVoiceRecordingMaxTimeLength() / 60 / 1000);
     	msg += resources.getText(R.string.timeout_msg_2nd_half);
     	Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
     }
