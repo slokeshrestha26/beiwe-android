@@ -127,7 +127,8 @@ public class PersistentData {
 
 	/** Set the login session to "expired" */
 	public static void logout() {
-		putCommit(LOGIN_EXPIRATION, 0L);  // LOGIN_EXPIRATION must be stored as a long
+		// LOGIN_EXPIRATION must be stored as a long
+		putCommit(LOGIN_EXPIRATION, 0L);
 	}
 
 	/**Getter for the IS_REGISTERED value. */
@@ -161,11 +162,8 @@ public class PersistentData {
 	}
 
 	public static int minPasswordLength() {
-		if (BuildConfig.APP_IS_BETA) {
-			return 1;
-		} else {
-			return 6;
-		}
+		if (BuildConfig.APP_IS_BETA) return 1;
+		else return 6;
 	}
 
  	/**Takes an input string and returns a boolean value stating whether the input matches the current password. */
@@ -186,7 +184,6 @@ public class PersistentData {
 
 	public static String getFCMInstanceID() {
 		return pref.getString(FCM_INSTANCE_ID, null); }
-	
 	
 	
 	/*#####################################################################################
@@ -228,12 +225,8 @@ public class PersistentData {
 	public static void setPowerStateEnabled(boolean enabled) {
 		putCommit(POWER_STATE, enabled);
 	}
-	public static void setAllowUploadOverCellularData(boolean enabled) {
-		putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled);
-	}
-	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) {
-		putCommit(AMBIENT_AUDIO, enabled);
-	}
+	public static void setAllowUploadOverCellularData(boolean enabled) { putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled); }
+	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) { putCommit(AMBIENT_AUDIO, enabled); }
 	
 	/*#####################################################################################
 	################################## Timer Settings #####################################
@@ -350,6 +343,7 @@ public class PersistentData {
 		if (editor == null) Log.e("LoginManager.java", "editor is null in setServerUrl()");
 		putCommit(SERVER_URL_KEY, prependHttpsToServerUrl(serverUrl));
 	}
+	
 	private static String prependHttpsToServerUrl(String serverUrl) {
 		if (serverUrl.startsWith("https://")) {
 			return serverUrl;
@@ -359,6 +353,7 @@ public class PersistentData {
 			return "https://" + serverUrl;
 		}
 	}
+	
 	public static String getServerUrl() { return pref.getString(SERVER_URL_KEY, null); }
 
 	public static void setLoginCredentials( String userID, String password ) {
@@ -465,7 +460,10 @@ public class PersistentData {
 			list.add(surveyId);
 			putCommit(SURVEY_IDS, new JSONArray(list).toString() );
 		}
-		else { throw new NullPointerException("duplicate survey id added: " + surveyId); } //we ensure uniqueness in the downloader, this should be unreachable.
+		else {
+			// create salt if it does not exist
+			throw new NullPointerException("duplicate survey id added: " + surveyId);
+		}
 	}
 	
 	private static void removeSurveyId(String surveyId) {
@@ -474,7 +472,10 @@ public class PersistentData {
 			list.remove(surveyId);
 			putCommit(SURVEY_IDS, new JSONArray(list).toString() );
 		}
-		else { throw new NullPointerException("survey id does not exist: " + surveyId); } //we ensure uniqueness in the downloader, this should be unreachable.
+		else {
+			// create salt if it does not exist
+			throw new NullPointerException("survey id does not exist: " + surveyId);
+		}
 	}
 	
 	private static JSONArray getSurveyQuestionMemoryJsonArray( String surveyId ) {
@@ -491,7 +492,10 @@ public class PersistentData {
 			list.add(questionId);
 			putCommit(surveyId + "-questionIds", new JSONArray(list).toString() );
 		}
-		else { throw new NullPointerException("duplicate question id added: " + questionId); } //we ensure uniqueness in the downloader, this should be unreachable.
+		else {
+			// create salt if it does not exist
+			throw new NullPointerException("duplicate question id added: " + questionId);
+		}
 	}
 	
 	public static void clearSurveyQuestionMemory(String surveyId) {
@@ -509,7 +513,8 @@ public class PersistentData {
 	// Get salt for pbkdf2 hashing
 	public static byte[] getHashSalt() {
 		String saltString = pref.getString(HASH_SALT_KEY, null);
-		if(saltString == null) { // create salt if it does not exist
+		// create salt if it does not exist
+		if(saltString == null) {
 			byte[] newSalt = SecureRandom.getSeed(64);
 			putCommit(HASH_SALT_KEY, new String(newSalt));
 			return newSalt;
@@ -522,7 +527,8 @@ public class PersistentData {
 	// Get iterations for pbkdf2 hashing
 	public static int getHashIterations() {
 		int iterations = pref.getInt(HASH_ITERATIONS_KEY, 0);
-		if(iterations == 0) { // create iterations if it does not exist
+		// create iterations if it does not exist
+		if(iterations == 0) {
 			// create random iteration count from 900 to 1100
 			int newIterations = 1100 - new Random().nextInt(200);
 			putCommit(HASH_ITERATIONS_KEY, newIterations);
@@ -537,7 +543,8 @@ public class PersistentData {
 		putCommit(USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing);
 	}
 	public static boolean getUseAnonymizedHashing() {
-		return pref.getBoolean(USE_ANONYMIZED_HASHING_KEY, true); //If not present, default to safe hashing
+		//If not present, default to safe hashing
+		return pref.getBoolean(USE_ANONYMIZED_HASHING_KEY, true);
 	}
 
 	/*###########################################################################################
@@ -550,8 +557,10 @@ public class PersistentData {
 
 	public static double getLatitudeOffset() {
 		float latitudeOffset = pref.getFloat(LATITUDE_OFFSET_KEY, 0.0f);
-		if(latitudeOffset == 0.0f && getUseGpsFuzzing()) { //create latitude offset if it does not exist
-			float newLatitudeOffset = (float)(.2 + Math.random()*1.6); // create random latitude offset between (-1, -.2) or (.2, 1)
+		//create latitude offset if it does not exist
+		if(latitudeOffset == 0.0f && getUseGpsFuzzing()) {
+			// create random latitude offset between (-1, -.2) or (.2, 1)
+			float newLatitudeOffset = (float)(.2 + Math.random()*1.6);
 			if(newLatitudeOffset > 1) {
 				newLatitudeOffset = (newLatitudeOffset-.8f) * -1;
 			}
@@ -565,8 +574,10 @@ public class PersistentData {
 
 	public static float getLongitudeOffset() {
 		float longitudeOffset = pref.getFloat(LONGITUDE_OFFSET_KEY, 0.0f);
-		if(longitudeOffset == 0.0f && getUseGpsFuzzing()) { //create longitude offset if it does not exist
-			float newLongitudeOffset = (float)(10 + Math.random()*340); // create random longitude offset between (-180, -10) or (10, 180)
+		//create longitude offset if it does not exist
+		if(longitudeOffset == 0.0f && getUseGpsFuzzing()) {
+			// create random longitude offset between (-180, -10) or (10, 180)
+			float newLongitudeOffset = (float)(10 + Math.random()*340);
 			if(newLongitudeOffset > 180) {
 				newLongitudeOffset = (newLongitudeOffset-170) * -1;
 			}
