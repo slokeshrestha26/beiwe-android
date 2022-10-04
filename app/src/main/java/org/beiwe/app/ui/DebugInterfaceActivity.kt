@@ -167,7 +167,12 @@ class DebugInterfaceActivity : SessionActivity() {
     fun getAlarmStates(view: View?) {
         val ids = PersistentData.getSurveyIds()
         for (surveyId in ids) {
-            printi("most recent alarm state", "survey id: " + surveyId + ", " + PersistentData.getMostRecentSurveyAlarmTime(surveyId) + ", " + PersistentData.getSurveyNotificationState(surveyId))
+            printi(
+                    "most recent alarm state",
+                    "survey id: " + surveyId + ", most recent: " + PersistentData.getMostRecentSurveyAlarmTime(surveyId) + ", active: " + PersistentData.getSurveyNotificationState(surveyId)
+            )
+            printi("survey timings", "(first element is Sunday): " + PersistentData.getSurveyTimes(surveyId))
+
         }
     }
 
