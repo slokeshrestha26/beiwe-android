@@ -25,7 +25,7 @@ android {
         minSdkVersion 16
         multiDexEnabled true
         targetSdkVersion 30
-        versionCode 58       //TODO: update this Beiwe version code for new releases
+        versionCode 59       //TODO: update this Beiwe version code for new releases
         versionName '3.2.1'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
