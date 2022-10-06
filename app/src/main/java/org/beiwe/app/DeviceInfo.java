@@ -94,6 +94,7 @@ public class DeviceInfo {
 	 *      target SDK 30, fix androidx core dependency
 	 * 59: app version 3.2.1, Bug fix for crash involving ambient audio that may be limited to
 	 *      some manufcturers. ambient audio is also now much better at staying up and restarting.
+	 * 60: app version 3.2.1, had to increment for play store.
 	 * */
 
 	private static String androidID;
