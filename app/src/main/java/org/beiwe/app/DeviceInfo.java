@@ -99,12 +99,10 @@ public class DeviceInfo {
 
 	private static String androidID;
 	private static String bluetoothMAC;
-	private static Context context;
 
 	/** grab the Android ID and the Bluetooth's MAC address */
 	@SuppressLint("HardwareIds")
 	public static void initialize(Context appContext) {
-		context = appContext;
 		androidID = Settings.Secure.getString( appContext.getContentResolver(), Settings.Secure.ANDROID_ID ); // android ID appears to be a 64 bit string
 		
 		/* If the BluetoothAdapter is null, or if the BluetoothAdapter.getAddress() returns null,

@@ -57,6 +57,10 @@ public class PersistentData {
 
 	private static final String ACCELEROMETER_OFF_DURATION_SECONDS = "accelerometer_off_duration_seconds";
 	private static final String ACCELEROMETER_ON_DURATION_SECONDS = "accelerometer_on_duration_seconds";
+	private static final String AMBIENT_AUDIO_OFF_DURATION_SECONDS = "ambient_audio_off_duration_seconds";
+	private static final String AMBIENT_AUDIO_ON_DURATION_SECONDS = "ambient_audio_on_duration_seconds";
+	private static final String AMBIENT_AUDIO_SAMPLE_RATE = "ambient_audio_sample_rate";
+	private static final String AMBIENT_AUDIO_BITRATE = "ambient_audio_bitrate";
 	private static final String GYROSCOPE_ON_DURATION_SECONDS = "gyro_on_duration_seconds";
 	private static final String GYROSCOPE_OFF_DURATION_SECONDS = "gyro_off_duration_seconds";
 	private static final String BLUETOOTH_ON_DURATION_SECONDS = "bluetooth_on_duration_seconds";
@@ -189,8 +193,9 @@ public class PersistentData {
 	/*#####################################################################################
 	################################# Listener Settings ###################################
 	#####################################################################################*/
-
+	
 	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER, false); }
+	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO, false); }
 	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE, false); }
 	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS, false); }
 	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS, false); }
@@ -199,7 +204,6 @@ public class PersistentData {
 	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH, false); }
 	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE, false); }
 	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
-	public static boolean getAmbientAudioCollectionIsEnabled(){ return pref.getBoolean(AMBIENT_AUDIO, false); }
 	
 	public static void setAccelerometerEnabled(boolean enabled) {
 		putCommit(ACCELEROMETER, enabled);
@@ -235,6 +239,10 @@ public class PersistentData {
 	// Default timings (only used if app doesn't download custom timings)
 	private static final long DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION = 10;
 	private static final long DEFAULT_ACCELEROMETER_ON_DURATION = 10 * 60;
+	private static final long DEFAULT_AMBIENT_AUDIO_OFF_MINIMUM_DURATION = 10 * 60;
+	private static final long DEFAULT_AMBIENT_AUDIO_ON_DURATION = 10 * 60;
+	private static final long DEFAULT_AMBIENT_AUDIO_SAMPLE_RATE = 22050;
+	private static final long DEFAULT_AMBIENT_AUDIO_BITRATE = 24000;
 	private static final long DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION = 10;
 	private static final long DEFAULT_GYROSCOPE_ON_DURATION = 10 * 60;
 	private static final long DEFAULT_BLUETOOTH_ON_DURATION = 1 * 60;
@@ -255,6 +263,18 @@ public class PersistentData {
 	
 	public static long getAccelerometerOnDuration () { return 1000L * pref.getLong(ACCELEROMETER_ON_DURATION_SECONDS, DEFAULT_ACCELEROMETER_ON_DURATION); }
 	public static void setAccelerometerOnDuration (long seconds) { putCommit(ACCELEROMETER_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getAmbientAudioOffDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_OFF_DURATION_SECONDS, DEFAULT_AMBIENT_AUDIO_OFF_MINIMUM_DURATION); }
+	public static void setAmbientAudioOffDuration (long seconds) { putCommit(AMBIENT_AUDIO_OFF_DURATION_SECONDS, seconds); }
+	
+	public static long getAmbientAudioOnDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_ON_DURATION_SECONDS, DEFAULT_AMBIENT_AUDIO_ON_DURATION); }
+	public static void setAmbientAudioOnDuration (long seconds) { putCommit(AMBIENT_AUDIO_ON_DURATION_SECONDS, seconds); }
+	
+	public static long getAmbientAudioSampleRate () { return pref.getLong(AMBIENT_AUDIO_SAMPLE_RATE, DEFAULT_AMBIENT_AUDIO_SAMPLE_RATE); }
+	public static void setAmbientAudioSampleRate (long rate) { putCommit(AMBIENT_AUDIO_SAMPLE_RATE, rate); }
+	
+	public static long getAmbientAudioBitrate () { return pref.getLong(AMBIENT_AUDIO_BITRATE, DEFAULT_AMBIENT_AUDIO_BITRATE); }
+	public static void setAmbientAudioBitrate (long rate) { putCommit(AMBIENT_AUDIO_BITRATE, rate); }
 	
 	public static long getBluetoothGlobalOffset () { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, DEFAULT_BLUETOOTH_GLOBAL_OFFSET); }
 	public static void setBluetoothGlobalOffset (long seconds) { putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds); }

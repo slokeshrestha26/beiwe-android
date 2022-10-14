@@ -185,6 +185,8 @@
     <!-- Timer Action Strings -->
     <string name="turn_accelerometer_off" translatable="false">Accelerometer OFF</string>
     <string name="turn_accelerometer_on" translatable="false">Accelerometer On</string>
+    <string name="turn_ambient_audio_off" translatable="false">Ambient Audio OFF</string>
+    <string name="turn_ambient_audio_on" translatable="false">Ambient Audio On</string>
     <string name="turn_gyroscope_off" translatable="false">Gyroscope OFF</string>
     <string name="turn_gyroscope_on" translatable="false">Gyroscope On</string>
     <string name="turn_bluetooth_off" translatable="false">Bluetooth OFF</string>

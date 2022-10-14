@@ -351,7 +351,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun checkAmbientAudioRunning(view: View?) {
-        printi("Ambient Audio Enabled", PersistentData.getAmbientAudioCollectionIsEnabled())
+        printi("Ambient Audio Enabled", PersistentData.getAmbientAudioEnabled())
         printi("Ambient Audio Running", AmbientAudioListener.isCurrentlyRunning())
     }
 

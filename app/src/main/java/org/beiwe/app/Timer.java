@@ -11,8 +11,8 @@ import java.util.Calendar;
 
 /** The Timer class provides a meeans of setting various timers.  These are used by the BackgroundService
  * for devices that must be turned on/off, and timing the user to automatically logout after a period of time.
- * This class includes all the Intents and IntentFilters we for trigged broadcasts.
- * @author Eli, Dor */
+ * This class includes all the Intents and IntentFilters we for triggered broadcasts. */
+
 public class Timer {
 	private AlarmManager alarmManager;
 	private Context appContext;
@@ -20,6 +20,8 @@ public class Timer {
 	// Control Message Intents
 	public static Intent accelerometerOffIntent;
 	public static Intent accelerometerOnIntent;
+	public static Intent ambientAudioOffIntent;
+	public static Intent ambientAudioOnIntent;
 	public static Intent gyroscopeOffIntent;
 	public static Intent gyroscopeOnIntent;
 	public static Intent bluetoothOffIntent;
@@ -48,6 +50,8 @@ public class Timer {
 		// double alarm intents
 		accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off));
 		accelerometerOnIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_on));
+		ambientAudioOffIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_off));
+		ambientAudioOnIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_on));
 		gyroscopeOffIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_off));
 		gyroscopeOnIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_on));
 		bluetoothOffIntent = setupIntent(appContext.getString(R.string.turn_bluetooth_off));
@@ -58,7 +62,6 @@ public class Timer {
 		// Set up event triggering alarm intents
 		signoutIntent = setupIntent(appContext.getString(R.string.signout_intent));
 		wifiLogIntent = setupIntent(appContext.getString(R.string.run_wifi_log));
-		encryptAmbientAudioIntent = setupIntent(appContext.getString(R.string.encrypt_ambient_audio_file));
 		uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent));
 		createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent));
 		checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent));

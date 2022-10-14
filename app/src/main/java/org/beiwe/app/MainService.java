@@ -237,17 +237,18 @@ public class MainService extends Service {
 		localHandle.timer = new Timer(localHandle);
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(appContext.getString(R.string.turn_accelerometer_off));
-		filter.addAction(appContext.getString(R.string.turn_gyroscope_off));
 		filter.addAction(appContext.getString(R.string.turn_accelerometer_on));
+		filter.addAction(appContext.getString(R.string.turn_ambient_audio_off));
+		filter.addAction(appContext.getString(R.string.turn_ambient_audio_on));
 		filter.addAction(appContext.getString(R.string.turn_gyroscope_on));
-		filter.addAction(appContext.getString(R.string.turn_bluetooth_off));
+		filter.addAction(appContext.getString(R.string.turn_gyroscope_off));
 		filter.addAction(appContext.getString(R.string.turn_bluetooth_on));
-		filter.addAction(appContext.getString(R.string.turn_gps_off));
+		filter.addAction(appContext.getString(R.string.turn_bluetooth_off));
 		filter.addAction(appContext.getString(R.string.turn_gps_on));
+		filter.addAction(appContext.getString(R.string.turn_gps_off));
 		filter.addAction(appContext.getString(R.string.signout_intent));
 		filter.addAction(appContext.getString(R.string.voice_recording));
 		filter.addAction(appContext.getString(R.string.run_wifi_log));
-		filter.addAction(appContext.getString(R.string.encrypt_ambient_audio_file));
 		filter.addAction(appContext.getString(R.string.upload_data_files_intent));
 		filter.addAction(appContext.getString(R.string.create_new_data_files_intent));
 		filter.addAction(appContext.getString(R.string.check_for_new_surveys_intent));
@@ -328,6 +329,7 @@ public class MainService extends Service {
 				accelerometerListener.turn_on();
 			}
 		}
+		
 		if (PersistentData.getGyroscopeEnabled()) {  //if gyroscope data recording is enabled and...
 			if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on)) < now || //the most recent gyroscope alarm time is in the past, or...
 				!timer.alarmIsSet(Timer.gyroscopeOnIntent)) { //there is no scheduled gyroscope-on timer.
@@ -338,6 +340,17 @@ public class MainService extends Service {
 				gyroscopeListener.turn_on();
 			}
 		}
+		
+		if (PersistentData.getAmbientAudioEnabled()) {
+			if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on)) < now ||
+				!timer.alarmIsSet(Timer.ambientAudioOnIntent)) {
+				sendBroadcast(Timer.ambientAudioOnIntent);
+			} else if (timer.alarmIsSet(Timer.ambientAudioOffIntent)
+				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on)) - PersistentData.getAmbientAudioOffDuration() + 1000 > now) {
+				AmbientAudioListener.startRecording(appContext);
+			}
+		}
+		
 		if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) < now || !timer.alarmIsSet(Timer.gpsOnIntent)) {
 			sendBroadcast(Timer.gpsOnIntent);
 		} else if (PersistentData.getGpsEnabled() && timer.alarmIsSet(Timer.gpsOffIntent)
@@ -348,11 +361,6 @@ public class MainService extends Service {
 		if (PersistentData.getMostRecentAlarmTime(getString(R.string.run_wifi_log)) < now || //the most recent wifi log time is in the past or
 			!timer.alarmIsSet(Timer.wifiLogIntent)) {
 			sendBroadcast(Timer.wifiLogIntent);
-		}
-		
-		// The logic for actually enabling the ambient audio needs to occur inside the broadcast loop
-		if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
-			sendBroadcast(Timer.checkIfAmbientAudioRecordingIsEnabled);
 		}
 		
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
@@ -429,13 +437,13 @@ public class MainService extends Service {
 	private BroadcastReceiver timerReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive (Context appContext, Intent intent) {
-			Log.d("BackgroundService - timers", "Received broadcast: " + intent.toString());
+			Log.d("BackgroundService", "Received broadcast: " + intent.toString());
 			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " Received Broadcast: " + intent.toString());
 			String broadcastAction = intent.getAction();
 			
 			/** For GPS and Accelerometer the failure modes are:
 			 * 1. If a recording event is triggered and followed by Doze being enabled then Beiwe will record until the Doze period ends.
-			 * 2. If, after Doze ends, the timers trigger out of order Beiwe ceaces to record and triggers a new recording event in the future. */
+			 * 2. If, after Doze ends, the timers trigger out of order Beiwe ceases to record and triggers a new recording event in the future. */
 			
 			/** Disable active sensor */
 			if (broadcastAction.equals(appContext.getString(R.string.turn_accelerometer_off))) {
@@ -452,14 +460,15 @@ public class MainService extends Service {
 				}
 				return;
 			}
+			if (broadcastAction.equals(appContext.getString(R.string.turn_ambient_audio_off))) {
+				AmbientAudioListener.encryptAmbientAudioFile();
+				return;
+			}
 			
-			/** Enable active sensors, reset timers. */
+			
+			// Enable active sensors, reset timers.
 			//Accelerometer. We automatically have permissions required for accelerometer.
 			if (broadcastAction.equals(appContext.getString(R.string.turn_accelerometer_on))) {
-				if (!PersistentData.getAccelerometerEnabled()) {
-					Log.e("BackgroundService Listener", "invalid Accelerometer on received");
-					return;
-				}
 				accelerometerListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
 				timer.setupExactSingleAlarm(PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOffIntent);
@@ -468,10 +477,10 @@ public class MainService extends Service {
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_accelerometer_on), alarmTime);
 				return;
 			}
+			
 			//Gyroscope. Almost identical logic to accelerometer above.
 			if (broadcastAction.equals(appContext.getString(R.string.turn_gyroscope_on))) {
-				if (!PersistentData.getGyroscopeEnabled() || !gyroscopeListener.exists) {
-					Log.e("BackgroundService Listener", "invalid Gyroscope on received");
+				if (!gyroscopeListener.exists) {
 					return;
 				}
 				gyroscopeListener.turn_on();
@@ -482,12 +491,9 @@ public class MainService extends Service {
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gyroscope_on), alarmTime);
 				return;
 			}
+			
 			//GPS. Almost identical logic to accelerometer above.
 			if (broadcastAction.equals(appContext.getString(R.string.turn_gps_on))) {
-				if (!PersistentData.getGpsEnabled()) {
-					Log.e("BackgroundService Listener", "invalid GPS on received");
-					return;
-				}
 				gpsListener.turn_on();
 				timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration(), Timer.gpsOffIntent);
 				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration() + PersistentData.getGpsOffDuration(), Timer.gpsOnIntent);
@@ -496,10 +502,6 @@ public class MainService extends Service {
 			}
 			//run a wifi scan.  Most similar to GPS, but without an off-timer.
 			if (broadcastAction.equals(appContext.getString(R.string.run_wifi_log))) {
-				if (!PersistentData.getWifiEnabled()) {
-					Log.e("BackgroundService Listener", "invalid WiFi scan received");
-					return;
-				}
 				if (PermissionHandler.checkWifiPermissions(appContext)) {
 					WifiListener.scanWifi();
 				} else {
@@ -510,17 +512,11 @@ public class MainService extends Service {
 				return;
 			}
 			
-			// Encrypt the current ambient audio file
-			if (broadcastAction.equals(appContext.getString(R.string.encrypt_ambient_audio_file))) {
-				AmbientAudioListener.encryptAmbientAudioFile();
-				return;
-			}
-			
 			/** Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.
 			 * The Bluetooth-on action sets the corresponding Bluetooth-off timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
 			if (broadcastAction.equals(appContext.getString(R.string.turn_bluetooth_on))) {
 				if (!PersistentData.getBluetoothEnabled()) {
-					Log.e("BackgroundService Listener", "invalid Bluetooth on received");
+					Log.e("BackgroundService", "invalid Bluetooth on received");
 					return;
 				}
 				if (PermissionHandler.checkBluetoothPermissions(appContext)) {
@@ -531,6 +527,7 @@ public class MainService extends Service {
 				timer.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent);
 				return;
 			}
+
 			if (broadcastAction.equals(appContext.getString(R.string.turn_bluetooth_off))) {
 				if (PermissionHandler.checkBluetoothPermissions(appContext)) {
 					if (bluetoothListener != null) bluetoothListener.disableBLEScan();
@@ -539,12 +536,14 @@ public class MainService extends Service {
 				return;
 			}
 			
+			
 			//starts a data upload attempt.
 			if (broadcastAction.equals(appContext.getString(R.string.upload_data_files_intent))) {
 				PostRequest.uploadAllFiles();
 				timer.setupExactSingleAlarm(PersistentData.getUploadDataFilesFrequency(), Timer.uploadDatafilesIntent);
 				return;
 			}
+			
 			//creates new data files
 			if (broadcastAction.equals(appContext.getString(R.string.create_new_data_files_intent))) {
 				TextFileManager.makeNewFilesForEverything();
@@ -552,12 +551,14 @@ public class MainService extends Service {
 				PostRequest.uploadAllFiles();
 				return;
 			}
+			
 			//Downloads the most recent survey questions and schedules the surveys.
 			if (broadcastAction.equals(appContext.getString(R.string.check_for_new_surveys_intent))) {
 				SurveyDownloader.downloadSurveys(getApplicationContext(), null);
 				timer.setupExactSingleAlarm(PersistentData.getCheckForNewSurveysFrequency(), Timer.checkForNewSurveysIntent);
 				return;
 			}
+			
 			// Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 
 			if (broadcastAction.equals(appContext.getString(R.string.signout_intent))) {
 				PersistentData.logout();
@@ -575,6 +576,7 @@ public class MainService extends Service {
 					timer.setupExactSingleAlarm(30000L, Timer.checkForSMSEnabled);
 				}
 			}
+			
 			if (broadcastAction.equals(appContext.getString(R.string.check_for_calls_enabled))) {
 				if (PermissionHandler.confirmCalls(appContext)) {
 					startCallLogger();
@@ -583,13 +585,12 @@ public class MainService extends Service {
 				}
 			}
 			
-			if (broadcastAction.equals(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))) {
-				if (PersistentData.getAmbientAudioCollectionIsEnabled()) {
-					timer.setupExactSingleAlarm(30000L, Timer.checkIfAmbientAudioRecordingIsEnabled);
-				}
-				if (PermissionHandler.confirmAmbientAudioCollection(appContext)) {
-					AmbientAudioListener.startRecording(appContext);
-				}
+			if (broadcastAction.equals(appContext.getString(R.string.turn_ambient_audio_on))) {
+				AmbientAudioListener.startRecording(appContext);
+				timer.setupExactSingleAlarm(PersistentData.getAmbientAudioOnDuration(), Timer.ambientAudioOffIntent);
+				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getAmbientAudioOffDuration() + PersistentData.getAmbientAudioOnDuration(), Timer.ambientAudioOnIntent);
+				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on), alarmTime);
+				return;
 			}
 			
 			//checks if the action is the id of a survey (expensive), if so pop up the notification for that survey, schedule the next alarm

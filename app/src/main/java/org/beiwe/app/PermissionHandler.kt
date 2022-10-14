@@ -203,7 +203,7 @@ object PermissionHandler {
 
     @JvmStatic
     fun confirmAmbientAudioCollection(context: Context): Boolean {
-        return PersistentData.getAmbientAudioCollectionIsEnabled() && checkAccessRecordAudio(context)
+        return PersistentData.getAmbientAudioEnabled() && checkAccessRecordAudio(context)
     }
 
     @JvmStatic
@@ -231,7 +231,7 @@ object PermissionHandler {
             if (!checkAccessReceiveMms(context)) return Manifest.permission.RECEIVE_MMS
             if (!checkAccessReceiveSms(context)) return Manifest.permission.RECEIVE_SMS
         }
-        if (includeRecording || PersistentData.getAmbientAudioCollectionIsEnabled()) {
+        if (includeRecording || PersistentData.getAmbientAudioEnabled()) {
             if (!checkAccessRecordAudio(context)) return Manifest.permission.RECORD_AUDIO
         }
 

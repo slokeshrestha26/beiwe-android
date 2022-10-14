@@ -22,15 +22,13 @@ import java.io.IOException;
  * AmbientAudioListener is a Singleton class: it should only be started and instantiated once.
  */
 public class AmbientAudioListener {
-    private static AmbientAudioListener ambientAudioListenerInstance = null;
     private static Context appContext;
     private static MediaRecorder mRecorder;
     private static final String filenameExtension = ".mp4";
-    private static final long fileDurationInMilliseconds = 15 * 60 * 1000;
     public static final String unencryptedTempAudioFilename = "tempUnencryptedAmbientAudioFile";
     public static String currentlyBeingWrittenEncryptedFilename = null;
     private static int deviceSetupCount = 0;
-    private AmbientAudioListener() {};
+    private static boolean instantiated = false;
 
     private static String getUnencryptedAudioFilepath() {
         return appContext.getFilesDir().getAbsolutePath() + "/" + unencryptedTempAudioFilename;
@@ -39,25 +37,24 @@ public class AmbientAudioListener {
     public static boolean isCurrentlyRunning() {
         // if both class variables are instantiated then we SHOULD be recording, have to watch
         // the audio file size to confirm.
-        return (ambientAudioListenerInstance != null && mRecorder != null);
+        return (instantiated && mRecorder != null);
     }
     
     public static synchronized void startRecording(Context applicationContext) {
-        
-        if (ambientAudioListenerInstance == null) {
+        TextFileManager.writeDebugLogStatement("AmbientAudioListener.startRecording()");
+        if (!instantiated) {
             // first run
-            TextFileManager.writeDebugLogStatement("AmbientAudioListener.startRecording()");
-            
             // Instantiate the AmbientAudioRecorder only if it has not yet been instantiated
-            ambientAudioListenerInstance = new AmbientAudioListener();
+//            ambientAudioListenerInstance = new AmbientAudioListener();
             appContext = applicationContext;
             
             // if there is an extant temp audio file and the ambient recording feature is just
             // starting up then we need to encrypt the existing file
             File temp_audio_file = applicationContext.getFileStreamPath(unencryptedTempAudioFilename);
             if (temp_audio_file.exists() && currentlyBeingWrittenEncryptedFilename == null) {
-                forceEncrypt();
+                forceEncrypt();  // for now we don't care if this stalls the background service
             }
+            instantiated = true;
         }
         
         // Start the Media Recorder only if it is not currently running
@@ -69,12 +66,13 @@ public class AmbientAudioListener {
                 mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 mRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 mRecorder.setOutputFile(getUnencryptedAudioFilepath());
-                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC);
                 mRecorder.setAudioChannels(1);
-                mRecorder.setAudioSamplingRate(44100);
-                mRecorder.setAudioEncodingBitRate(64000);
+                mRecorder.setAudioSamplingRate(((int) PersistentData.getAmbientAudioSampleRate()));
+                mRecorder.setAudioEncodingBitRate((int) PersistentData.getAmbientAudioBitrate());
                 TextFileManager.writeDebugLogStatement("AmbientAudioListener device setup success after " + deviceSetupCount + " attempt(s)");
             } catch (java.lang.RuntimeException e) {
+                // TODO: does this occur only when certain security details (device lock) are active, or is it truly manufacturer-based
                 // this causes a lot of spam when the screen is off and the microphone is being turned on.
                 printe("AmbientAudioListener", "AmbientAudioListener device setup failed, count is at " + deviceSetupCount);
                 e.printStackTrace();
@@ -94,18 +92,15 @@ public class AmbientAudioListener {
                 e.printStackTrace();
                 TextFileManager.writeDebugLogStatement("AmbientAudioListener MediaRecorder.prepare() failed");
                 TextFileManager.writeDebugLogStatement(e.getMessage());
+                return;
             }
             mRecorder.start();
-            
-            // Set a timer for how long this should run before calling encryptAmbientAudioFile()
-            long alarmTime = MainService.timer.setupExactSingleAlarm(fileDurationInMilliseconds, Timer.encryptAmbientAudioIntent);
-            PersistentData.setMostRecentAlarmTime(appContext.getString(R.string.encrypt_ambient_audio_file), alarmTime);
         }
     }
     
     public static synchronized void encryptAmbientAudioFile() {
         TextFileManager.writeDebugLogStatement("AmbientAudioListener.encryptAmbientAudioFile()");
-        if (ambientAudioListenerInstance != null && mRecorder != null) {
+        if (instantiated && mRecorder != null) {
             // If the audio recorder exists, stop recording and start encrypting the file
             mRecorder.stop();
             mRecorder.reset();
