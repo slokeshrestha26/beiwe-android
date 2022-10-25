@@ -6,6 +6,105 @@ def keystorePropertiesFile = rootProject.file("private/keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+/*
+Ensure the version number is well documented
+
+Don't forget to update the version in the android manifest, only the version string is visible to the user.
+Version history:
+1: add additional device data during the registration process, including this version number.
+2: added sms debugging
+3: added universal crash log to the app
+4: added a lot of CrashHandler integration to all sorts of error-handled conditions the codebase.
+5: Initial version of Android 6.
+    Enhanced Audio UI rewrite included,raw recording code is functional but not enabled, no
+    standard on parsing audio surveys for their type.
+6: second version of Android 6.
+    Enhanced audio functionality is included and functional, fixed crash that came up on a device
+    when the app was uninstalled and then reinstalled?
+    A functionally identical 6 was later released, it contains a new error message for a new type of
+    iOS-related registration error.
+7: audio survey files now contain the surveyid for the correct audio survey.
+8: Now support a flag for data upload over cellular, fixed bug in wifi scanning.
+9: Moves Record/Play buttons outside the scroll window on voice recording screen.
+10: 2.0, Change to TextFileManager to potentially improve uninitialized errors, added
+    device idle and low power mode change to power state listener.
+11: development version of 12.
+12: 2.1, several bug fixes including a fix for the on-opening-surveyactivity crash and a
+    crash that could occur when when encrypting audio files. Adds support for branching serveys
+    (conditional display logic)
+13: 2.1.1, data improvements to GPS and WIFI data streams, improvements in said data
+    streams and additional context provided in the app log (debug log).
+14: 2.1.2, minor behavior improvement in extremely rare occurrence inside of
+    sessionActivity, see inline documentation there for details.
+15: bug fix in crash handler
+16: 2.1.3, rewrite of file uploading to fix App Not Responding (ANR) errors; also
+    BackgroundService.onStartCommand() now uses START_REDELIVER_INTENT
+17: 2.1.4, fixed a bug that still showed the next survey, even if that survey time had
+    been deleted in the backend and the updatee had propagated to the phone
+18: 2.1.5, fixed bugs with recording received SMS messages and sent MMS messages
+19: 2.2.0, enabled app to point to any server URL; improved Registration and
+    Password Reset interfaces and networking.
+20: 2.2.1, updated text on Registration screens
+21: 2.2.2, updates styles, restores persistent, individual survey notifications in Android 7
+22: 2.2.3, improves error messages
+23: 2.2.4, OnnelaLabServer version and GooglePlayStore version (with customizable URL)
+    have different names (Beiwe vs. Beiwe2)
+24: 2.2.5, handle null Bluetooth MAC Address in Android 8.0 and above
+25: 2.2.6, fix crash on opening app from audio survey notification when AppContext is null
+26: 2.2.7, Added Sentry
+27: 2.3.0, fix restart on crash
+28: 2.3.1, Add ACCESS_COARSE_LOCATION to permission handler
+29: 2.3.2, Add more intents to wake up the app in the BootListener;
+    fixed crashes in SMS Sent Listener, SpannableString survey questions, and Registration
+    screen orientation change
+30: 2.3.3, Adds a repeating timer to restart the Background Service if crashed,
+    improves file upload, fixes an occasional crash in audio recordings,
+    fixes an occasional crash in registration, handles image surveys without crashing
+31: 2.4.0, Updates compile target to SDK 26 (Android 8.0),
+    implements anoynmized phone number and MAC address hashing,
+    prevents creation of header-less files when the phone is out of storage space,
+    fixes a crash in trying to upload files before registration
+32: 2.4.1, Fixes survey notification crash on Android 4,
+    prevent crash in phone call logger,
+    protect against crash in MMS logger
+33: 2.4.2, Fuzzes/anonymizes GPS data for studies on servers that enable it
+34: 2.4.3, Removes "Call My Clinician" and "Call Research Assistant" button
+     for studies that have those set in App Settings. Defaults to showing the buttons.
+35: 2.4.4, Allow Markdown URL links to be clickable
+37: 2.5.0, googlePlayStore build variants no longer ask for SMS/MMS and Call Log
+     permissions because of Google policy changes effective March 9th, 2019.  onnelaLabServer
+     build variants still collect SMS/MMS and Call Log data.
+38: 2.5.1, Adds gyroscope sensor. Sets minimum WiFi log frequency.
+39: 2.6.0, Adds optional always-available surveys.
+41: 2.6.1, Adds localization for Traditional Chinese (Taiwan)
+42: 2.6.2, Deletes app data/registration for APK-installed (non-Google Play
+     Store-installed) app
+43: 2.6.3, Fixes permissions request infinite loop in the onnelaLabServer build
+     variant
+44: 3.0.0, Can receive survey push notifications. Upgrades compile SDK target to
+     Android 10. Blocks registration if doesn't download key and app settings.
+45: 3.0.1, Improves Sentry error logging (includes study name and study id, if
+     available from the server), updates app logo, logs product flavor in identifiers.
+46: 3.0.2, Reduces logging of ENOSPC out-of-storage-space errors, and adds a fix
+     for the sporadic invalid encryption key errors received on the backend.
+47: 3.0.3, Updates Sentry DSN
+48: 3.1.0, Adds foreground service, and optional ambient audio collection feature
+     (ambient audio can be enabled or disabled at the study level. It's disabled by default.)
+49: 3.1.1, Fixes background location permission for Android 11 and above
+50: 3.1.2, Only prompts for background location permission in onnelaLabServer and
+     commStatsCustomUrl versions; not in googlePlayStore version
+51: 3.1.3, Silences the persistent data collection notification
+58: 3.2.0, Italian & German translations, remove background location permission,
+     target SDK 30, fix androidx core dependency
+59: 3.2.1, Bug fix for crash involving ambient audio that may be limited to
+     some manufcturers. ambient audio is also now much better at staying up and restarting.
+60: 3.2.1, had to increment for play store.
+61: 3.2.2. updates ambient audio to have same timers behavior as accelerometer etc, there is a
+    coresponding update on the server to be able to set this.  Also uses HE-AAC, but that
+    just seems to be broken and outputs LC-AAC.  No compatibility loss so setting and hoping.
+    Adds extra parameters to all post requests for versioned server endpoints and basic tracking.
+*/
+
 android {
     signingConfigs {
         config {
@@ -25,8 +124,8 @@ android {
         minSdkVersion 16
         multiDexEnabled true
         targetSdkVersion 30
-        versionCode 60       //TODO: update this Beiwe version code for new releases
-        versionName '3.2.1'  //TODO: update this Beiwe version number for new releases
+        versionCode 61       //TODO: update this Beiwe version code for new releases
+        versionName '3.2.2'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
     buildTypes {
