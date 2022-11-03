@@ -331,7 +331,7 @@ public class TextFileManager {
 			this.fileName = this.name;
 		} else {
 			// if user has not registered, stop non-persistent file generation
-			if (!PersistentData.isRegistered()) {
+			if (!PersistentData.getIsRegistered()) {
 				return false;
 			}
 			this.fileName = PersistentData.getPatientID() + "_" + this.name + "_" + System.currentTimeMillis() + ".csv";

@@ -31,7 +31,7 @@ public class FCMService extends FirebaseMessagingService {
         Thread fcmBlockerThread = new Thread(new Runnable() {
             @Override
             public void run () {
-                while (!PersistentData.isRegistered()) {
+                while (!PersistentData.getIsRegistered()) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ignored) {

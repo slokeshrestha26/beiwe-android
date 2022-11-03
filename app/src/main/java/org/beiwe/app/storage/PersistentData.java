@@ -19,10 +19,8 @@ import java.util.Random;
  * @author Dor Samet, Eli Jones, Josh Zagorsky */
 public class PersistentData {
 	public static String NULL_ID = "NULLID";
-	private static final long MAX_LONG = 9223372036854775807L;
 	
 	private static boolean isInitialized = false;
-	
 	
 	// Private things that are encapsulated using functions in this class 
 	private static SharedPreferences pref;
@@ -44,32 +42,35 @@ public class PersistentData {
 
 	private static final String FCM_INSTANCE_ID = "fcmInstanceID";
 
-	private static final String ACCELEROMETER = "accelerometer";
-	private static final String GYROSCOPE = "gyroscope";
-	private static final String GPS = "gps";
-	private static final String CALLS = "calls";
-	private static final String TEXTS = "texts";
-	private static final String WIFI = "wifi";
-	private static final String BLUETOOTH = "bluetooth";
-	private static final String POWER_STATE = "power_state";
+	private static final String ACCELEROMETER_ENABLED = "accelerometer";
+	private static final String GYROSCOPE_ENABLED = "gyroscope";
+	private static final String GPS_ENABLED = "gps";
+	private static final String CALLS_ENABLED = "calls";
+	private static final String TEXTS_ENABLED = "texts";
+	private static final String WIFI_ENABLED = "wifi";
+	private static final String BLUETOOTH_ENABLED = "bluetooth";
+	private static final String POWER_STATE_ENABLED = "power_state";
+	private static final String AMBIENT_AUDIO_ENABLED = "ambient_audio";
 	private static final String ALLOW_UPLOAD_OVER_CELLULAR_DATA = "allow_upload_over_cellular_data";
-	private static final String AMBIENT_AUDIO = "ambient_audio";
-
-	private static final String ACCELEROMETER_OFF_DURATION_SECONDS = "accelerometer_off_duration_seconds";
-	private static final String ACCELEROMETER_ON_DURATION_SECONDS = "accelerometer_on_duration_seconds";
-	private static final String AMBIENT_AUDIO_OFF_DURATION_SECONDS = "ambient_audio_off_duration_seconds";
-	private static final String AMBIENT_AUDIO_ON_DURATION_SECONDS = "ambient_audio_on_duration_seconds";
+	
+	// you can never never change these values; ever.  If you do it will break the study data gathering
+	private static final String ACCELEROMETER_OFF_SECONDS = "accelerometer_off_duration_seconds";
+	private static final String ACCELEROMETER_ON_SECONDS = "accelerometer_on_duration_seconds";
+	private static final String ACCELEROMETER_FREQUENCY = "accelerometer_frequency";
+	private static final String AMBIENT_AUDIO_OFF_SECONDS = "ambient_audio_off_duration_seconds";
+	private static final String AMBIENT_AUDIO_ON_SECONDS = "ambient_audio_on_duration_seconds";
 	private static final String AMBIENT_AUDIO_SAMPLE_RATE = "ambient_audio_sample_rate";
 	private static final String AMBIENT_AUDIO_BITRATE = "ambient_audio_bitrate";
-	private static final String GYROSCOPE_ON_DURATION_SECONDS = "gyro_on_duration_seconds";
-	private static final String GYROSCOPE_OFF_DURATION_SECONDS = "gyro_off_duration_seconds";
-	private static final String BLUETOOTH_ON_DURATION_SECONDS = "bluetooth_on_duration_seconds";
-	private static final String BLUETOOTH_TOTAL_DURATION_SECONDS = "bluetooth_total_duration_seconds";
+	private static final String GYROSCOPE_ON_SECONDS = "gyro_on_duration_seconds";
+	private static final String GYROSCOPE_OFF_SECONDS = "gyro_off_duration_seconds";
+	private static final String GYROSCOPE_FREQUENCY = "gyro_frequency";
+	private static final String BLUETOOTH_ON_SECONDS = "bluetooth_on_duration_seconds";
+	private static final String BLUETOOTH_TOTAL_SECONDS = "bluetooth_total_duration_seconds";
 	private static final String BLUETOOTH_GLOBAL_OFFSET_SECONDS = "bluetooth_global_offset_seconds";
 	private static final String CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS = "check_for_new_surveys_frequency_seconds";
 	private static final String CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS = "create_new_data_files_frequency_seconds";
-	private static final String GPS_OFF_DURATION_SECONDS = "gps_off_duration_seconds";
-	private static final String GPS_ON_DURATION_SECONDS = "gps_on_duration_seconds";
+	private static final String GPS_OFF_SECONDS = "gps_off_duration_seconds";
+	private static final String GPS_ON_SECONDS = "gps_on_duration_seconds";
 	private static final String SECONDS_BEFORE_AUTO_LOGOUT = "seconds_before_auto_logout";
 	private static final String UPLOAD_DATA_FILES_FREQUENCY_SECONDS = "upload_data_files_frequency_seconds";
 	private static final String VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS = "voice_recording_max_time_length_seconds";
@@ -92,6 +93,7 @@ public class PersistentData {
 		isInitialized = true;
 	}
 
+	// convenience method(s) for different types but all with the same name, makes everything easier.
 	private static void putCommit(String name, long l) {
 		editor.putLong(name, l);
 		editor.commit();
@@ -135,20 +137,18 @@ public class PersistentData {
 		putCommit(LOGIN_EXPIRATION, 0L);
 	}
 
-	/**Getter for the IS_REGISTERED value. */
-	public static boolean isRegistered() {
+	// IS_REGISTERED
+	public static boolean getIsRegistered () {
 		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
-		return pref.getBoolean(IS_REGISTERED, false); }
-
-	/**Setter for the IS_REGISTERED value. */
-	public static void setRegistered(boolean value) {
+		return pref.getBoolean(IS_REGISTERED, false);
+	}
+	public static void setIsRegistered (boolean value) {
 		putCommit(IS_REGISTERED, value);
 	}
 
 	public static void setLastRequestedPermission(String value)  {
 		putCommit(LastRequestedPermission, value);
 	}
-
 	public static String getLastRequestedPermission() {
 		return pref.getString(LastRequestedPermission, "");
 	}
@@ -194,125 +194,99 @@ public class PersistentData {
 	################################# Listener Settings ###################################
 	#####################################################################################*/
 	
-	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER, false); }
-	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO, false); }
-	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE, false); }
-	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS, false); }
-	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS, false); }
-	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS, false); }
-	public static boolean getWifiEnabled(){ return pref.getBoolean(WIFI, false); }
-	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH, false); }
-	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE, false); }
+	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER_ENABLED, false); }
+	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false); }
+	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE_ENABLED, false); }
+	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS_ENABLED, false); }
+	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS_ENABLED, false); }
+	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS_ENABLED, false); }
+	public static boolean getWifiEnabled(){ return pref.getBoolean(WIFI_ENABLED, false); }
+	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH_ENABLED, false); }
+	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE_ENABLED, false); }
 	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
 	
 	public static void setAccelerometerEnabled(boolean enabled) {
-		putCommit(ACCELEROMETER, enabled);
+		putCommit(ACCELEROMETER_ENABLED, enabled);
 	}
 	public static void setGyroscopeEnabled(boolean enabled) {
-		putCommit(GYROSCOPE, enabled);
+		putCommit(GYROSCOPE_ENABLED, enabled);
 	}
 	public static void setGpsEnabled(boolean enabled) {
-		putCommit(GPS, enabled);
+		putCommit(GPS_ENABLED, enabled);
 	}
 	public static void setCallsEnabled(boolean enabled) {
-		putCommit(CALLS, enabled);
+		putCommit(CALLS_ENABLED, enabled);
 	}
 	public static void setTextsEnabled(boolean enabled) {
-		putCommit(TEXTS, enabled);
+		putCommit(TEXTS_ENABLED, enabled);
 	}
 	public static void setWifiEnabled(boolean enabled) {
-		putCommit(WIFI, enabled);
+		putCommit(WIFI_ENABLED, enabled);
 	}
 	public static void setBluetoothEnabled(boolean enabled) {
-		putCommit(BLUETOOTH, enabled);
+		putCommit(BLUETOOTH_ENABLED, enabled);
 	}
 	public static void setPowerStateEnabled(boolean enabled) {
-		putCommit(POWER_STATE, enabled);
+		putCommit(POWER_STATE_ENABLED, enabled);
 	}
 	public static void setAllowUploadOverCellularData(boolean enabled) { putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled); }
-	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) { putCommit(AMBIENT_AUDIO, enabled); }
+	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) { putCommit(AMBIENT_AUDIO_ENABLED, enabled); }
 	
 	/*#####################################################################################
 	################################## Timer Settings #####################################
 	#####################################################################################*/
-
-	// Default timings (only used if app doesn't download custom timings)
-	private static final long DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION = 10;
-	private static final long DEFAULT_ACCELEROMETER_ON_DURATION = 10 * 60;
-	private static final long DEFAULT_AMBIENT_AUDIO_OFF_MINIMUM_DURATION = 10 * 60;
-	private static final long DEFAULT_AMBIENT_AUDIO_ON_DURATION = 10 * 60;
-	private static final long DEFAULT_AMBIENT_AUDIO_SAMPLE_RATE = 22050;
-	private static final long DEFAULT_AMBIENT_AUDIO_BITRATE = 24000;
-	private static final long DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION = 10;
-	private static final long DEFAULT_GYROSCOPE_ON_DURATION = 10 * 60;
-	private static final long DEFAULT_BLUETOOTH_ON_DURATION = 1 * 60;
-	private static final long DEFAULT_BLUETOOTH_TOTAL_DURATION = 5 * 60;
-	private static final long DEFAULT_BLUETOOTH_GLOBAL_OFFSET = 0 * 60;
-	private static final long DEFAULT_CHECK_FOR_NEW_SURVEYS_PERIOD = 24 * 60 * 60;
-	private static final long DEFAULT_CREATE_NEW_DATA_FILES_PERIOD = 15 * 60;
-	private static final long DEFAULT_GPS_OFF_MINIMUM_DURATION = 5 * 60;
-	private static final long DEFAULT_GPS_ON_DURATION = 5 * 60;
-	private static final long DEFAULT_SECONDS_BEFORE_AUTO_LOGOUT = 5 * 60;
-	private static final long DEFAULT_UPLOAD_DATA_FILES_PERIOD = 60;
-	private static final long DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH = 4 * 60;
-	private static final long DEFAULT_WIFI_LOG_FREQUENCY = 5 * 60;
+	// Default values are only used if app doesn't download custom timings, which shouldn't ever happen.
 	
+	public static long getAccelerometerOffDuration () { return 1000L * pref.getLong(ACCELEROMETER_OFF_SECONDS, 10); }
+	public static void setAccelerometerOffDuration (long seconds) { putCommit(ACCELEROMETER_OFF_SECONDS, seconds); }
+	public static long getAccelerometerOnDuration () { return 1000L * pref.getLong(ACCELEROMETER_ON_SECONDS, 10 * 60); }
+	public static void setAccelerometerOnDuration (long seconds) { putCommit(ACCELEROMETER_ON_SECONDS, seconds); }
+	public static long getAccelerometerFrequency() { return pref.getLong(ACCELEROMETER_FREQUENCY, 5); }
+	public static void setAccelerometerFrequency (long frequency) { putCommit(ACCELEROMETER_FREQUENCY, frequency); }
 	
-	public static long getAccelerometerOffDuration () { return 1000L * pref.getLong(ACCELEROMETER_OFF_DURATION_SECONDS, DEFAULT_ACCELEROMETER_OFF_MINIMUM_DURATION); }
-	public static void setAccelerometerOffDuration (long seconds) { putCommit(ACCELEROMETER_OFF_DURATION_SECONDS, seconds); }
-	
-	public static long getAccelerometerOnDuration () { return 1000L * pref.getLong(ACCELEROMETER_ON_DURATION_SECONDS, DEFAULT_ACCELEROMETER_ON_DURATION); }
-	public static void setAccelerometerOnDuration (long seconds) { putCommit(ACCELEROMETER_ON_DURATION_SECONDS, seconds); }
-	
-	public static long getAmbientAudioOffDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_OFF_DURATION_SECONDS, DEFAULT_AMBIENT_AUDIO_OFF_MINIMUM_DURATION); }
-	public static void setAmbientAudioOffDuration (long seconds) { putCommit(AMBIENT_AUDIO_OFF_DURATION_SECONDS, seconds); }
-	
-	public static long getAmbientAudioOnDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_ON_DURATION_SECONDS, DEFAULT_AMBIENT_AUDIO_ON_DURATION); }
-	public static void setAmbientAudioOnDuration (long seconds) { putCommit(AMBIENT_AUDIO_ON_DURATION_SECONDS, seconds); }
-	
-	public static long getAmbientAudioSampleRate () { return pref.getLong(AMBIENT_AUDIO_SAMPLE_RATE, DEFAULT_AMBIENT_AUDIO_SAMPLE_RATE); }
+	public static long getAmbientAudioOffDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_OFF_SECONDS, 10 * 60); }
+	public static void setAmbientAudioOffDuration (long seconds) { putCommit(AMBIENT_AUDIO_OFF_SECONDS, seconds); }
+	public static long getAmbientAudioOnDuration () { return 1000L * pref.getLong(AMBIENT_AUDIO_ON_SECONDS, 10 * 60); }
+	public static void setAmbientAudioOnDuration (long seconds) { putCommit(AMBIENT_AUDIO_ON_SECONDS, seconds); }
+	public static long getAmbientAudioSampleRate () { return pref.getLong(AMBIENT_AUDIO_SAMPLE_RATE, 22050); }
 	public static void setAmbientAudioSampleRate (long rate) { putCommit(AMBIENT_AUDIO_SAMPLE_RATE, rate); }
-	
-	public static long getAmbientAudioBitrate () { return pref.getLong(AMBIENT_AUDIO_BITRATE, DEFAULT_AMBIENT_AUDIO_BITRATE); }
+	public static long getAmbientAudioBitrate () { return pref.getLong(AMBIENT_AUDIO_BITRATE, 24000); }
 	public static void setAmbientAudioBitrate (long rate) { putCommit(AMBIENT_AUDIO_BITRATE, rate); }
 	
-	public static long getBluetoothGlobalOffset () { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, DEFAULT_BLUETOOTH_GLOBAL_OFFSET); }
+	public static long getBluetoothGlobalOffset () { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, 0 * 60); }
 	public static void setBluetoothGlobalOffset (long seconds) { putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds); }
+	public static long getBluetoothOnDuration () { return 1000L * pref.getLong(BLUETOOTH_ON_SECONDS, 1 * 60); }
+	public static void setBluetoothOnDuration (long seconds) { putCommit(BLUETOOTH_ON_SECONDS, seconds); }
+	public static long getBluetoothTotalDuration () { return 1000L * pref.getLong(BLUETOOTH_TOTAL_SECONDS, 5 * 60); }
+	public static void setBluetoothTotalDuration (long seconds) { putCommit(BLUETOOTH_TOTAL_SECONDS, seconds); }
 	
-	public static long getBluetoothOnDuration () { return 1000L * pref.getLong(BLUETOOTH_ON_DURATION_SECONDS, DEFAULT_BLUETOOTH_ON_DURATION); }
-	public static void setBluetoothOnDuration (long seconds) { putCommit(BLUETOOTH_ON_DURATION_SECONDS, seconds); }
-	
-	public static long getBluetoothTotalDuration () { return 1000L * pref.getLong(BLUETOOTH_TOTAL_DURATION_SECONDS, DEFAULT_BLUETOOTH_TOTAL_DURATION); }
-	public static void setBluetoothTotalDuration (long seconds) { putCommit(BLUETOOTH_TOTAL_DURATION_SECONDS, seconds); }
-	
-	public static long getCheckForNewSurveysFrequency () { return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, DEFAULT_CHECK_FOR_NEW_SURVEYS_PERIOD); }
+	public static long getCheckForNewSurveysFrequency () { return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, 24 * 60 * 60); }
 	public static void setCheckForNewSurveysFrequency (long seconds) { putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds); }
-	
-	public static long getCreateNewDataFilesFrequency () { return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_CREATE_NEW_DATA_FILES_PERIOD); }
+	public static long getCreateNewDataFilesFrequency () { return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, 15 * 60); }
 	public static void setCreateNewDataFilesFrequency (long seconds) { putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds); }
 	
-	public static long getGpsOffDuration () { return 1000L * pref.getLong(GPS_OFF_DURATION_SECONDS, DEFAULT_GPS_OFF_MINIMUM_DURATION); }
-	public static void setGpsOffDuration (long seconds) { putCommit(GPS_OFF_DURATION_SECONDS, seconds); }
+	public static long getGpsOffDuration () { return 1000L * pref.getLong(GPS_OFF_SECONDS, 5 * 60); }
+	public static void setGpsOffDuration (long seconds) { putCommit(GPS_OFF_SECONDS, seconds); }
+	public static long getGpsOnDuration () { return 1000L * pref.getLong(GPS_ON_SECONDS, 5 * 60); }
+	public static void setGpsOnDuration (long seconds) { putCommit(GPS_ON_SECONDS, seconds); }
 	
-	public static long getGpsOnDuration () { return 1000L * pref.getLong(GPS_ON_DURATION_SECONDS, DEFAULT_GPS_ON_DURATION); }
-	public static void setGpsOnDuration (long seconds) { putCommit(GPS_ON_DURATION_SECONDS, seconds); }
+	public static long getGyroscopeOffDuration () { return 1000L * pref.getLong(GYROSCOPE_OFF_SECONDS, 10); }
+	public static void setGyroscopeOffDuration (long seconds) { putCommit(GYROSCOPE_OFF_SECONDS, seconds); }
+	public static long getGyroscopeOnDuration () { return 1000L * pref.getLong(GYROSCOPE_ON_SECONDS, 10 * 60); }
+	public static void setGyroscopeOnDuration (long seconds) { putCommit(GYROSCOPE_ON_SECONDS, seconds); }
+	public static long getGyroscopeFrequency () { return pref.getLong(GYROSCOPE_FREQUENCY, 5); }
+	public static void setGyroscopeFrequency (long frequency) { putCommit(GYROSCOPE_FREQUENCY, frequency); }
 	
-	public static long getGyroscopeOffDuration () { return 1000L * pref.getLong(GYROSCOPE_OFF_DURATION_SECONDS, DEFAULT_GYROSCOPE_OFF_MINIMUM_DURATION); }
-	public static void setGyroscopeOffDuration (long seconds) { putCommit(GYROSCOPE_OFF_DURATION_SECONDS, seconds); }
-	
-	public static long getGyroscopeOnDuration () { return 1000L * pref.getLong(GYROSCOPE_ON_DURATION_SECONDS, DEFAULT_GYROSCOPE_ON_DURATION); }
-	public static void setGyroscopeOnDuration (long seconds) { putCommit(GYROSCOPE_ON_DURATION_SECONDS, seconds); }
-	
-	public static long getTimeBeforeAutoLogout () { return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, DEFAULT_SECONDS_BEFORE_AUTO_LOGOUT); }
+	public static long getTimeBeforeAutoLogout () { return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, 5 * 60); }
 	public static void setTimeBeforeAutoLogout (long seconds) { putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds); }
 	
 	public static void setUploadDataFilesFrequency (long seconds) { putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds); }
-	public static long getUploadDataFilesFrequency () { return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, DEFAULT_UPLOAD_DATA_FILES_PERIOD); }
+	public static long getUploadDataFilesFrequency () { return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, 60); }
 	
-	public static long getVoiceRecordingMaxTimeLength () { return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, DEFAULT_VOICE_RECORDING_MAX_TIME_LENGTH); }
+	public static long getVoiceRecordingMaxTimeLength () { return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, 4 * 60); }
 	public static void setVoiceRecordingMaxTimeLength (long seconds) { putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds); }
 	
-	public static long getWifiLogFrequency () { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, DEFAULT_WIFI_LOG_FREQUENCY); }
+	public static long getWifiLogFrequency () { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, 5 * 60); }
 	public static void setWifiLogFrequency (long seconds) { putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds); }
 	
 	//accelerometer, gyroscope bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
@@ -424,7 +398,7 @@ public class PersistentData {
 	public static String getSurveyType(String surveyId){ return pref.getString(surveyId + "-type", null); }
 	public static String getSurveySettings(String surveyId){ return pref.getString(surveyId + "-settings", null); }
 	public static Boolean getSurveyNotificationState( String surveyId) { return pref.getBoolean(surveyId + "-notificationState", false ); }
-	public static long getMostRecentSurveyAlarmTime(String surveyId) { return pref.getLong( surveyId + "-prior_alarm", MAX_LONG); }
+	public static long getMostRecentSurveyAlarmTime(String surveyId) { return pref.getLong( surveyId + "-prior_alarm", 9223372036854775807L); }
 	
 	public static void createSurveyData(String surveyId, String content, String timings, String type, String settings){
 		setSurveyContent(surveyId,  content);

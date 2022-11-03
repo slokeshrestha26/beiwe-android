@@ -37,7 +37,7 @@ class ConsentFormActivity : RunningBackgroundServiceActivity() {
     }
 
     fun consentButton(view: View?) {
-        PersistentData.setRegistered(true)
+        PersistentData.setIsRegistered(true)
         PersistentData.loginOrRefreshLogin()
 
         // Download the survey questions and schedule the surveys

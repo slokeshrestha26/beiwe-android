@@ -139,9 +139,9 @@
     <string name="number_entry_top_message">Phone Numbers</string>
     <string name="number_entry_button">Set Numbers</string>
     <string name="phone_number_entry_your_clinician_label">Primary researcher phone:</string>
-    <string name="phone_number_entry_your_clinician_hint">10-digit number</string>
+    <string name="phone_number_entry_your_clinician_hint">8-15 digit number</string>
     <string name="phone_number_entry_research_assistant_label">Research assistant phone:</string>
-    <string name="phone_number_entry_research_assistant_hint">10-digit number</string>
+    <string name="phone_number_entry_research_assistant_hint">8-15 digit number</string>
 
     <!-- Loading Activity Strings -->
     <string name="loading_activity_loading_message" tools:ignore="TypographyEllipsis">Loading...</string>

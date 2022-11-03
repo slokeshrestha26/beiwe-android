@@ -7,6 +7,8 @@
     <!-- GPS and network-location service -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Accelerometer and Gyro -->
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
     <!-- voice recording -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- network and upload -->

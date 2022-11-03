@@ -135,7 +135,7 @@ public class MainService extends Service {
 			sendBroadcast(Timer.checkForCallsEnabled);
 		
 		//Only do the following if the device is registered
-		if (PersistentData.isRegistered()) {
+		if (PersistentData.getIsRegistered()) {
 			DeviceInfo.initialize(appContext); //if at registration this has already been initialized. (we don't care.)
 			startTimers();
 		}
@@ -295,7 +295,7 @@ public class MainService extends Service {
 					Thread outerNotifcationBlockerThread = new Thread(new Runnable() {
 						@Override
 						public void run () {
-							while (!PersistentData.isRegistered()) {
+							while (!PersistentData.getIsRegistered()) {
 								try {
 									Thread.sleep(1000);
 								} catch (InterruptedException ignored) {
@@ -469,6 +469,9 @@ public class MainService extends Service {
 			// Enable active sensors, reset timers.
 			//Accelerometer. We automatically have permissions required for accelerometer.
 			if (broadcastAction.equals(appContext.getString(R.string.turn_accelerometer_on))) {
+				if (!accelerometerListener.exists) {
+					return;
+				}
 				accelerometerListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
 				timer.setupExactSingleAlarm(PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOffIntent);
@@ -601,7 +604,7 @@ public class MainService extends Service {
 				return;
 			}
 			
-			if (PersistentData.isRegistered() && broadcastAction.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+			if (PersistentData.getIsRegistered() && broadcastAction.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 				NetworkInfo networkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 				if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
 					PostRequest.uploadAllFiles();

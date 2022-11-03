@@ -10,13 +10,17 @@ import org.beiwe.app.storage.EncryptionEngine;
 /**This is a class that NEEDS to be instantiated in the main service. In order to get the Android ID, the class needs
  * Context. Once instantiated, the class assigns two variables for AndroidID and BluetoothMAC. Once they are instantiated,
  * they can be called from different classes to be used. They are hashed when they are called.
- * 
+ *
  * The class is used to grab unique ID data, and pass it to the server. The data is used while authenticating users
- * 
- * @author Dor Samet, Eli Jones */  
+ *
+ * @author Dor Samet, Eli Jones */
 
 public class DeviceInfo {
-
+	// this is to be used in an increasing number of places where we hae system elapsed time for sensor events
+	public static long boot_time = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime();
+	public static long boot_time_nano = System.nanoTime() - android.os.SystemClock.elapsedRealtimeNanos();
+	
+	
 	private static String androidID;
 	private static String bluetoothMAC;
 
@@ -37,7 +41,7 @@ public class DeviceInfo {
 			if (bluetoothAddress == null) { bluetoothAddress = ""; }
 			bluetoothMAC = EncryptionEngine.hashMAC(bluetoothAddress); }
 		else { //Android before version 6
-			BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();	
+			BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 			if ( bluetoothAdapter == null || bluetoothAdapter.getAddress() == null ) { bluetoothMAC = ""; }
 			else { bluetoothMAC = bluetoothAdapter.getAddress(); }
 		}

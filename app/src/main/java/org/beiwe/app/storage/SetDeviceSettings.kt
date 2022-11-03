@@ -38,8 +38,10 @@ object SetDeviceSettings {
         // Write timer settings
         PersistentData.setAccelerometerOffDuration(deviceSettings.getLong("accelerometer_off_duration_seconds"))
         PersistentData.setAccelerometerOnDuration(deviceSettings.getLong("accelerometer_on_duration_seconds"))
+        PersistentData.setAccelerometerFrequency(deviceSettings.getLong("accelerometer_frequency"))
         PersistentData.setGyroscopeOffDuration(deviceSettings.getLong("gyro_off_duration_seconds"))
         PersistentData.setGyroscopeOnDuration(deviceSettings.getLong("gyro_on_duration_seconds"))
+        PersistentData.setGyroscopeFrequency(deviceSettings.getLong("gyro_frequency"))
         PersistentData.setBluetoothOnDuration(deviceSettings.getLong("bluetooth_on_duration_seconds"))
         PersistentData.setBluetoothTotalDuration(deviceSettings.getLong("bluetooth_total_duration_seconds"))
         PersistentData.setBluetoothGlobalOffset(deviceSettings.getLong("bluetooth_global_offset_seconds"))
