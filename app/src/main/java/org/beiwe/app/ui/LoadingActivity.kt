@@ -35,8 +35,8 @@ class LoadingActivity : RunningBackgroundServiceActivity() {
     /**For some reason we have to override the serviceconnection in order to call finish()
      * (inside loadingSequence()). otherwise we can't unbind the background service.
      * IllegalArgumentException: Service not registered: org.beiwe.app.RunningBackgroundServiceActivit...
-     * using the mainServiceConnection variable is the least messy way that works.  */
-    protected var mainServiceConnection = object : ServiceConnection {
+     * using the name mainServiceConnection2 is what works it kotlin, in java we shadow the original.  */
+    private var mainServiceConnection2: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
             // Log.d("loading ServiceConnection", "Main Service Connected");
             val some_binder = binder as BackgroundServiceBinder
@@ -66,7 +66,7 @@ class LoadingActivity : RunningBackgroundServiceActivity() {
             startingIntent.addFlags(Intent.FLAG_FROM_BACKGROUND)
             // ContextCompat correctly handles old and new android APIs
             ContextCompat.startForegroundService(applicationContext, startingIntent)
-            bindService(startingIntent, mainServiceConnection, BIND_AUTO_CREATE)
+            bindService(startingIntent, mainServiceConnection2, BIND_AUTO_CREATE)
         } else
             failureExit()
     }
@@ -82,7 +82,7 @@ class LoadingActivity : RunningBackgroundServiceActivity() {
             else
                 startActivity(Intent(this, MainMenuActivity::class.java))
         }
-        unbindService(mainServiceConnection)
+        unbindService(mainServiceConnection2)
         finish() //destroy the loading screen
     }
 

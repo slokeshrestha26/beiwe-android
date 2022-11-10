@@ -304,7 +304,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun buttonStartTimer(view: View?) {
-        mainService.startTimers()
+        mainService!!.startTimers()
     }
 
     //file operations
@@ -392,7 +392,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun stopBackgroundService(view: View?) {
-        mainService.stop()
+        mainService!!.stop()
     }
 
     fun testManualErrorReport(view: View?) {
