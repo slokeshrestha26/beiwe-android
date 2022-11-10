@@ -182,55 +182,42 @@ public class PersistentData {
 	################################# Firebase Cloud Messaging Instance ID ################
 	#####################################################################################*/
 
-	public static void setFCMInstanceID(String fcmInstanceID) {
-		putCommit(FCM_INSTANCE_ID, fcmInstanceID);
-	}
-
-	public static String getFCMInstanceID() {
-		return pref.getString(FCM_INSTANCE_ID, null); }
-	
+	public static String getFCMInstanceID() { return pref.getString(FCM_INSTANCE_ID, null); }
+	public static void setFCMInstanceID(String fcmInstanceID) { putCommit(FCM_INSTANCE_ID, fcmInstanceID); }
 	
 	/*#####################################################################################
 	################################# Listener Settings ###################################
 	#####################################################################################*/
 	
 	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER_ENABLED, false); }
-	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false); }
-	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE_ENABLED, false); }
-	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS_ENABLED, false); }
-	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS_ENABLED, false); }
-	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS_ENABLED, false); }
-	public static boolean getWifiEnabled(){ return pref.getBoolean(WIFI_ENABLED, false); }
-	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH_ENABLED, false); }
-	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE_ENABLED, false); }
-	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
+	public static void setAccelerometerEnabled(boolean enabled) { putCommit(ACCELEROMETER_ENABLED, enabled); }
 	
-	public static void setAccelerometerEnabled(boolean enabled) {
-		putCommit(ACCELEROMETER_ENABLED, enabled);
-	}
-	public static void setGyroscopeEnabled(boolean enabled) {
-		putCommit(GYROSCOPE_ENABLED, enabled);
-	}
-	public static void setGpsEnabled(boolean enabled) {
-		putCommit(GPS_ENABLED, enabled);
-	}
-	public static void setCallsEnabled(boolean enabled) {
-		putCommit(CALLS_ENABLED, enabled);
-	}
-	public static void setTextsEnabled(boolean enabled) {
-		putCommit(TEXTS_ENABLED, enabled);
-	}
-	public static void setWifiEnabled(boolean enabled) {
-		putCommit(WIFI_ENABLED, enabled);
-	}
-	public static void setBluetoothEnabled(boolean enabled) {
-		putCommit(BLUETOOTH_ENABLED, enabled);
-	}
-	public static void setPowerStateEnabled(boolean enabled) {
-		putCommit(POWER_STATE_ENABLED, enabled);
-	}
+	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
 	public static void setAllowUploadOverCellularData(boolean enabled) { putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled); }
+	
+	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false); }
 	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) { putCommit(AMBIENT_AUDIO_ENABLED, enabled); }
+	
+	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH_ENABLED, false); }
+	public static void setBluetoothEnabled(boolean enabled) { putCommit(BLUETOOTH_ENABLED, enabled); }
+	
+	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS_ENABLED, false); }
+	public static void setCallsEnabled(boolean enabled) { putCommit(CALLS_ENABLED, enabled); }
+	
+	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS_ENABLED, false); }
+	public static void setGpsEnabled(boolean enabled) { putCommit(GPS_ENABLED, enabled); }
+	
+	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE_ENABLED, false); }
+	public static void setGyroscopeEnabled(boolean enabled) { putCommit(GYROSCOPE_ENABLED, enabled); }
+	
+	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE_ENABLED, false); }
+	public static void setPowerStateEnabled(boolean enabled) { putCommit(POWER_STATE_ENABLED, enabled); }
+	
+	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS_ENABLED, false); }
+	public static void setTextsEnabled(boolean enabled) { putCommit(TEXTS_ENABLED, enabled); }
+	
+	public static boolean getWifiEnabled(){ return pref.getBoolean(WIFI_ENABLED, false); }
+	public static void setWifiEnabled(boolean enabled) { putCommit(WIFI_ENABLED, enabled); }
 	
 	/*#####################################################################################
 	################################## Timer Settings #####################################
