@@ -30,7 +30,10 @@
     <!-- as of the android 6 compatibility update, Beiwe no longer supports installation onto external media -->
     <!-- Power management and monitoring, not sure where this would be used... -->
     <uses-permission android:name="android.permission.BATTERY_STATS" />
-    
+
+    <!-- new, required for android 12 -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -41,7 +44,8 @@
 
         <activity
             android:name="org.beiwe.app.ui.LoadingActivity"
-            android:label="${appName}${appNameSuffix}" >
+            android:label="${appName}${appNameSuffix}"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -78,7 +82,8 @@
         <activity
             android:name="org.beiwe.app.ui.registration.RegisterActivity"
             android:label="@string/title_activity_register"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"/>
         <activity
             android:name="org.beiwe.app.ui.user.MainMenuActivity"
             android:label="@string/title_activity_main_menu" />
@@ -114,12 +119,12 @@
         <service
             android:name=".MainService"
             android:foregroundServiceType="location"
-            android:exported="false"
+            android:exported="true"
             android:label="ForegroundService-thing" />
 
         <service
             android:name=".networking.FCMService"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -127,7 +132,8 @@
 
         <!-- RECEIVERS -->
 
-        <receiver android:name=".listeners.BootListener" >
+        <receiver android:name=".listeners.BootListener"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
@@ -137,7 +143,8 @@
 
             </intent-filter>
         </receiver>
-        <receiver android:name=".listeners.SmsReceivedLogger" >
+        <receiver android:name=".listeners.SmsReceivedLogger"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
@@ -151,7 +158,8 @@
         <receiver android:name=".listeners.BluetoothListener" >
         </receiver>
         
-        <receiver android:name=".listeners.PowerStateListener" >
+        <receiver android:name=".listeners.PowerStateListener"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />

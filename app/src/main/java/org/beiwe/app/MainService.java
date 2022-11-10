@@ -397,9 +397,19 @@ public class MainService extends Service {
 		
 		Intent restartServiceIntent = new Intent(getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage(getPackageName());
-		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, 0);
+		int flags = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent repeatingRestartServicePendingIntent = PendingIntent.getService(
+			getApplicationContext(), 1, restartServiceIntent, flags);
+		
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000 * 60 * 2, 1000 * 60 * 2, restartServicePendingIntent);
+		alarmService.setRepeating(AlarmManager.RTC_WAKEUP,
+			System.currentTimeMillis() + 1000 * 60 * 2,
+			1000 * 60 * 2,
+			repeatingRestartServicePendingIntent
+		);
 	}
 	
 	/**Refreshes the logout timer.
@@ -652,24 +662,28 @@ public class MainService extends Service {
 	@Override
 	public int onStartCommand (Intent intent, int flags, int startId) { //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "started with flag " + flags);
+		Intent intent_to_start_foreground_service = new Intent(getApplicationContext(), MainService.class);
 		
-		Context app_context = this.getApplicationContext();
-		Intent intent_to_start_foreground_service = new Intent(app_context, MainService.class);
-		PendingIntent pendingIntent =
-			PendingIntent.getActivity(app_context, 0, intent_to_start_foreground_service, 0);
+		int flags2 = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags2 = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent onStartCommandPendingIntent = PendingIntent.getService(
+			getApplicationContext(), 0, intent_to_start_foreground_service, flags2);
 		Notification notification =
-			new Notification.Builder(app_context, notificationChannelId)
+			new Notification.Builder(getApplicationContext(), notificationChannelId)
 				.setContentTitle("Beiwe App")
 				.setContentText("Beiwe data collection running")
 				.setSmallIcon(R.mipmap.ic_launcher)
-				.setContentIntent(pendingIntent)
+				.setContentIntent(onStartCommandPendingIntent)
 				.setTicker("Beiwe data collection running in the background, no action required")
 				.build();
 		//multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
 		startForeground(1, notification);
 		// We want this service to continue running until it is explicitly stopped, so return sticky.
 		return START_STICKY;
-		//we are testing out this restarting behavior for the service.  It is entirely unclear that this will have any observable effect.
+		// in testing out this restarting behavior for the service it is entirely unclear if changing
+		// this return will have any observable effect despite the documentation's claim that it does.
 		//return START_REDELIVER_INTENT;
 	}
 	
@@ -706,7 +720,14 @@ public class MainService extends Service {
 		//how does this even...  Whatever, 10 seconds later the main service will start.
 		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
 		restartServiceIntent.setPackage(getPackageName());
-		PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+		
+		int flags = PendingIntent.FLAG_ONE_SHOT;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_ONE_SHOT + PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent restartServicePendingIntent = PendingIntent.getService(
+			getApplicationContext(), 1, restartServiceIntent, flags);
+		
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 500, restartServicePendingIntent);
 	}

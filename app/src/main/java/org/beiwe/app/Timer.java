@@ -90,7 +90,11 @@ public class Timer {
 	 * @return a long of the system time in milliseconds that the alarm was set for. */
 	public Long setupExactSingleAlarm(Long milliseconds, Intent intentToBeBroadcast) {
 		Long triggerTime = System.currentTimeMillis() + milliseconds;
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
+		int flags = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags);
 		setExactAlarm(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
 		return triggerTime;
 	}
@@ -105,8 +109,13 @@ public class Timer {
 		Long nextTriggerTime = currentTime - (currentTime % period) + startTimeInPeriod;
 		if (nextTriggerTime < currentTime) {
 			nextTriggerTime += period;
+		
 		}
-		PendingIntent pendingTimerIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
+		int flags = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent pendingTimerIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags);
 		setExactAlarm(AlarmManager.RTC_WAKEUP, nextTriggerTime, pendingTimerIntent);
 	}
 	
@@ -119,7 +128,11 @@ public class Timer {
 	/**Takes a specially prepared intent and sets it to go off at the day and time provided
 	 * @param intentToBeBroadcast an intent that has been prepared by the startWeeklyAlarm function.*/
 	public void setupSurveyAlarm(String surveyId, Intent intentToBeBroadcast, Calendar alarmTime) {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
+		int flags = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags);
 		long nextTriggerTime = alarmTime.getTimeInMillis();
 //		triggerAtMillis = System.currentTimeMillis() + 15000; //hax, debug code.
 //		long timeTillFire = nextTriggerTime - System.currentTimeMillis();
@@ -158,7 +171,11 @@ public class Timer {
 	/**Cancels an alarm, does not return any info about whether the alarm existed.
 	 * @param intentToBeBroadcast an Intent identifying the alarm to cancel. */
 	public void cancelAlarm(Intent intentToBeBroadcast) {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, 0);
+		int flags = 0;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags);
 		alarmManager.cancel(pendingIntent);
 	}
 	
@@ -166,7 +183,12 @@ public class Timer {
 	 * @param intent an Intent identifying the alarm to check.
 	 * @return Returns TRUE if there is an alarm set matching that intent; otherwise false. */
 	public Boolean alarmIsSet(Intent intent) {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, PendingIntent.FLAG_NO_CREATE);
+		int flags = PendingIntent.FLAG_NO_CREATE;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			flags = PendingIntent.FLAG_NO_CREATE + PendingIntent.FLAG_IMMUTABLE;
+		}
+		PendingIntent pendingIntent = pendingIntent = PendingIntent.getBroadcast(appContext, 0, intent, flags);
+		
 		if (pendingIntent == null) {
 			return false;
 		} else {
