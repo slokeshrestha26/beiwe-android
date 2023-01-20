@@ -25,11 +25,10 @@ import java.util.*
 
 class DebugInterfaceActivity : SessionActivity() {
     //extends a session activity.
-    var appContext: Context? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_debug_interface)
-        appContext = this.applicationContext
 
         if (BuildConfig.APP_IS_DEV) {
             debugtexttwenty.visibility = View.VISIBLE
@@ -65,39 +64,39 @@ class DebugInterfaceActivity : SessionActivity() {
 
     //Intent triggers caught in BackgroundService
     fun accelerometerOn(view: View?) {
-        appContext!!.sendBroadcast(Timer.accelerometerOnIntent)
+        this.applicationContext.sendBroadcast(Timer.accelerometerOnIntent)
     }
 
     fun accelerometerOff(view: View?) {
-        appContext!!.sendBroadcast(Timer.accelerometerOffIntent)
+        this.applicationContext.sendBroadcast(Timer.accelerometerOffIntent)
     }
 
     fun gyroscopeOn(view: View?) {
-        appContext!!.sendBroadcast(Timer.gyroscopeOnIntent)
+        this.applicationContext.sendBroadcast(Timer.gyroscopeOnIntent)
     }
 
     fun gyroscopeOff(view: View?) {
-        appContext!!.sendBroadcast(Timer.gyroscopeOffIntent)
+        this.applicationContext.sendBroadcast(Timer.gyroscopeOffIntent)
     }
 
     fun gpsOn(view: View?) {
-        appContext!!.sendBroadcast(Timer.gpsOnIntent)
+        this.applicationContext.sendBroadcast(Timer.gpsOnIntent)
     }
 
     fun gpsOff(view: View?) {
-        appContext!!.sendBroadcast(Timer.gpsOffIntent)
+        this.applicationContext.sendBroadcast(Timer.gpsOffIntent)
     }
 
     fun scanWifi(view: View?) {
-        appContext!!.sendBroadcast(Timer.wifiLogIntent)
+        this.applicationContext.sendBroadcast(Timer.wifiLogIntent)
     }
 
     fun bluetoothButtonStart(view: View?) {
-        appContext!!.sendBroadcast(Timer.bluetoothOnIntent)
+        this.applicationContext.sendBroadcast(Timer.bluetoothOnIntent)
     }
 
     fun bluetoothButtonStop(view: View?) {
-        appContext!!.sendBroadcast(Timer.bluetoothOffIntent)
+        this.applicationContext.sendBroadcast(Timer.bluetoothOffIntent)
     }
 
     //raw debugging info
@@ -323,27 +322,28 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun listFiles(view: View?) {
-        printw("files...", "UPLOADABLE FILES")
+        val prefix = Thread.currentThread().id.toString() + " - "
+        printw("files...", "${prefix}UPLOADABLE FILES")
         var files = TextFileManager.getAllUploadableFiles()
         Arrays.sort(files)
 
         for (file in files) {
-            var len = appContext!!.getFileStreamPath(file).length()
-            printi("files...", "${file} ${len}B")
+            var len = this.applicationContext.getFileStreamPath(file).length()
+            printi("files...", "${prefix}${file} ${len}B")
         }
 
-        printw("files...", "ALL FILES")
+        printw("files...", "${prefix}ALL FILES")
         files = TextFileManager.getAllFiles()
         Arrays.sort(files)
 
         for (file in files) {
-            var len = appContext!!.getFileStreamPath(file).length()
-            printi("files...", "${file} ${len}B")
+            var len = this.applicationContext.getFileStreamPath(file).length()
+            printi("files...", "${prefix}${file} ${len}B")
         }
     }
 
     fun startAmbientAudioRecording(view: View?) {
-        AmbientAudioListener.startRecording(appContext)
+        AmbientAudioListener.startRecording(this.applicationContext)
     }
 
     fun encryptAmbientAudioFile(view: View?) {
@@ -357,12 +357,12 @@ class DebugInterfaceActivity : SessionActivity() {
 
     //ui operations
     fun loadMainMenu(view: View?) {
-        startActivity(Intent(appContext, MainMenuActivity::class.java))
+        startActivity(Intent(this.applicationContext, MainMenuActivity::class.java))
     }
 
     fun popSurveyNotifications(view: View?) {
         for (surveyId in PersistentData.getSurveyIds()) {
-            SurveyNotifications.displaySurveyNotification(appContext, surveyId)
+            SurveyNotifications.displaySurveyNotification(this.applicationContext, surveyId)
         }
     }
 
@@ -500,6 +500,6 @@ class DebugInterfaceActivity : SessionActivity() {
 
     fun clearNotifications(view: View?) {
         for (surveyId in PersistentData.getSurveyIds())
-            SurveyNotifications.dismissNotification(appContext, surveyId)
+            SurveyNotifications.dismissNotification(this.applicationContext, surveyId)
     }
 }

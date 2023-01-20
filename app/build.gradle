@@ -121,10 +121,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "org.beiwe.app"
-        minSdkVersion 16
+        minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 31
         versionCode 62       //TODO: update this Beiwe version code for new releases
