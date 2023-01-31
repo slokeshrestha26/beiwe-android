@@ -105,7 +105,9 @@ Version history:
     Adds extra parameters to all post requests for versioned server endpoints and basic tracking.
 62: 3.3.0. Custom frequencies are now passed in to the accelerometer and gyroscope sensors.
     Fixes the message at registration stating the number of allowed digits.
-    updates android sdk versions to 31 (android 12) for better or for worse.
+    due to updates to android sdk versions to 31 (android 12) there were bugs and could not release.
+63: 3.3.1.  Updates to requirements/libraries, various cleanups and logging options, fixes the
+    pending intent flags for push notifications.
 */
 
 android {
@@ -127,8 +129,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 31
-        versionCode 62       //TODO: update this Beiwe version code for new releases
-        versionName '3.3.0'  //TODO: update this Beiwe version number for new releases
+        versionCode 63       //TODO: update this Beiwe version code for new releases
+        versionName '3.3.1'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
     buildTypes {

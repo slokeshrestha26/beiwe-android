@@ -18,6 +18,7 @@ import android.app.NotificationChannel
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
+import org.beiwe.app.pending_intent_flag_fix
 import org.json.JSONObject
 import org.beiwe.app.survey.AudioRecorderEnhancedActivity
 import org.json.JSONException
@@ -115,9 +116,7 @@ object SurveyNotifications {
         //we manually cancel the notification anyway, so this is likely moot.
         // UPDATE: when targetting api version 31 and above we have to set FLAG_IMMUTABLE (or mutable)
 
-        var intent_flag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT else PendingIntent.FLAG_CANCEL_CURRENT
-
+        val intent_flag = pending_intent_flag_fix(PendingIntent.FLAG_CANCEL_CURRENT)
         val pendingActivityIntent = PendingIntent.getActivity(appContext, surveyIdHash, activityIntent, intent_flag)
         notificationBuilder.setContentIntent(pendingActivityIntent)
         val surveyNotification = notificationBuilder.build()

@@ -92,7 +92,8 @@ class Timer(mainService: MainService) {
      * @return a long of the system time in milliseconds that the alarm was set for. */
     fun setupExactSingleAlarm(milliseconds: Long, intentToBeBroadcast: Intent): Long {
         val triggerTime = System.currentTimeMillis() + milliseconds
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+
+        val flags = pending_intent_flag_fix(0) // no flags
         val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         setExactAlarm(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
         return triggerTime
@@ -108,7 +109,8 @@ class Timer(mainService: MainService) {
         var nextTriggerTime = currentTime - currentTime % period + startTimeInPeriod
         if (nextTriggerTime < currentTime)
             nextTriggerTime += period
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+
+        val flags = pending_intent_flag_fix(0) // no flags
         val pendingTimerIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         setExactAlarm(AlarmManager.RTC_WAKEUP, nextTriggerTime, pendingTimerIntent)
     }
@@ -122,7 +124,8 @@ class Timer(mainService: MainService) {
     /**Takes a specially prepared intent and sets it to go off at the day and time provided
      * @param intentToBeBroadcast an intent that has been prepared by the startWeeklyAlarm function. */
     private fun setupSurveyAlarm(surveyId: String, intentToBeBroadcast: Intent, alarmTime: Calendar) {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)  PendingIntent.FLAG_IMMUTABLE else 0
+
+        val flags = pending_intent_flag_fix(0) // no flags
         val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         setExactAlarm(AlarmManager.RTC_WAKEUP, alarmTime.timeInMillis, pendingIntent)
         PersistentData.setMostRecentSurveyAlarmTime(surveyId, alarmTime.timeInMillis)
@@ -146,7 +149,7 @@ class Timer(mainService: MainService) {
     /**Cancels an alarm, does not return any info about whether the alarm existed.
      * @param intentToBeBroadcast an Intent identifying the alarm to cancel. */
     fun cancelAlarm(intentToBeBroadcast: Intent) {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        val flags = pending_intent_flag_fix(0) // no flags
         val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         alarmManager.cancel(pendingIntent)
     }
@@ -155,8 +158,7 @@ class Timer(mainService: MainService) {
      * @param intent an Intent identifying the alarm to check.
      * @return Returns TRUE if there is an alarm set matching that intent; otherwise false. */
     fun alarmIsSet(intent: Intent): Boolean {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            PendingIntent.FLAG_NO_CREATE + PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_NO_CREATE
+        val flags = pending_intent_flag_fix(PendingIntent.FLAG_NO_CREATE)
         return PendingIntent.getBroadcast(appContext, 0, intent, flags) != null
     }
 }

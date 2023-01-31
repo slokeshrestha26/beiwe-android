@@ -8,11 +8,10 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import org.beiwe.app.DeviceInfo
-import org.beiwe.app.print
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
-class AccelerometerListener(private val appContext: Context) : SensorEventListener {
+class AccelerometerListener(appContext: Context) : SensorEventListener {
     companion object {
         @JvmField
         var header = "timestamp,accuracy,x,y,z"
@@ -31,6 +30,7 @@ class AccelerometerListener(private val appContext: Context) : SensorEventListen
      * function to log any accelerometer updates to the accelerometer log. */
     init {
         if (exists) {
+            // logic tests two layers of nullability
             accelSensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
             if (accelSensorManager == null) {
                 Log.e("Accelerometer Problems", "accelSensorManager does not exist? (1)")
@@ -53,16 +53,18 @@ class AccelerometerListener(private val appContext: Context) : SensorEventListen
             return
 
         // 1 / frequency equals the period in seconds, times one million gets period in microseconds
-        val delay_period_microseconds = (1.0 / PersistentData.getAccelerometerFrequency().toDouble() * 1000000).toInt()
+        val delay_period_microseconds = ((1.0 / PersistentData.getAccelerometerFrequency().toDouble()) * 1000000).toInt()
 //        print("starting accelerometer with delay of $delay_period_microseconds")
 //        print("accelerometer frequency was " + PersistentData.getAccelerometerFrequency())
 
         if (!accelSensorManager!!.registerListener(this, accelSensor, delay_period_microseconds)) {
             Log.e("Accelerometer", "Accelerometer is broken")
+            // this one happens occasionally, for 5% of users, across many manufacturers (samsung, motorola, HMD, HUAWEI, Yulong, LGE, OnePlus, Google, OPPO)
+            // The other log statements do not.
             TextFileManager.getDebugLogFile().writeEncrypted("Trying to start Accelerometer session, device cannot find accelerometer.")
-        } else {
-            enabled = true
         }
+        else
+            enabled = true
     }
 
     @Synchronized
@@ -78,12 +80,16 @@ class AccelerometerListener(private val appContext: Context) : SensorEventListen
         accuracy = arg1.toString()
     }
 
+    // private var prior_timecode: Long = 0  // purely for debugging
+
     /** On receipt of a sensor change, record it.  Include accuracy.
      * (only ever triggered by the system.)  */
     @Synchronized
     override fun onSensorChanged(arg0: SensorEvent) {
         // we record the system boot time once and use that as a reference.
         val javaTimeCode = DeviceInfo.boot_time + (arg0.timestamp / 1000000)
+        // print("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
+        // prior_timecode = javaTimeCode
         val values = arg0.values
         val value0 = String.format("%.16f", values[0])
         val value1 = String.format("%.16f", values[1])

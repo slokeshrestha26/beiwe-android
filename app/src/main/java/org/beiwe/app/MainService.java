@@ -1,6 +1,6 @@
 package org.beiwe.app;
 
-import static org.beiwe.app.UtilsKt.printe;
+import static org.beiwe.app.UtilsKt.*;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -32,16 +32,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
-import org.beiwe.app.listeners.AccelerometerListener;
-import org.beiwe.app.listeners.AmbientAudioListener;
-import org.beiwe.app.listeners.BluetoothListener;
-import org.beiwe.app.listeners.CallLogger;
-import org.beiwe.app.listeners.GPSListener;
-import org.beiwe.app.listeners.GyroscopeListener;
-import org.beiwe.app.listeners.MMSSentLogger;
-import org.beiwe.app.listeners.PowerStateListener;
-import org.beiwe.app.listeners.SmsSentLogger;
-import org.beiwe.app.listeners.WifiListener;
+import org.beiwe.app.listeners.*;
 import org.beiwe.app.networking.PostRequest;
 import org.beiwe.app.networking.SurveyDownloader;
 import org.beiwe.app.storage.PersistentData;
@@ -76,7 +67,7 @@ public class MainService extends Service {
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
 	//begin to run with an already fully instantiated main service.
 	private static MainService localHandle;
-	
+	private static boolean foregroundServiceStarted = false;
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
 	@Override
@@ -397,17 +388,15 @@ public class MainService extends Service {
 		
 		Intent restartServiceIntent = new Intent(getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage(getPackageName());
-		int flags = 0;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-			flags = PendingIntent.FLAG_IMMUTABLE;
-		}
+		int flags = pending_intent_flag_fix(PendingIntent.FLAG_UPDATE_CURRENT);
 		PendingIntent repeatingRestartServicePendingIntent = PendingIntent.getService(
 			getApplicationContext(), 1, restartServiceIntent, flags);
 		
+		// TODO: why is this causing the thing to ding every 2 (5?) minutes?
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.setRepeating(AlarmManager.RTC_WAKEUP,
-			System.currentTimeMillis() + 1000 * 60 * 2,
-			1000 * 60 * 2,
+			System.currentTimeMillis() + 1000 * 60 * 5,
+			1000 * 60 * 5,
 			repeatingRestartServicePendingIntent
 		);
 	}
@@ -451,11 +440,11 @@ public class MainService extends Service {
 			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " Received Broadcast: " + intent.toString());
 			String broadcastAction = intent.getAction();
 			
-			/** For GPS and Accelerometer the failure modes are:
+			/* For GPS and Accelerometer the failure modes are:
 			 * 1. If a recording event is triggered and followed by Doze being enabled then Beiwe will record until the Doze period ends.
 			 * 2. If, after Doze ends, the timers trigger out of order Beiwe ceases to record and triggers a new recording event in the future. */
 			
-			/** Disable active sensor */
+			/* Disable active sensor */
 			if (broadcastAction.equals(appContext.getString(R.string.turn_accelerometer_off))) {
 				accelerometerListener.turn_off();
 				return;
@@ -485,7 +474,10 @@ public class MainService extends Service {
 				accelerometerListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
 				timer.setupExactSingleAlarm(PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getAccelerometerOffDuration() + PersistentData.getAccelerometerOnDuration(), Timer.accelerometerOnIntent);
+				long alarmTime = timer.setupExactSingleAlarm(
+					PersistentData.getAccelerometerOffDuration() + PersistentData.getAccelerometerOnDuration(),
+					Timer.accelerometerOnIntent
+				);
 				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash. 
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_accelerometer_on), alarmTime);
 				return;
@@ -499,7 +491,10 @@ public class MainService extends Service {
 				gyroscopeListener.turn_on();
 				//start both the sensor-off-action timer, and the next sensor-on-timer.
 				timer.setupExactSingleAlarm(PersistentData.getGyroscopeOnDuration(), Timer.gyroscopeOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGyroscopeOffDuration() + PersistentData.getGyroscopeOnDuration(), Timer.gyroscopeOnIntent);
+				long alarmTime = timer.setupExactSingleAlarm(
+					PersistentData.getGyroscopeOffDuration() + PersistentData.getGyroscopeOnDuration(),
+					Timer.gyroscopeOnIntent
+				);
 				//record the system time that the next alarm is supposed to go off at, so that we can recover in the event of a reboot or crash.
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gyroscope_on), alarmTime);
 				return;
@@ -509,7 +504,10 @@ public class MainService extends Service {
 			if (broadcastAction.equals(appContext.getString(R.string.turn_gps_on))) {
 				gpsListener.turn_on();
 				timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration(), Timer.gpsOffIntent);
-				long alarmTime = timer.setupExactSingleAlarm(PersistentData.getGpsOnDuration() + PersistentData.getGpsOffDuration(), Timer.gpsOnIntent);
+				long alarmTime = timer.setupExactSingleAlarm(
+					PersistentData.getGpsOnDuration() + PersistentData.getGpsOffDuration(),
+					Timer.gpsOnIntent
+				);
 				PersistentData.setMostRecentAlarmTime(getString(R.string.turn_gps_on), alarmTime);
 				return;
 			}
@@ -548,7 +546,6 @@ public class MainService extends Service {
 				timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDuration(), PersistentData.getBluetoothGlobalOffset(), Timer.bluetoothOnIntent);
 				return;
 			}
-			
 			
 			//starts a data upload attempt.
 			if (broadcastAction.equals(appContext.getString(R.string.upload_data_files_intent))) {
@@ -660,26 +657,31 @@ public class MainService extends Service {
 	
 	/** The BackgroundService is meant to be all the time, so we return START_STICKY */
 	@Override
-	public int onStartCommand (Intent intent, int flags, int startId) { //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
+	public int onStartCommand (Intent intent, int flags, int startId) {
+		//Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "started with flag " + flags);
-		Intent intent_to_start_foreground_service = new Intent(getApplicationContext(), MainService.class);
 		
-		int flags2 = 0;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-			flags2 = PendingIntent.FLAG_IMMUTABLE;
+		if (!foregroundServiceStarted) {
+			Intent intent_to_start_foreground_service = new Intent(getApplicationContext(), MainService.class);
+			int intent_flags = pending_intent_flag_fix(0);  // no flags
+			PendingIntent onStartCommandPendingIntent = PendingIntent.getService(
+				getApplicationContext(), 0, intent_to_start_foreground_service, intent_flags
+			);
+			
+			Notification notification =
+				new Notification.Builder(getApplicationContext(), notificationChannelId)
+					.setContentTitle("Beiwe App")
+					.setContentText("Beiwe data collection running")
+					.setSmallIcon(R.mipmap.ic_launcher)
+					.setContentIntent(onStartCommandPendingIntent)
+					.setTicker("Beiwe data collection running in the background, no action required")
+					.build();
+			
+			// multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
+			startForeground(1, notification);
+			foregroundServiceStarted = true;
 		}
-		PendingIntent onStartCommandPendingIntent = PendingIntent.getService(
-			getApplicationContext(), 0, intent_to_start_foreground_service, flags2);
-		Notification notification =
-			new Notification.Builder(getApplicationContext(), notificationChannelId)
-				.setContentTitle("Beiwe App")
-				.setContentText("Beiwe data collection running")
-				.setSmallIcon(R.mipmap.ic_launcher)
-				.setContentIntent(onStartCommandPendingIntent)
-				.setTicker("Beiwe data collection running in the background, no action required")
-				.build();
-		//multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
-		startForeground(1, notification);
+		
 		// We want this service to continue running until it is explicitly stopped, so return sticky.
 		return START_STICKY;
 		// in testing out this restarting behavior for the service it is entirely unclear if changing
@@ -687,15 +689,17 @@ public class MainService extends Service {
 		//return START_REDELIVER_INTENT;
 	}
 	
-	//(the rest of these are identical, so I have compactified it)
+	// the rest of these are ~identical
 	@Override
-	public void onTaskRemoved (Intent rootIntent) { //Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
+	public void onTaskRemoved (Intent rootIntent) {
+		//Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "onTaskRemoved called with intent: " + rootIntent.toString());
 		restartService();
 	}
 	
 	@Override
-	public boolean onUnbind (Intent intent) { //Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
+	public boolean onUnbind (Intent intent) {
+		//Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "onUnbind called with intent: " + intent.toString());
 		restartService();
 		return super.onUnbind(intent);
@@ -721,20 +725,11 @@ public class MainService extends Service {
 		Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
 		restartServiceIntent.setPackage(getPackageName());
 		
-		int flags = PendingIntent.FLAG_ONE_SHOT;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-			flags = PendingIntent.FLAG_ONE_SHOT + PendingIntent.FLAG_IMMUTABLE;
-		}
+		int flags = pending_intent_flag_fix(PendingIntent.FLAG_ONE_SHOT);
 		PendingIntent restartServicePendingIntent = PendingIntent.getService(
 			getApplicationContext(), 1, restartServiceIntent, flags);
 		
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 500, restartServicePendingIntent);
-	}
-	
-	public void crashBackgroundService () {
-		if (BuildConfig.APP_IS_BETA) {
-			throw new NullPointerException("stop poking me!");
-		}
 	}
 }
