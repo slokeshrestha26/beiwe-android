@@ -310,54 +310,68 @@ public class MainService extends Service {
 	public void startTimers () {
 		Long now = System.currentTimeMillis();
 		Log.i("BackgroundService", "running startTimer logic.");
+		
 		if (PersistentData.getAccelerometerEnabled()) {  //if accelerometer data recording is enabled and...
-			if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_accelerometer_on)) < now || //the most recent accelerometer alarm time is in the past, or...
+			long accelMostRecentAlarmTime = PersistentData.getMostRecentAlarmTime(getString(R.string.turn_accelerometer_on));
+			long accelMostRecentOffTime = accelMostRecentAlarmTime - PersistentData.getAccelerometerOffDuration() + 1000;
+			if (accelMostRecentAlarmTime < now || //the most recent accelerometer alarm time is in the past, or...
 				!timer.alarmIsSet(Timer.accelerometerOnIntent)) { //there is no scheduled accelerometer-on timer.
 				sendBroadcast(Timer.accelerometerOnIntent); // start accelerometer timers (immediately runs accelerometer recording session).
+			} else if (timer.alarmIsSet(Timer.accelerometerOffIntent) && accelMostRecentOffTime > now) {
 				//note: when there is no accelerometer-off timer that means we are in-between scans.  This state is fine, so we don't check for it.
-			} else if (timer.alarmIsSet(Timer.accelerometerOffIntent)
-				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_accelerometer_on)) - PersistentData.getAccelerometerOffDuration() + 1000 > now) {
 				accelerometerListener.turn_on();
 			}
 		}
 		
-		if (PersistentData.getGyroscopeEnabled()) {  //if gyroscope data recording is enabled and...
-			if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on)) < now || //the most recent gyroscope alarm time is in the past, or...
-				!timer.alarmIsSet(Timer.gyroscopeOnIntent)) { //there is no scheduled gyroscope-on timer.
-				sendBroadcast(Timer.gyroscopeOnIntent); // start gyroscope timers (immediately runs gyroscope recording session).
-				//note: when there is no gyroscope-off timer that means we are in-between scans.  This state is fine, so we don't check for it.
-			} else if (timer.alarmIsSet(Timer.gyroscopeOffIntent)
-				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on)) - PersistentData.getGyroscopeOffDuration() + 1000 > now) {
+		// logic identical to accelerometer
+		if (PersistentData.getGyroscopeEnabled()) {
+			long gyroMostRecentAlarmTime = PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gyroscope_on));
+			long gyroMostRecentOffTime = gyroMostRecentAlarmTime - PersistentData.getGyroscopeOffDuration() + 1000;
+			if (gyroMostRecentAlarmTime < now || !timer.alarmIsSet(Timer.gyroscopeOnIntent)) {
+				sendBroadcast(Timer.gyroscopeOnIntent);
+			} else if (timer.alarmIsSet(Timer.gyroscopeOffIntent) && gyroMostRecentOffTime > now) {
 				gyroscopeListener.turn_on();
 			}
 		}
 		
+		// logic identical to accelerometer
 		if (PersistentData.getAmbientAudioEnabled()) {
-			if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on)) < now ||
-				!timer.alarmIsSet(Timer.ambientAudioOnIntent)) {
+			long ambientAudioMostRecentAlarmTime = PersistentData.getMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on));
+			long ambientAudioMostRecentOffTime = ambientAudioMostRecentAlarmTime - PersistentData.getAmbientAudioOffDuration() + 1000;
+			if (ambientAudioMostRecentAlarmTime < now || !timer.alarmIsSet(Timer.ambientAudioOnIntent)) {
 				sendBroadcast(Timer.ambientAudioOnIntent);
-			} else if (timer.alarmIsSet(Timer.ambientAudioOffIntent)
-				&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_ambient_audio_on)) - PersistentData.getAmbientAudioOffDuration() + 1000 > now) {
+			} else if (timer.alarmIsSet(Timer.ambientAudioOffIntent) && ambientAudioMostRecentOffTime > now) {
 				AmbientAudioListener.startRecording(appContext);
 			}
 		}
-		
-		if (PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) < now || !timer.alarmIsSet(Timer.gpsOnIntent)) {
-			sendBroadcast(Timer.gpsOnIntent);
-		} else if (PersistentData.getGpsEnabled() && timer.alarmIsSet(Timer.gpsOffIntent)
-			&& PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on)) - PersistentData.getGpsOffDuration() + 1000 > now) {
-			gpsListener.turn_on();
+		// logic identical to accelerometer
+		if (PersistentData.getGpsEnabled()) {
+			long gpsMostRecentAlarmTime = PersistentData.getMostRecentAlarmTime(getString(R.string.turn_gps_on));
+			long gpsMostRecentOffTime = gpsMostRecentAlarmTime - PersistentData.getGpsOffDuration() + 1000;
+			if (gpsMostRecentAlarmTime < now || !timer.alarmIsSet(Timer.gpsOnIntent)) {
+				sendBroadcast(Timer.gpsOnIntent);
+			} else if (timer.alarmIsSet(Timer.gpsOffIntent) && gpsMostRecentOffTime > now) {
+				gpsListener.turn_on();
+			}
 		}
 		
-		if (PersistentData.getMostRecentAlarmTime(getString(R.string.run_wifi_log)) < now || //the most recent wifi log time is in the past or
-			!timer.alarmIsSet(Timer.wifiLogIntent)) {
-			sendBroadcast(Timer.wifiLogIntent);
+		// wifi has a one-time timer
+		if (PersistentData.getWifiEnabled()) {
+			// the most recent wifi log time is in the past or no timer is set
+			long mostRecentWifiScan = PersistentData.getMostRecentAlarmTime(getString(R.string.run_wifi_log));
+			if (mostRecentWifiScan < now || !timer.alarmIsSet(Timer.wifiLogIntent)) {
+				sendBroadcast(Timer.wifiLogIntent);
+			}
 		}
 		
 		//if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event, set up the next Bluetooth-on alarm.
 		//(Bluetooth needs to run at absolute points in time, it should not be started if a scheduled event is missed.)
-		if (PermissionHandler.confirmBluetooth(appContext) && !timer.alarmIsSet(Timer.bluetoothOnIntent)) {
-			timer.setupExactSingleAbsoluteTimeAlarm(PersistentData.getBluetoothTotalDuration(), PersistentData.getBluetoothGlobalOffset(), Timer.bluetoothOnIntent);
+		if (PersistentData.getBluetoothEnabled()) {
+			if (PermissionHandler.confirmBluetooth(appContext) && !timer.alarmIsSet(Timer.bluetoothOnIntent)) {
+				timer.setupExactSingleAbsoluteTimeAlarm(
+					PersistentData.getBluetoothTotalDuration(), PersistentData.getBluetoothGlobalOffset(), Timer.bluetoothOnIntent
+				);
+			}
 		}
 		
 		// Functionality timers. We don't need aggressive checking for if these timers have been missed, as long as they run eventually it is fine.
@@ -386,17 +400,16 @@ public class MainService extends Service {
 			}
 		}
 		
+		// this is a repeating alarm that ensures the service is running, it starts the service if it isn't.
 		Intent restartServiceIntent = new Intent(getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage(getPackageName());
 		int flags = pending_intent_flag_fix(PendingIntent.FLAG_UPDATE_CURRENT);
 		PendingIntent repeatingRestartServicePendingIntent = PendingIntent.getService(
 			getApplicationContext(), 1, restartServiceIntent, flags);
-		
-		// TODO: why is this causing the thing to ding every 2 (5?) minutes?
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 		alarmService.setRepeating(AlarmManager.RTC_WAKEUP,
-			System.currentTimeMillis() + 1000 * 60 * 5,
-			1000 * 60 * 5,
+			System.currentTimeMillis() + 1000 * 60 * 2,
+			1000 * 60 * 2,
 			repeatingRestartServicePendingIntent
 		);
 	}
@@ -523,7 +536,7 @@ public class MainService extends Service {
 				return;
 			}
 			
-			/** Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.
+			/* Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time as a trigger, and therefore we don't need to store most-recent-timer state.
 			 * The Bluetooth-on action sets the corresponding Bluetooth-off timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
 			if (broadcastAction.equals(appContext.getString(R.string.turn_bluetooth_on))) {
 				if (!PersistentData.getBluetoothEnabled()) {
@@ -578,6 +591,7 @@ public class MainService extends Service {
 				return;
 			}
 			
+			// logic for the SMS/MMS message logger
 			if (broadcastAction.equals(appContext.getString(R.string.check_for_sms_enabled))) {
 				if (PermissionHandler.confirmTexts(appContext)) {
 					startSmsSentLogger();
@@ -587,6 +601,7 @@ public class MainService extends Service {
 				}
 			}
 			
+			// logic for the call (metadata) logger
 			if (broadcastAction.equals(appContext.getString(R.string.check_for_calls_enabled))) {
 				if (PermissionHandler.confirmCalls(appContext)) {
 					startCallLogger();
@@ -595,6 +610,7 @@ public class MainService extends Service {
 				}
 			}
 			
+			// ambient audio logic
 			if (broadcastAction.equals(appContext.getString(R.string.turn_ambient_audio_on))) {
 				AmbientAudioListener.startRecording(appContext);
 				timer.setupExactSingleAlarm(PersistentData.getAmbientAudioOnDuration(), Timer.ambientAudioOffIntent);
@@ -611,6 +627,7 @@ public class MainService extends Service {
 				return;
 			}
 			
+			// logic for data upload (note only runs after registration)
 			if (PersistentData.getIsRegistered() && broadcastAction.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 				NetworkInfo networkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 				if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
@@ -619,11 +636,10 @@ public class MainService extends Service {
 				}
 			}
 			
-			//this is a special action that will only run if the app device is in debug mode.
+			//these are  a special actions that will only run if the app device is in debug mode.
 			if (broadcastAction.equals("crashBeiwe") && BuildConfig.APP_IS_BETA) {
 				throw new NullPointerException("beeeeeoooop.");
 			}
-			//this is a special action that will only run if the app device is in debug mode.
 			if (broadcastAction.equals("enterANR") && BuildConfig.APP_IS_BETA) {
 				try {
 					sleep(100000);
