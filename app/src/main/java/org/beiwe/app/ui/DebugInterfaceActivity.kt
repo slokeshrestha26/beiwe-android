@@ -23,11 +23,13 @@ import java.io.File
 import java.security.spec.InvalidKeySpecException
 import java.util.*
 
+@Suppress("UNUSED_PARAMETER")
 class DebugInterfaceActivity : SessionActivity() {
     //extends a session activity.
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(bundle: Bundle?) {
+        // bundle is the saved instance state, if there is one.
+        super.onCreate(bundle)
         setContentView(R.layout.activity_debug_interface)
 
         if (BuildConfig.APP_IS_DEV) {
