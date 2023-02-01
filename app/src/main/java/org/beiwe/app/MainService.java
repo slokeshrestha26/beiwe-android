@@ -67,7 +67,11 @@ public class MainService extends Service {
 	//This is Really Hacky and terrible style, but it is okay because the scheduling code can only ever
 	//begin to run with an already fully instantiated main service.
 	private static MainService localHandle;
-	private static boolean foregroundServiceStarted = false;
+	private static Long foregroundServiceLastStarted = 0L;
+	
+	int FCM_TIMER = 1000*60*120;  // 2 hours between sending fcm updates
+	int FOREGROUND_SERVICE_TIMER = 1000*60*60*6;  // 6 hours for a foreground service notification
+	int FOREGROUND_SERVICE_RESTART_PERIODICITY = 1000*60*2;  // but try every 2 minutes because we are very greedy about this.
 	
 	/** onCreate is essentially the constructor for the service, initialize variables here. */
 	@Override
@@ -117,13 +121,13 @@ public class MainService extends Service {
 			startSmsSentLogger();
 			startMmsSentLogger();
 		} else if (PersistentData.getTextsEnabled()) {
-			sendBroadcast(Timer.checkForSMSEnabled);
+			sendBroadcast(Timer.checkForSMSEnabledIntent);
 		}
 		
 		if (PermissionHandler.confirmCalls(appContext))
 			startCallLogger();
 		else if (PersistentData.getCallsEnabled())
-			sendBroadcast(Timer.checkForCallsEnabled);
+			sendBroadcast(Timer.checkForCallsEnabledIntent);
 		
 		//Only do the following if the device is registered
 		if (PersistentData.getIsRegistered()) {
@@ -246,6 +250,7 @@ public class MainService extends Service {
 		filter.addAction(appContext.getString(R.string.check_for_sms_enabled));
 		filter.addAction(appContext.getString(R.string.check_for_calls_enabled));
 		filter.addAction(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled));
+		filter.addAction(appContext.getString(R.string.fcm_upload));
 		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		filter.addAction("crashBeiwe");
 		filter.addAction("enterANR");
@@ -295,7 +300,7 @@ public class MainService extends Service {
 								}
 							}
 							PersistentData.setFCMInstanceID(token);
-							PostRequest.setFCMInstanceID(token);
+							PostRequest.sendFCMInstanceID(token);
 						}
 					}, "outerNotifcationBlockerThread");
 					outerNotifcationBlockerThread.start();
@@ -303,12 +308,22 @@ public class MainService extends Service {
 			});
 	}
 	
+	/* Sends the FCM token to the backend. Automatically sets an alarm to run perioditaccally.
+	   based on the FCM_TIMER variable. */
+	public void sendFcmToken () {
+		String fcm_token = PersistentData.getFCMInstanceID();
+		if (fcm_token != null) {
+			PostRequest.sendFCMInstanceID(fcm_token);
+		}
+		timer.setupExactSingleAlarm(FCM_TIMER, Timer.sendCurrentFCMTokenIntent);
+	}
+	
 	/*#############################################################################
 	####################            Timer Logic             #######################
 	#############################################################################*/
 	
 	public void startTimers () {
-		Long now = System.currentTimeMillis();
+		long now = System.currentTimeMillis();
 		Log.i("BackgroundService", "running startTimer logic.");
 		
 		if (PersistentData.getAccelerometerEnabled()) {  //if accelerometer data recording is enabled and...
@@ -393,23 +408,32 @@ public class MainService extends Service {
 			}
 		}
 		
-		//checks that surveys are actually scheduled, if a survey is not scheduled, schedule it!
+		// checks that surveys are actually scheduled, if a survey is not scheduled, schedule it!
 		for (String surveyId: PersistentData.getSurveyIds()) {
 			if (!timer.alarmIsSet(new Intent(surveyId))) {
 				SurveyScheduler.scheduleSurvey(surveyId);
 			}
 		}
 		
+		// a repeating alarm to send an updated fcm tokens to the server, periodicity is 2 hours.
+		if (!timer.alarmIsSet(Timer.sendCurrentFCMTokenIntent)) {
+			sendFcmToken();
+		}
+		
 		// this is a repeating alarm that ensures the service is running, it starts the service if it isn't.
+		// Periodicity is FOREGROUND_SERVICE_RESTART_PERIODICITY.
+		// This is a special intent, it has a  construction that targets the MainService's onStartCommand method.
 		Intent restartServiceIntent = new Intent(getApplicationContext(), MainService.class);
 		restartServiceIntent.setPackage(getPackageName());
 		int flags = pending_intent_flag_fix(PendingIntent.FLAG_UPDATE_CURRENT);
 		PendingIntent repeatingRestartServicePendingIntent = PendingIntent.getService(
 			getApplicationContext(), 1, restartServiceIntent, flags);
+		
 		AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-		alarmService.setRepeating(AlarmManager.RTC_WAKEUP,
-			System.currentTimeMillis() + 1000 * 60 * 2,
-			1000 * 60 * 2,
+		alarmService.setRepeating(
+			AlarmManager.RTC_WAKEUP,
+			System.currentTimeMillis() + FOREGROUND_SERVICE_RESTART_PERIODICITY,
+			FOREGROUND_SERVICE_RESTART_PERIODICITY,
 			repeatingRestartServicePendingIntent
 		);
 	}
@@ -449,7 +473,8 @@ public class MainService extends Service {
 	private BroadcastReceiver timerReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive (Context appContext, Intent intent) {
-			Log.d("BackgroundService", "Received broadcast: " + intent.toString());
+			Log.e("BackgroundService", "Received broadcast: " + intent.toString());
+			// Don't change this log to have a "correct" comma.
 			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " Received Broadcast: " + intent.toString());
 			String broadcastAction = intent.getAction();
 			
@@ -477,6 +502,10 @@ public class MainService extends Service {
 				return;
 			}
 			
+			// send the current fcm token to the server.
+			if (broadcastAction.equals(appContext.getString(R.string.fcm_upload))) {
+				sendFcmToken();
+			}
 			
 			// Enable active sensors, reset timers.
 			//Accelerometer. We automatically have permissions required for accelerometer.
@@ -597,7 +626,7 @@ public class MainService extends Service {
 					startSmsSentLogger();
 					startMmsSentLogger();
 				} else if (PersistentData.getTextsEnabled()) {
-					timer.setupExactSingleAlarm(30000L, Timer.checkForSMSEnabled);
+					timer.setupExactSingleAlarm(30000L, Timer.checkForSMSEnabledIntent);
 				}
 			}
 			
@@ -606,7 +635,7 @@ public class MainService extends Service {
 				if (PermissionHandler.confirmCalls(appContext)) {
 					startCallLogger();
 				} else if (PersistentData.getCallsEnabled()) {
-					timer.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabled);
+					timer.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabledIntent);
 				}
 			}
 			
@@ -676,10 +705,14 @@ public class MainService extends Service {
 	public int onStartCommand (Intent intent, int flags, int startId) {
 		//Log.d("BackgroundService onStartCommand", "started with flag " + flags );
 		TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " " + "started with flag " + flags);
+		long now = System.currentTimeMillis();
+		long millisecondsSincePrevious = now - foregroundServiceLastStarted;
 		
-		if (!foregroundServiceStarted) {
+		// if it has been FOREGROUND_SERVICE_TIMER or longer since the last time we started the
+		// foreground service notification, start it again.
+		if (foregroundServiceLastStarted == 0 || millisecondsSincePrevious > FOREGROUND_SERVICE_TIMER) {
 			Intent intent_to_start_foreground_service = new Intent(getApplicationContext(), MainService.class);
-			int intent_flags = pending_intent_flag_fix(0);  // no flags
+			int intent_flags = pending_intent_flag_fix(PendingIntent.FLAG_UPDATE_CURRENT);  // no flags
 			PendingIntent onStartCommandPendingIntent = PendingIntent.getService(
 				getApplicationContext(), 0, intent_to_start_foreground_service, intent_flags
 			);
@@ -695,7 +728,7 @@ public class MainService extends Service {
 			
 			// multiple sources recommend an ID of 1 because it works. documentation is very spotty about this
 			startForeground(1, notification);
-			foregroundServiceStarted = true;
+			foregroundServiceLastStarted = now;
 		}
 		
 		// We want this service to continue running until it is explicitly stopped, so return sticky.

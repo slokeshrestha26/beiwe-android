@@ -48,9 +48,10 @@ class Timer(mainService: MainService) {
         lateinit var uploadDatafilesIntent: Intent
         lateinit var createNewDataFilesIntent: Intent
         lateinit var checkForNewSurveysIntent: Intent
-        lateinit var checkForSMSEnabled: Intent
-        lateinit var checkIfAmbientAudioRecordingIsEnabled: Intent
-        lateinit var checkForCallsEnabled: Intent
+        lateinit var checkForSMSEnabledIntent: Intent
+        lateinit var checkIfAmbientAudioRecordingIsEnabledIntent: Intent
+        lateinit var checkForCallsEnabledIntent: Intent
+        lateinit var sendCurrentFCMTokenIntent: Intent
     }
 
     private val alarmManager: AlarmManager
@@ -79,9 +80,10 @@ class Timer(mainService: MainService) {
         uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent))
         createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent))
         checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent))
-        checkForSMSEnabled = setupIntent(appContext.getString(R.string.check_for_sms_enabled))
-        checkForCallsEnabled = setupIntent(appContext.getString(R.string.check_for_calls_enabled))
-        checkIfAmbientAudioRecordingIsEnabled = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
+        checkForSMSEnabledIntent = setupIntent(appContext.getString(R.string.check_for_sms_enabled))
+        checkForCallsEnabledIntent = setupIntent(appContext.getString(R.string.check_for_calls_enabled))
+        checkIfAmbientAudioRecordingIsEnabledIntent = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
+        sendCurrentFCMTokenIntent = setupIntent(appContext.getString(R.string.fcm_upload))
     }
 
     /* ###############################################################################################
@@ -124,7 +126,6 @@ class Timer(mainService: MainService) {
     /**Takes a specially prepared intent and sets it to go off at the day and time provided
      * @param intentToBeBroadcast an intent that has been prepared by the startWeeklyAlarm function. */
     private fun setupSurveyAlarm(surveyId: String, intentToBeBroadcast: Intent, alarmTime: Calendar) {
-
         val flags = pending_intent_flag_fix(0) // no flags
         val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         setExactAlarm(AlarmManager.RTC_WAKEUP, alarmTime.timeInMillis, pendingIntent)

@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -243,14 +244,9 @@ public class TextFileManager {
 		keyFile = new TextFileManager(
 			appContext, "keyFile", "", true, true, false, false
 		);
-//      Persistent files (old, no longer used, but this is an example of a persistent file (one that does not get abandoned at shut-down/initialization) )
-//		currentDailyQuestions = new TextFileManager(
-//				appContext, "currentDailyQuestionsFile.json", EMPTY_HEADER, true, true, false
-//		);
-//		 currentWeeklyQuestions = new TextFileManager(
-//			 	appContext, "currentWeeklyQuestionsFile.json", EMPTY_HEADER, true, true, false
-//		);
-		// The debug file is no longer persistent, so that we can upload it to the server associated with a user, otherwise it has the name "logfile.txt" and fails to upload.
+		
+		//
+		// The debug file is not persistent, so that we can upload it to the server associated with a user, otherwise it has the name "logfile.txt" and fails to upload.
 		debugLogFile = new TextFileManager(
 			appContext, "logFile", "THIS LINE IS A LOG FILE HEADER", false, false, true, false
 		);
@@ -560,11 +556,25 @@ public class TextFileManager {
 		return appContext.getFilesDir().list();
 	}
 	
+	/** @return a list of all files in the app's file directory that are allowed to be uploaded.
+	 *  The definition of an uploadable file is one that starts with the patient id. */
+	private static synchronized ArrayList<String> getUploadableFilesList () {
+		String patient_id = PersistentData.getPatientID();
+		String[] allFiles = getAllFiles();
+		ArrayList<String> uploadableFiles = new ArrayList<String>();
+		for (String file : allFiles) {
+			if (file.startsWith(patient_id)) {
+				uploadableFiles.add(file);
+			}
+		}
+		return uploadableFiles;
+	}
+	
 	/** Returns all data that are not currently in use
 	 * @return String[] a list of file names */
 	public static synchronized String[] getAllUploadableFiles () {
-		Set<String> files = new HashSet<String>();
-		Collections.addAll(files, getAllFiles());
+		// add all the uploadable files to the files set
+		Set<String> files = new HashSet<String>(getUploadableFilesList());
 		
 		// These files should never be uploaded
 		files.remove(TextFileManager.getKeyFile().fileName);

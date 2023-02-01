@@ -41,7 +41,7 @@ public class FCMService extends FirebaseMessagingService {
                     }
                 }
                 PersistentData.setFCMInstanceID(final_token);
-                PostRequest.setFCMInstanceID(final_token);
+                PostRequest.sendFCMInstanceID(final_token);
             }
         }, "fcmBlockerThread");
         fcmBlockerThread.start();

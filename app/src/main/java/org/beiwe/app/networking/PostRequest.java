@@ -1,5 +1,6 @@
 package org.beiwe.app.networking;
 
+
 import android.content.Context;
 import android.util.Log;
 
@@ -7,6 +8,7 @@ import org.beiwe.app.BuildConfig;
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.DeviceInfo;
 import org.beiwe.app.R;
+import org.beiwe.app.UtilsKt;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.SetDeviceSettings;
 import org.beiwe.app.storage.TextFileManager;
@@ -269,16 +271,16 @@ public class PostRequest {
 	 * @return HTTP Response code as int
 	 * @throws IOException */
 	private static int doFileUpload (File file, URL uploadUrl, long stopTime) throws IOException {
-		if (file.length() > 1024 * 1024 * 10) {
-			Log.i("upload", "file length: " + file.length());
-		}
+		if (BuildConfig.APP_IS_DEV)
+			Log.d("uploading", "starting attempt to upload " + file.getName() + ", size: " + file.length()/1024 + "KB");
+		
 		HttpsURLConnection connection = minimalHTTP(uploadUrl);
 		BufferedOutputStream request = new BufferedOutputStream(connection.getOutputStream(), 65536);
 		BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file), 65536);
-		
 		request.write(securityParameters(null).getBytes());
 		request.write(makeParameter("file_name", file.getName()).getBytes());
 		request.write("file=".getBytes());
+		
 //		long start = System.currentTimeMillis();
 		// Read in data from the file, and pour it into the POST request stream
 		int data;
@@ -296,6 +298,7 @@ public class PostRequest {
 //		if (file.length() >  1024*1024*10) {
 //			Log.w("upload", "speed: " + (file.length() / ((stop - start) / 1000)) / 1024 + "KBps");
 //		}
+		
 		inputStream.close();
 		request.write("".getBytes());
 		request.flush();
@@ -304,14 +307,13 @@ public class PostRequest {
 		// Get HTTP Response. Pretty sure this blocks, nothing can really be done about that.
 		int response = connection.getResponseCode();
 		connection.disconnect();
-		if (BuildConfig.APP_IS_DEV) {
-			Log.d("uploading", "finished attempt to upload " +
-				file.getName() + "; received code " + response);
-		}
+		
+		if (BuildConfig.APP_IS_DEV)
+			Log.d("uploaded", "finished attempt to upload " + file.getName() + "; got code " + response);
 		return response;
 	}
 	
-	public static void setFCMInstanceID (String token) {
+	public static void sendFCMInstanceID (String token) {
 		if (!NetworkUtility.canUpload(appContext)) {
 			return;
 		}
@@ -408,7 +410,7 @@ public class PostRequest {
 			for (String fileName: TextFileManager.getAllUploadableFiles()) {
 				try {
 					file = new File(appContext.getFilesDir() + "/" + fileName);
-//				Log.d("uploading", "uploading " + file.getName());
+					
 					if (PostRequest.doFileUpload(file, uploadUrl, stopTime) == 200) {
 						TextFileManager.delete(fileName);
 					}
