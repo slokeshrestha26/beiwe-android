@@ -21,6 +21,7 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
     private var gyroSensor: Sensor? = null
     private var enabled: Boolean = false
     private var accuracy ="unknown"
+    private var lineCount = 0
 
     @JvmField
     var exists: Boolean = appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)
@@ -89,6 +90,12 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
         val value0 = String.format("%.16f", values[0])
         val value1 = String.format("%.16f", values[1])
         val value2 = String.format("%.16f", values[2])
+        // if the linecount is over 10,000 then we create a new file:
+        if (lineCount > 10000) {
+            TextFileManager.getGyroFile().newFile()
+            lineCount = 0
+        }
         TextFileManager.getGyroFile().writeEncrypted("$javaTimeCode,$accuracy,$value0,$value1,$value2")
+        lineCount++
     }
 }

@@ -20,8 +20,8 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
     private var accelSensorManager: SensorManager? = null
     private var accelSensor: Sensor? = null
     private var enabled: Boolean = false
-    private var accuracy ="unknown"
-
+    private var accuracy = "unknown"
+    private var lineCount = 0
 
     @JvmField
     var exists: Boolean = appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
@@ -94,6 +94,13 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
         val value0 = String.format("%.16f", values[0])
         val value1 = String.format("%.16f", values[1])
         val value2 = String.format("%.16f", values[2])
+
+        // if the linecount is over 10,000 then we create a new file:
+        if (lineCount > 10000) {
+            TextFileManager.getAccelFile().newFile()
+            lineCount = 0
+        }
         TextFileManager.getAccelFile().writeEncrypted("$javaTimeCode,$accuracy,$value0,$value1,$value2")
+        lineCount++
     }
 }
