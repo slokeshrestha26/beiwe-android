@@ -10,7 +10,7 @@ import java.util.*
 
 object PermissionHandler {
     const val PERMISSION_GRANTED = PackageManager.PERMISSION_GRANTED
-    var PERMISSION_DENIED = PackageManager.PERMISSION_DENIED
+
     @JvmField
     var POWER_EXCEPTION_PERMISSION = "POWER_EXCEPTION_PERMISSION"
     @JvmField
@@ -73,78 +73,61 @@ object PermissionHandler {
 	 *  We will check for microphone recording as a special condition on the audio recording screen. */
     @JvmStatic
     fun checkAccessCoarseLocation(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23) {
-            context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
-        } else {
-            true
-        }
+        return context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
     }
 
     @JvmStatic
     fun checkAccessFineLocation(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
     }
 
     fun checkAccessNetworkState(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) == PERMISSION_GRANTED
     }
 
     fun checkAccessWifiState(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) == PERMISSION_GRANTED
     }
 
     fun checkAccessBluetooth(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.BLUETOOTH) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.BLUETOOTH) == PERMISSION_GRANTED
     }
 
     fun checkAccessBluetoothAdmin(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) == PERMISSION_GRANTED
     }
 
     fun checkAccessCallPhone(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.CALL_PHONE) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.CALL_PHONE) == PERMISSION_GRANTED
     }
 
     fun checkAccessReadCallLog(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.READ_CALL_LOG) == PERMISSION_GRANTED
     }
 
     fun checkAccessReadContacts(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PERMISSION_GRANTED
     }
 
     fun checkAccessReadPhoneState(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PERMISSION_GRANTED
     }
 
     @JvmStatic
     fun checkAccessReadSms(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.READ_SMS) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.READ_SMS) == PERMISSION_GRANTED
     }
 
     fun checkAccessReceiveMms(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.RECEIVE_MMS) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.RECEIVE_MMS) == PERMISSION_GRANTED
     }
 
     fun checkAccessReceiveSms(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PERMISSION_GRANTED
     }
 
     fun checkAccessRecordAudio(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= 23)
-            context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PERMISSION_GRANTED else true
+        return context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PERMISSION_GRANTED
     }
 
     @JvmStatic
