@@ -1,6 +1,5 @@
 package org.beiwe.app.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -19,7 +18,6 @@ import org.beiwe.app.ui.user.MainMenuActivity
 import org.beiwe.app.ui.utils.SurveyNotifications
 import org.json.JSONArray
 import org.json.JSONException
-import java.io.File
 import java.security.spec.InvalidKeySpecException
 import java.util.*
 
@@ -374,11 +372,11 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun crashBackground(view: View?) {
-        MainService.timer.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
+        MainService.timer!!.setupExactSingleAlarm(0.toLong(), Intent("crashBeiwe"))
     }
 
     fun crashBackgroundInFive(view: View?) {
-        MainService.timer.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
+        MainService.timer!!.setupExactSingleAlarm(5000.toLong(), Intent("crashBeiwe"))
     }
 
     fun enterANRUI(view: View?) {
@@ -390,7 +388,7 @@ class DebugInterfaceActivity : SessionActivity() {
     }
 
     fun enterANRBackground(view: View?) {
-        MainService.timer.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
+        MainService.timer!!.setupExactSingleAlarm(0.toLong(), Intent("enterANR"))
     }
 
     fun stopBackgroundService(view: View?) {
