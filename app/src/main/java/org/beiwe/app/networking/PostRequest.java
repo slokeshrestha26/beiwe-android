@@ -271,8 +271,12 @@ public class PostRequest {
 	 * @return HTTP Response code as int
 	 * @throws IOException */
 	private static int doFileUpload (File file, URL uploadUrl, long stopTime) throws IOException {
-		if (BuildConfig.APP_IS_DEV)
-			Log.d("uploading", "starting attempt to upload " + file.getName() + ", size: " + file.length()/1024 + "KB");
+		
+		if (BuildConfig.APP_IS_DEV) {
+			String size = "";
+			if (file.length() < 1024) size = file.length() + " bytes"; else size = file.length()/1024 + "KB";
+			Log.d("uploading", "starting attempt to upload " + file.getName() + ", size: " + size);
+		}
 		
 		HttpsURLConnection connection = minimalHTTP(uploadUrl);
 		BufferedOutputStream request = new BufferedOutputStream(connection.getOutputStream(), 65536);

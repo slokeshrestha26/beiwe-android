@@ -73,7 +73,7 @@ class MainService : Service() {
         initializeFireBaseIDToken()
         TextFileManager.initialize(appContext)
         PostRequest.initialize(appContext)
-        registerTimers()
+        registerTimers(appContext!!)
         createNotificationChannel()
         doSetup()
     }
@@ -82,7 +82,7 @@ class MainService : Service() {
         //Accelerometer, gyro, power state, and wifi don't need permissions or they are checked in
         // the broadcastreceiver logic
         startPowerStateListener()
-        gpsListener = GPSListener(appContext)
+        gpsListener = GPSListener(appContext!!)
         WifiListener.initialize(appContext)
 
         if (PersistentData.getAccelerometerEnabled())
