@@ -1,5 +1,6 @@
 package org.beiwe.app.ui.utils
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import org.beiwe.app.printe
 import org.beiwe.app.JSONUtils
@@ -26,25 +27,26 @@ import org.beiwe.app.survey.AudioRecorderActivity
 
 /**The purpose of this class is to deal with all that has to do with Survey Notifications.
  * This is a STATIC method, and is called from the main service.
- * @author Eli Jones
- */
+ * @author Eli Jones */
 object SurveyNotifications {
     private const val CHANNEL_ID = "survey_notification_channel"
 
     /**Show notifications for each survey in surveyIds, as long as that survey exists in PersistentData. */
     @JvmStatic
     fun showSurveyNotifications(appContext: Context, surveyIds: List<String>?) {
-        if (surveyIds != null) {
-            val idsOfStoredSurveys = JSONUtils.jsonArrayToStringList(PersistentData.getSurveyIdsJsonArray())
-            for (surveyId in surveyIds) {
-                if (idsOfStoredSurveys.contains(surveyId)) {
-                    displaySurveyNotification(appContext, surveyId)
-                } else {
-                    val errorMsg = "Tried to show notification for survey ID " + surveyId +
-                            " but didn't have that survey stored in PersistentData."
-                    printe(errorMsg)
-                    TextFileManager.writeDebugLogStatement(errorMsg)
-                }
+        // return early if empty
+        if (surveyIds == null || surveyIds.isEmpty())  // ah, || short circuits, keep, don't use 'or'
+            return
+
+        val idsOfStoredSurveys = JSONUtils.jsonArrayToStringList(PersistentData.getSurveyIdsJsonArray())
+        for (surveyId in surveyIds) {
+            if (idsOfStoredSurveys.contains(surveyId)) {
+                displaySurveyNotification(appContext, surveyId)
+            } else {
+                val errorMsg = "Tried to show notification for survey ID $surveyId but didn't have" +
+                        " that survey stored in PersistentData."
+                printe(errorMsg)
+                TextFileManager.writeDebugLogStatement(errorMsg)
             }
         }
     }
@@ -55,27 +57,24 @@ object SurveyNotifications {
     @JvmStatic
     fun displaySurveyNotification(appContext: Context, surveyId: String) {
         //activityIntent contains information on the action triggered by tapping the notification.
-        var notificationBuilder: Notification.Builder
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerSurveyNotificationChannel(appContext)
+            ensureSurveyNotificationChannelExists(appContext)
             displaySurveyNotificationNew(appContext, surveyId)
         } else 
             displaySurveyNotificationOld(appContext, surveyId)
     }
 
-    /**
-     * Survey notification function for phones running api versions O or newer
+    /** Survey notification function for phones running api versions O or newer
      * Uses Notification.Builder
      * @param appContext
-     * @param surveyId
-     */
+     * @param surveyId */
     private fun displaySurveyNotificationNew(appContext: Context, surveyId: String) {
         val notificationBuilder = Notification.Builder(appContext, CHANNEL_ID)
-        val activityIntent: Intent
         notificationBuilder.setContentTitle(appContext.getString(R.string.survey_notification_app_name))
         notificationBuilder.setShowWhen(true) // As of API 24 this no longer defaults to true and must be set explicitly
-        
+
         // build the activity intent based on the type of survey
+        val activityIntent: Intent
         if (PersistentData.getSurveyType(surveyId) == "tracking_survey") {
             activityIntent = Intent(appContext, SurveyActivity::class.java)
             activityIntent.action = appContext.getString(R.string.start_tracking_survey)
@@ -113,7 +112,7 @@ object SurveyNotifications {
 		 * Solution: use FLAG_CANCEL_CURRENT, it provides the same functionality for our purposes.
 		 * (or add android:exported="true" to the activity's permissions in the Manifest.)
 		 * http://stackoverflow.com/questions/21250364/notification-click-not-launch-the-given-activity-on-nexus-phones */
-        //we manually cancel the notification anyway, so this is likely moot.
+        // We manually cancel the notification anyway, so this is likely moot.
         // UPDATE: when targetting api version 31 and above we have to set FLAG_IMMUTABLE (or mutable)
 
         val intent_flag = pending_intent_flag_fix(PendingIntent.FLAG_CANCEL_CURRENT)
@@ -125,7 +124,6 @@ object SurveyNotifications {
         notificationManager.cancel(surveyIdHash) //cancel any current notification with this id hash
         notificationManager.notify(surveyIdHash, surveyNotification)  // If another notification with the same ID pops up, this notification will be updated/cancelled.
 
-
         //And, finally, set the notification state for zombie alarms.
         PersistentData.setSurveyNotificationState(surveyId, true)
 
@@ -136,17 +134,16 @@ object SurveyNotifications {
         }
     }
 
-    /**
-     * Survey notification function for phones running api versions older than O
+    /**Survey notification function for phones running api versions older than O
      * Uses NotificationCompat.Builder
      * @param appContext
-     * @param surveyId
-     */
+     * @param surveyId */
+    @SuppressLint("UnspecifiedImmutableFlag")  // this is the compat version of the function
     private fun displaySurveyNotificationOld(appContext: Context, surveyId: String) {
         //activityIntent contains information on the action triggered by tapping the notification.
         val notificationBuilder = NotificationCompat.Builder(appContext)
-        val activityIntent: Intent
         notificationBuilder.setContentTitle(appContext.getString(R.string.survey_notification_app_name))
+        val activityIntent: Intent
         if (PersistentData.getSurveyType(surveyId) == "tracking_survey") {
             activityIntent = Intent(appContext, SurveyActivity::class.java)
             activityIntent.action = appContext.getString(R.string.start_tracking_survey)
@@ -204,16 +201,17 @@ object SurveyNotifications {
     }
 
     // Apps targeting api 26 or later need a notification channel to display notifications
-    private fun registerSurveyNotificationChannel(context: Context) {
+    private fun ensureSurveyNotificationChannelExists(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // if it already exists return early
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (notificationManager == null || notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
+            if (notificationManager.getNotificationChannel(CHANNEL_ID) != null)
                 return
-            }
-            val notificationChannel = NotificationChannel(CHANNEL_ID, "Survey Notification", NotificationManager.IMPORTANCE_LOW)
 
-            // Copied these from an example, these values should change
-            notificationChannel.description = "Channel description"
+            // Originally copied these from an example, these values could change but its fine?
+            val notificationChannel = NotificationChannel(
+                    CHANNEL_ID, "Survey Notification", NotificationManager.IMPORTANCE_LOW)
+            notificationChannel.description = "The Beiwe App notification channel"
             notificationChannel.enableLights(true)
             notificationChannel.lightColor = Color.RED
             notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
@@ -235,10 +233,10 @@ object SurveyNotifications {
     /**Tries to determine the type of audio survey.  If it is an Enhanced audio survey AudioRecorderEnhancedActivity.class is returned,
      * any other outcome (including an inability to determine type) returns AudioRecorderActivity.class instead.  */
     fun getAudioSurveyClass(surveyId: String?): Class<*> {
-        val surveySettings: JSONObject
         try {
-            surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
-            if (surveySettings.getString("audio_survey_type") == "raw") return AudioRecorderEnhancedActivity::class.java
+            val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
+            if (surveySettings.getString("audio_survey_type") == "raw")
+                return AudioRecorderEnhancedActivity::class.java
         } catch (e: JSONException) {
             e.printStackTrace()
         }

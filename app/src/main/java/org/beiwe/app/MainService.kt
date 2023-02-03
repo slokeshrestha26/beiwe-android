@@ -227,7 +227,7 @@ class MainService : Service() {
 
             //We need to wait until the participant is registered to send the fcm token.
             val token = taskResult.token
-            val outerNotifcationBlockerThread = Thread(Runnable {
+            val outerNotificationBlockerThread = Thread(Runnable {
                 while (!PersistentData.getIsRegistered()) {
                     try {
                         Thread.sleep(1000)
@@ -238,8 +238,8 @@ class MainService : Service() {
                 }
                 PersistentData.setFCMInstanceID(token)
                 PostRequest.sendFCMInstanceID(token)
-            }, "outerNotifcationBlockerThread")
-            outerNotifcationBlockerThread.start()
+            }, "outerNotificationBlockerThread")
+            outerNotificationBlockerThread.start()
         })
     }
 
