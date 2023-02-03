@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import org.beiwe.app.DeviceInfo
+import org.beiwe.app.printe
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
@@ -44,6 +45,9 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
                 TextFileManager.getDebugLogFile().writeEncrypted("accelSensor does not exist? (2)")
                 exists = false
             }
+            // only runs once per app launch
+            TextFileManager.getDebugLogFile().writeEncrypted(
+                    System.currentTimeMillis().toString() + " accelerometer sensor info: $accelSensor")
         }
     }
 
@@ -86,10 +90,12 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
      * (only ever triggered by the system.)  */
     @Synchronized
     override fun onSensorChanged(arg0: SensorEvent) {
-        // we record the system boot time once and use that as a reference.
+        // we record the system boot time once and use that as a reference, actual info of the
+        // timestamp comes from the sensor event and is in nanoseconds. Device precision is unknown.
         val javaTimeCode = DeviceInfo.boot_time + (arg0.timestamp / 1000000)
-        // print("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
-        // prior_timecode = javaTimeCode
+
+        // needs to be error log or else we get no logcat output. wut.
+        // printe("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
         val values = arg0.values
         val value0 = String.format("%.16f", values[0])
         val value1 = String.format("%.16f", values[1])
@@ -100,7 +106,77 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
             TextFileManager.getAccelFile().newFile()
             lineCount = 0
         }
+
+        // for testing high speeds print only every 100th line to avoid spam
+        // if (lineCount % 100 == 0)
+        //     printe("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
+
         TextFileManager.getAccelFile().writeEncrypted("$javaTimeCode,$accuracy,$value0,$value1,$value2")
         lineCount++
+        // prior_timecode = javaTimeCode
     }
 }
+
+/* The following are the results of values passed in to the microsecond delay parameter of the
+ * accelerometer sensor on the left, and the milliseconds between recorded events on the right.
+ *
+ * This was done on Pixel 6 (not 6a) running android 12, and then later 13.
+ *
+ * Sometimes the value would just snap back to 18 after starting at a different value, but if I used
+ * developer functions to crash the background service and reopen the app, it would snap to whatever
+ * the "correct" "allowed" value.  Baffling.
+ *
+ * This chunk of testing was done with the app open, plugged in.  Values with / means it varied a bit.
+ *
+ * "fastest" (0): 1 millisecond
+ * 1000: 1
+ * 2000: 2/3
+ * 4000: 2/3
+ * 3000: 2/3
+ * 5000: 4 or 5
+ * 6000: 4/5
+ * 7000: 4/5
+ * 8000: 4/5
+ * 9000: 4/5
+ * 9999: 9/10
+ * 10000: 9/10
+ * 15000: 9/10
+ * 20000: 18
+ * 30000: 18
+ * 35000: 18
+ * 40000: 36/37
+ * 50000: 36/37, and then 18
+ * 60000: 36/37, and then 18
+ * 100000: 72
+ * 150000: 72, and then 18
+ * 200000: 145
+ * 300000: 145
+ * 400000: 145 and then 18
+ * 500000: 145 and then 18
+ * 600000: 145 and then 18
+ *
+ *
+ *
+ * other observations:
+ * when the device screen turns off due to the screen timer it would step down to a lower value.
+ * but I don't know what the value was, this test wos not intentional.
+ *  the step was 145 milliseconds -> 288
+ * I  tried 200000, it got stuck on 18 milliseconds and did not replicate the behavior.
+ * I tried 300000 and it got stuck on 18 milliseconds for several minutes, then jumped to 145 BEFORE
+ *  the device's screen turned off... then went BACK to 18 again still before the screen was off...
+ *  then it went to 145 with the screen on, THEN the screen turned off, then it went back to 18.
+ *    The only observation I can make in addition is that this switch would be ROUGHLY around when
+ *    other timer events kicked off actions, like uploads or other sensors.  Its fairly reliable in
+ *    this co-occurrence.  Maybe there is some kind of calculation where the system assigns more
+ *    resources when these timers go off.  (it this case these were minutely timers.
+ *      OKAY and it then EVENTUALLY like 10 minutes later started at 288... and then when there was
+ *      another set of timer events that kicked it back up to 18.
+ *      AFTER returning to the device about 45 minutes later it was still vacillating between these values.
+ *
+ * - I let a faster data rate, 4000, run for a while and it was fairly stable.
+ *
+ * - Using the dev tools to update the app with a custom value while the device has the screen off and
+ *   was previously running at the lower, power-saving value would kick it up to the higher value.
+ * - Accidentally unplugging the test device and plugging it back in a couple seconds later made
+ *   no apparent change to the sampling rate.
+ */

@@ -8,6 +8,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import org.beiwe.app.DeviceInfo
+import org.beiwe.app.printe
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
@@ -44,6 +45,9 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
                 TextFileManager.getDebugLogFile().writeEncrypted("gyroSensor does not exist? (2)")
                 exists = false
             }
+            // only runs once per app launch
+            TextFileManager.getDebugLogFile().writeEncrypted(
+                    System.currentTimeMillis().toString() + " gyroscope sensor info: $gyroSensor")
         }
     }
 
