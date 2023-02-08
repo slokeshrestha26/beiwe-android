@@ -8,7 +8,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import org.beiwe.app.DeviceInfo
-import org.beiwe.app.printe
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
@@ -87,7 +86,7 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
     @Synchronized
     override fun onSensorChanged(arg0: SensorEvent) {
         // we record the system boot time once and use that as a reference.
-        val javaTimeCode = DeviceInfo.boot_time + (arg0.timestamp / 1000000)
+        val javaTimeCode = DeviceInfo.boot_time_milli + (arg0.timestamp / 1000000)
         // print("gyro milliseconds since prior: ${javaTimeCode-prior_timecode})")
         // prior_timecode = javaTimeCode
         val values = arg0.values

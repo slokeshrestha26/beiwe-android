@@ -17,7 +17,7 @@ import org.beiwe.app.storage.EncryptionEngine;
 
 public class DeviceInfo {
 	// this is to be used in an increasing number of places where we hae system elapsed time for sensor events
-	public static long boot_time = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime();
+	public static long boot_time_milli = System.currentTimeMillis() - android.os.SystemClock.elapsedRealtime();
 	public static long boot_time_nano = System.nanoTime() - android.os.SystemClock.elapsedRealtimeNanos();
 	
 	

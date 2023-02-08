@@ -7,8 +7,11 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.util.Log
+import org.beiwe.app.DeviceInfo
 import org.beiwe.app.PermissionHandler.checkAccessCoarseLocation
 import org.beiwe.app.PermissionHandler.checkAccessFineLocation
+import org.beiwe.app.printe
+import org.beiwe.app.printi
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
@@ -26,9 +29,10 @@ class GPSListener(private val appContext: Context) : LocationListener {
         const val header = "timestamp, latitude, longitude, altitude, accuracy"
     }
 
-    private val pkgManager: PackageManager
+    private val pkgManager: PackageManager = appContext.packageManager
     private var locationManager: LocationManager
     private var enabled = false
+    private var first_instantiation = true
 
     /** Listens for GPS updates from the network GPS location provider and/or the true
      * GPS provider, both if possible.  It is NOT activated upon instantiation.  Requires an
@@ -36,7 +40,6 @@ class GPSListener(private val appContext: Context) : LocationListener {
      * When activated using the turn_on() function it will log any location updates to the GPS log.
      * @param appContext A Context provided an Activity or Service. */
     init {
-        pkgManager = appContext.packageManager
         locationManager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         Log.d("initializing GPS...", "initializing GPS...")
     }
@@ -71,6 +74,12 @@ class GPSListener(private val appContext: Context) : LocationListener {
         //Instantiate a new location manager (looks like the fine and coarse available variables get confused if we use an old one.)
         locationManager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
+        // Uncomment to view all location providers, prints on gps session.
+        // printe("locationmanager gnssYearOfHardware ${locationManager.gnssYearOfHardware}")
+        // printe("locationmanager gnssAntennaInfos ${locationManager.gnssAntennaInfos}")
+        // printe("locationmanager gnssCapabilities ${locationManager.gnssCapabilities}")
+        // locationManager.allProviders.forEach { printe("provider: $it") }
+
         //If the feature exists, request locations from it. (enable if their boolean flag is true.)
         if (fineExists && finePermissible && coarsePermissible) {
             //AndroidStudio insists that both of these require the same location permissions, which seems to be correct
@@ -94,7 +103,28 @@ class GPSListener(private val appContext: Context) : LocationListener {
         if (!coarseAvailable)
             makeDebugLogStatement("GPS data stream warning: coarse location updates are currently disabled.")
 
+        // There is more information to be had but its kind of junk, output looks like this:
+        //  GPS properties: ProviderProperties[powerUsage=Low, accuracy=Fine, supports=[bearing,speed,altitude]]
+        //  Network properties: ProviderProperties[powerUsage=Low, accuracy=Fine]
+        // if (first_instantiation && fineAvailable) {
+        //     val properties: ProviderProperties? = locationManager.getProviderProperties(LocationManager.GPS_PROVIDER)
+        //     if (properties != null)
+        //         printe("GPS properties: $properties")
+        // }
+        // if (first_instantiation && coarseAvailable) {
+        //     val properties: ProviderProperties? = locationManager.getProviderProperties(LocationManager.PASSIVE_PROVIDER)
+        //     if (properties != null)
+        //         printe("Network properties: $properties")
+        // }
+
+
         enabled = true
+        if (first_instantiation) {
+            first_instantiation = false
+            val device_info = "GPS GNSS Hardware Model Name: ${locationManager.gnssHardwareModelName}"
+            printi(device_info)
+            makeDebugLogStatement(device_info)
+        }
     }
 
     /** Disable all location updates  */

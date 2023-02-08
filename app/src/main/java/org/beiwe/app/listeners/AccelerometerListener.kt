@@ -8,7 +8,6 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import org.beiwe.app.DeviceInfo
-import org.beiwe.app.printe
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 
@@ -92,7 +91,7 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
     override fun onSensorChanged(arg0: SensorEvent) {
         // we record the system boot time once and use that as a reference, actual info of the
         // timestamp comes from the sensor event and is in nanoseconds. Device precision is unknown.
-        val javaTimeCode = DeviceInfo.boot_time + (arg0.timestamp / 1000000)
+        val javaTimeCode = DeviceInfo.boot_time_milli + (arg0.timestamp / 1000000)
 
         // needs to be error log or else we get no logcat output. wut.
         // printe("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
