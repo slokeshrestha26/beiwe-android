@@ -110,6 +110,9 @@ Version history:
     pending intent flags for push notifications.
 64: 3.3.2.  Adds fcm uploads, codified the app restart behavior, some cleanup, logging improvements
     in post requests, oh and UPLOADS NOW ONLY UPLOADS DATA FILES FINALLY ONLY TOOK YEARS.
+65: 3.3.3.  fcm port, formatting, documentation, and cleanup.  Removes permission handler's
+    special casing based on versions of android that are no longer supported.  gpslistener ported to
+    kotlin. gyro, accelerometer, gps now report sensor device information.
 */
 
 android {
@@ -131,8 +134,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 31
-        versionCode 64       //TODO: update this Beiwe version code for new releases
-        versionName '3.3.2'  //TODO: update this Beiwe version number for new releases
+        versionCode 65       //TODO: update this Beiwe version code for new releases
+        versionName '3.3.3'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
     buildTypes {
