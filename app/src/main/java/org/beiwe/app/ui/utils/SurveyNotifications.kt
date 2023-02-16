@@ -65,6 +65,7 @@ object SurveyNotifications {
     }
 
     /** Survey notification function for phones running api versions O or newer
+     * Calls PersistentData.setSurveyNotificationState
      * Uses Notification.Builder
      * @param appContext
      * @param surveyId */

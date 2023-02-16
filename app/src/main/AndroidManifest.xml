@@ -44,7 +44,7 @@
 
         <activity
             android:name="org.beiwe.app.ui.LoadingActivity"
-            android:label="${appName}${appNameSuffix}"
+
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

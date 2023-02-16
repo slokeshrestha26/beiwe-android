@@ -275,7 +275,7 @@ public class PostRequest {
 		if (BuildConfig.APP_IS_DEV) {
 			String size = "";
 			if (file.length() < 1024) size = file.length() + " bytes"; else size = file.length()/1024 + "KB";
-			Log.d("uploading", "starting attempt to upload " + file.getName() + ", size: " + size);
+			// Log.d("uploading", "starting attempt to upload " + file.getName() + ", size: " + size);
 		}
 		
 		HttpsURLConnection connection = minimalHTTP(uploadUrl);
@@ -313,7 +313,7 @@ public class PostRequest {
 		connection.disconnect();
 		
 		if (BuildConfig.APP_IS_DEV)
-			Log.d("uploaded", "finished attempt to upload " + file.getName() + "; got code " + response);
+			Log.v("uploaded", "finished attempt to upload " + file.getName() + "; got code " + response);
 		return response;
 	}
 	

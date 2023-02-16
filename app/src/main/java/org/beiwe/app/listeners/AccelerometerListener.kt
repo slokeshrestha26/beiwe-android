@@ -19,11 +19,10 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
 
     private var accelSensorManager: SensorManager? = null
     private var accelSensor: Sensor? = null
-    private var enabled: Boolean = false
+    var running: Boolean = false
     private var accuracy = "unknown"
     private var lineCount = 0
 
-    @JvmField
     var exists: Boolean = appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
 
     /**Listens for accelerometer updates.  NOT activated on instantiation. Use the turn_on()
@@ -67,14 +66,17 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
             TextFileManager.getDebugLogFile().writeEncrypted("Trying to start Accelerometer session, device cannot find accelerometer.")
         }
         else
-            enabled = true
+            running = true
     }
 
     @Synchronized
     fun turn_off() {
         accelSensorManager?.unregisterListener(this)
-        enabled = false
+        running = false
     }
+
+    val accelerometer_off_action: () -> Unit = { turn_off() }
+    val accelerometer_on_action: () -> Unit = { turn_on() }
 
     /** Update the accuracy, synchronized so very closely timed trigger events do not overlap.
      * (only triggered by the system.)  */

@@ -1,5 +1,7 @@
 package org.beiwe.app.storage;
 
+import static org.beiwe.app.listeners.AmbientAudioListenerKt.ambientTempAudioFilename;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -538,7 +540,7 @@ public class TextFileManager {
 	
 	/** Make new files for all the non-persistent files. */
 	public static synchronized void makeNewFilesForEverything () {
-//		Log.d("TextFileManager.java", "makeNewFilesForEverything() called");
+		// Log.d("TextFileManager.java", "makeNewFilesForEverything() called");
 		GPSFile.newFile();
 		accelFile.newFile();
 		gyroFile.newFile();
@@ -581,7 +583,7 @@ public class TextFileManager {
 		files.remove(AudioRecorderActivity.unencryptedTempAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedRawAudioFileName);
 		files.remove(AudioRecorderEnhancedActivity.unencryptedTempAudioFileName); //should be identical to regular audiorecording file, but keep in case it changes.
-		files.remove(AmbientAudioListener.unencryptedTempAudioFilename);
+		files.remove(ambientTempAudioFilename);
 		
 		// These files are currently being written to, so they shouldn't be uploaded now
 		files.remove(TextFileManager.getGPSFile().fileName);
@@ -592,7 +594,7 @@ public class TextFileManager {
 		files.remove(TextFileManager.getTextsLogFile().fileName);
 		files.remove(TextFileManager.getDebugLogFile().fileName);
 		files.remove(TextFileManager.getBluetoothLogFile().fileName);
-		files.remove(AmbientAudioListener.currentlyBeingWrittenEncryptedFilename);
+		files.remove(AmbientAudioListener.currentlyWritingEncryptedFilename);
 		
 		// These files are only occasionally open, but they may be currently open. If they are, don't upload them
 		files.remove(TextFileManager.getSurveyAnswersFile().fileName);

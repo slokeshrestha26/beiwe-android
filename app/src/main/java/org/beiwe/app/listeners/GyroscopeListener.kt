@@ -19,11 +19,10 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
 
     private var gyroSensorManager: SensorManager? = null
     private var gyroSensor: Sensor? = null
-    private var enabled: Boolean = false
+    var running: Boolean = false
     private var accuracy ="unknown"
     private var lineCount = 0
 
-    @JvmField
     var exists: Boolean = appContext.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)
 
     /**Listens for gyroscope updates.  NOT activated on instantiation. Use the turn_on() function
@@ -64,14 +63,17 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
             Log.e("Gyroscope", "Gyroscope is broken")
             TextFileManager.getDebugLogFile().writeEncrypted("Trying to start gyroscope session, device cannot find gyroscope.")
         } else
-            enabled = true
+            running = true
     }
 
     @Synchronized
     fun turn_off() {
         gyroSensorManager?.unregisterListener(this)
-        enabled = false
+        running = false
     }
+
+    val gyro_off_action: () -> Unit = { turn_off() }
+    val gyro_on_action: () -> Unit = { turn_on() }
 
     /** Update the accuracy, synchronized so very closely timed trigger events do not overlap.
      * (only triggered by the system.)  */

@@ -31,7 +31,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
 
     private val pkgManager: PackageManager = appContext.packageManager
     private var locationManager: LocationManager
-    private var enabled = false
+    var running = false
     private var first_instantiation = true
 
     /** Listens for GPS updates from the network GPS location provider and/or the true
@@ -68,7 +68,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
             return
 
         // if already enabled return true.  We want the above logging, do not refactor to earlier in the logic.
-        if (enabled)
+        if (running)
             return
 
         //Instantiate a new location manager (looks like the fine and coarse available variables get confused if we use an old one.)
@@ -118,7 +118,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
         // }
 
 
-        enabled = true
+        running = true
         if (first_instantiation) {
             first_instantiation = false
             val device_info = "GPS GNSS Hardware Model Name: ${locationManager.gnssHardwareModelName}"
@@ -132,13 +132,21 @@ class GPSListener(private val appContext: Context) : LocationListener {
     fun turn_off() {
         // pretty confident this cannot fail.
         locationManager.removeUpdates(this)
-        enabled = false
+        running = false
     }
+
+    val gps_off_action: () -> Unit = { turn_off() }
+    val gps_on_action: () -> Unit = { turn_on() }
 
     /** pushes an update to us whenever there is a location update.  */
     override fun onLocationChanged(location: Location) {
-        val javaTimeCode = System.currentTimeMillis()
+        // val javaTimeCode = System.currentTimeMillis()
         //order: time, latitude, longitude, altitude, horizontal_accuracy\n
+        printe(System.currentTimeMillis())
+        printe(location.elapsedRealtimeNanos / 1_000_000)
+
+        // we record the system boot time once and use that as a reference.
+        val javaTimeCode = DeviceInfo.boot_time_milli + (location.elapsedRealtimeNanos / 1_000_000)
 
         // Latitude and longitude offset should be 0 unless GPS fuzzing is enabled
         val latitude = location.latitude + PersistentData.getLatitudeOffset()

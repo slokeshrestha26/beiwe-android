@@ -64,27 +64,27 @@ class DebugInterfaceActivity : SessionActivity() {
 
     //Intent triggers caught in BackgroundService
     fun accelerometerOn(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.accelerometerOnIntent)
+        mainService!!.accelerometerListener!!.turn_on()
     }
 
     fun accelerometerOff(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.accelerometerOffIntent)
+        mainService!!.accelerometerListener!!.turn_off()
     }
 
     fun gyroscopeOn(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.gyroscopeOnIntent)
+        mainService!!.gyroscopeListener!!.turn_on()
     }
 
     fun gyroscopeOff(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.gyroscopeOffIntent)
+        mainService!!.gyroscopeListener!!.turn_off()
     }
 
     fun gpsOn(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.gpsOnIntent)
+        mainService!!.gpsListener!!.turn_on()
     }
 
     fun gpsOff(view: View?) {
-        this.applicationContext.sendBroadcast(Timer.gpsOffIntent)
+        mainService!!.gpsListener!!.turn_off()
     }
 
     fun scanWifi(view: View?) {
@@ -352,7 +352,7 @@ class DebugInterfaceActivity : SessionActivity() {
 
     fun checkAmbientAudioRunning(view: View?) {
         printi("Ambient Audio Enabled", PersistentData.getAmbientAudioEnabled())
-        printi("Ambient Audio Running", AmbientAudioListener.isCurrentlyRunning())
+        printi("Ambient Audio Running", AmbientAudioListener.isCurrentlyRunning)
     }
 
     //ui operations

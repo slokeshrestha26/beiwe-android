@@ -110,12 +110,19 @@ Version history:
     pending intent flags for push notifications.
 64: 3.3.2.  Adds fcm uploads, codified the app restart behavior, some cleanup, logging improvements
     in post requests, oh and UPLOADS NOW ONLY UPLOADS DATA FILES FINALLY ONLY TOOK YEARS.
+
 65: 3.3.3.  fcm port, formatting, documentation, and cleanup.  Removes permission handler's
     special casing based on versions of android that are no longer supported.  gpslistener ported to
     kotlin. gyro, accelerometer, gps now report sensor device information.
+
+
+    Update next - complete rewrite of logic that checks for actions to execute.  Adds some
+    extra configuration details to this gradle file in anticipation of writing tests.
 */
 
+
 android {
+
     signingConfigs {
         config {
             storeFile file(keystoreProperties['storeFile'])
@@ -125,8 +132,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     compileSdkVersion 31
     defaultConfig {
@@ -138,6 +145,12 @@ android {
         versionName '3.3.3'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
+
+    // some kind of conflict with these files when including testing libraries, or even just having them installed
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -149,17 +162,31 @@ android {
             buildConfigField("String", "SENTRY_DSN", "\"" + keystoreProperties['releaseDSN'] + "\"")
         }
         beta {
+            minifyEnabled false
             versionNameSuffix("-beta")
             signingConfig signingConfigs.config
             manifestPlaceholders = [appNameSuffix: "-beta"]
             buildConfigField("boolean", "APP_IS_BETA", "true")
             buildConfigField("boolean", "APP_IS_DEV", "false")
             buildConfigField("String", "SENTRY_DSN", "\"" + keystoreProperties['betaDSN'] + "\"")
+            debuggable true
         }
         development {
+            minifyEnabled false
             versionNameSuffix("-development")
             signingConfig signingConfigs.config
             manifestPlaceholders = [appNameSuffix: "-development"]
+            buildConfigField("boolean", "APP_IS_BETA", "true")
+            buildConfigField("boolean", "APP_IS_DEV", "true")
+            buildConfigField("String", "SENTRY_DSN", "\"" + keystoreProperties['developmentDSN'] + "\"")
+            debuggable true
+        }
+        // this entry is required to make tests work, it is copy-pasted from the development entry.
+        debug {
+            minifyEnabled false
+            versionNameSuffix("-debug")
+            signingConfig signingConfigs.config
+            manifestPlaceholders = [appNameSuffix: "-tests"]
             buildConfigField("boolean", "APP_IS_BETA", "true")
             buildConfigField("boolean", "APP_IS_DEV", "true")
             buildConfigField("String", "SENTRY_DSN", "\"" + keystoreProperties['developmentDSN'] + "\"")
@@ -170,19 +197,19 @@ android {
     productFlavors {
         onnelaLabServer {
             dimension "version"
-            manifestPlaceholders = [appName: "Beiwe"]
+            manifestPlaceholders = [appName: "Beiwe", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "false")
             buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'true')
         }
         googlePlayStore {
             dimension "version"
-            manifestPlaceholders = [appName: "Beiwe2"]
+            manifestPlaceholders = [appName: "Beiwe2", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", 'true')
             buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'false')
         }
         commStatsCustomUrl {
             dimension "version"
-            manifestPlaceholders = [appName: "Beiwe"]
+            manifestPlaceholders = [appName: "Beiwe", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "true")
             buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'true')
         }
@@ -220,8 +247,20 @@ dependencies {
     implementation 'com.madgag.spongycastle:core:1.54.0.0'
     implementation 'com.google.firebase:firebase-messaging:20.2.3'
     implementation 'com.google.firebase:firebase-analytics:17.4.4'  // App can compile without this.
-    implementation "androidx.core:core-ktx:1.8.0"  // 1.9.0 requires target SDK 33
+    implementation 'androidx.core:core-ktx:1.8.0'  // 1.9.0 requires target SDK 33
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//
+//    // Required -- JUnit 4 framework
+//    testImplementation "junit:junit:5.9.2"
+//    // Optional -- Robolectric environment
+//    testImplementation "androidx.test:core:1.5.0"
+//    // Optional -- Mockito framework
+//    testImplementation "org.mockito:mockito-core:5.1.1"
+//    // Optional -- mockito-kotlin
+//    testImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"
+//    // Optional -- Mockk framework
+//    testImplementation "io.mockk:mockk:1.13.4"
+
     apply plugin: 'kotlin-android-extensions'
 
 }
