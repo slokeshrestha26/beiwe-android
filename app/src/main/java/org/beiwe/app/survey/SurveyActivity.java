@@ -32,6 +32,7 @@ public class SurveyActivity extends SessionActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		PersistentData.setTakingSurvey();
 		super.onCreate(savedInstanceState);
 		initialViewMoment = System.currentTimeMillis();
 		setContentView(R.layout.activity_survey);
@@ -45,6 +46,11 @@ public class SurveyActivity extends SessionActivity implements
 //		}
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		PersistentData.setNotTakingSurvey();
+	}
 
 	@Override
 	protected void doBackgroundDependentTasks() {

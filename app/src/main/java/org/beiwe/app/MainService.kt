@@ -2,7 +2,6 @@
 
 package org.beiwe.app
 
-import android.annotation.SuppressLint
 import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,7 +10,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.*
 import android.util.Log
@@ -23,16 +21,15 @@ import io.sentry.Sentry
 import io.sentry.android.AndroidSentryClientFactory
 import io.sentry.dsn.InvalidDsnException
 import org.beiwe.app.PermissionHandler.checkBluetoothPermissions
-import org.beiwe.app.PermissionHandler.checkGpsPermissions
 import org.beiwe.app.PermissionHandler.checkWifiPermissions
 import org.beiwe.app.PermissionHandler.confirmBluetooth
 import org.beiwe.app.PermissionHandler.confirmCalls
 import org.beiwe.app.PermissionHandler.confirmTexts
 import org.beiwe.app.listeners.*
-import org.beiwe.app.networking.NetworkUtility
 import org.beiwe.app.networking.PostRequest
 import org.beiwe.app.networking.SurveyDownloader
 import org.beiwe.app.storage.PersistentData
+import org.beiwe.app.storage.SetDeviceSettings
 import org.beiwe.app.storage.TextFileManager
 import org.beiwe.app.survey.SurveyScheduler
 import org.beiwe.app.ui.user.LoginActivity
@@ -46,17 +43,18 @@ const val NOTIFICATION_CHANNEL_NAME = "Beiwe Data Collection" // user facing nam
 
 // timer constants all internal values require milliseconds
 const val FCM_TIMER = 1000L * 60 * 120 // 2 hours between sending fcm updates
-const val FOREGROUND_SERVICE_TIMER = 1000L * 60 * 60 * 6 // 6 hours for a foreground service notification
-const val FOREGROUND_SERVICE_RESTART_PERIODICITY = 1000L * 30 // but try every 2 minutes because we are very greedy about this.
+const val DEVICE_SETTINGS_UPDATE_PERIODICITY = 1000L * 60 * 60 * 2 // 2 hours between checking for updated device settings updates
+const val FOREGROUND_SERVICE_NOTIFICATION_TIMER = 1000L * 60 * 60 * 6 // 6 hours for a foreground service notification
+const val FOREGROUND_SERVICE_RESTART_PERIODICITY = 1000L * 30 // set to 30 seconds because we are very greedy about this.
+const val THREADHANDLER_PERIODICITY = 1000L * 30
 
 const val BLLUETOOTH_MESSAGE_1 = "bluetooth Failure, device should not have gotten to this line of code"
 const val BLLUETOOTH_MESSAGE_2 = "Device does not support bluetooth LE, bluetooth features disabled."
 
+const val FCM_ERROR_MESSAGE  = "Unable to get FCM token, will not be able to receive push notifications."
+
 
 class MainService : Service() {
-    // unfortunately this variable cannot be made non-null, it is not available at init.
-    private var appContext: Context? = null
-
     // the various listeners for sensor data
     var gpsListener: GPSListener? = null
     var powerStateListener: PowerStateListener? = null
@@ -64,66 +62,93 @@ class MainService : Service() {
     var gyroscopeListener: GyroscopeListener? = null
     var bluetoothListener: BluetoothListener? = null
 
+    // these assets don't require android assets, they can go in the common init.
+    val background_handlerThread = HandlerThread("background_handler_thread")
+    var background_handler: Handler
+    var background_looper: Looper
+
+    init {
+        background_handlerThread.start()
+        background_looper = background_handlerThread.looper
+        background_handler = Handler(background_looper)
+    }
+
     /*##############################################################################################
     ##############################           App Core Setup              ###########################
     ##############################################################################################*/
 
     /** onCreate is essentially the constructor for the service, initialize variables here.  */
     override fun onCreate() {
-        appContext = this.applicationContext!!
-        localHandle = this //yes yes, gross, I know. must instantiate before  registerTimers()
+        localHandle = this //yes yes, gross, I know. must instantiate before registerTimers()
 
         try {
             val sentryDsn = BuildConfig.SENTRY_DSN
-            Sentry.init(sentryDsn, AndroidSentryClientFactory(appContext))
+            Sentry.init(sentryDsn, AndroidSentryClientFactory(applicationContext))
         } catch (ie: InvalidDsnException) {
-            Sentry.init(AndroidSentryClientFactory(appContext))
+            Sentry.init(AndroidSentryClientFactory(applicationContext))
         }
 
         // report errors from the service to sentry only when this is not the development build
         if (!BuildConfig.APP_IS_DEV)
-            Thread.setDefaultUncaughtExceptionHandler(CrashHandler(appContext!!))
+            Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
+
+        // Accessing a survey requires thhe user opening the app or an activet survey notification,
+        // which means the background service is always running before that point, even in the
+        // corner case of when the background starts an system-on.
+        PersistentData.initialize(applicationContext)
+        PersistentData.setNotTakingSurvey()
 
         // Initialize everything that is necessary for the app!
-        PersistentData.initialize(appContext)
         initializeFireBaseIDToken()
-        TextFileManager.initialize(appContext)
-        PostRequest.initialize(appContext)
-        registerTimers(appContext!!)
+        TextFileManager.initialize(applicationContext)
+        PostRequest.initialize(applicationContext)
+        registerTimers(applicationContext)
         createNotificationChannel()
         doSetup()
+
+        // dispatch the ThreadHandler based run_all_app_logic call with a 1/2 duration offset.
+        background_handler.postDelayed(periodic_run_app_logic, THREADHANDLER_PERIODICITY / 2)
+    }
+
+    // namespace hack, see comment
+    fun get_periodic_run_app_logic(): () -> Unit = periodic_run_app_logic
+    val periodic_run_app_logic: () -> Unit = {
+        printv("run_all_app_logic - ThreadHandler")
+        run_all_app_logic()
+        // in the scope of this closure "periodic_run_app_logic" doesn't exist, we need to access it, not referency it.
+        background_handler.postDelayed(get_periodic_run_app_logic(), THREADHANDLER_PERIODICITY)
     }
 
     fun doSetup() {
         //Accelerometer, gyro, power state, and wifi don't need permissions or they are checked in
         // the broadcastreceiver logic
         startPowerStateListener()
-        gpsListener = GPSListener(appContext!!)
-        WifiListener.initialize(appContext)
+        gpsListener = GPSListener(applicationContext)
+        WifiListener.initialize(applicationContext)
 
         if (PersistentData.getAccelerometerEnabled())
-            accelerometerListener = AccelerometerListener(appContext!!)
+            accelerometerListener = AccelerometerListener(applicationContext)
         if (PersistentData.getGyroscopeEnabled())
-            gyroscopeListener = GyroscopeListener(appContext!!)
+            gyroscopeListener = GyroscopeListener(applicationContext)
 
         //Bluetooth, wifi, gps, calls, and texts need permissions
-        if (confirmBluetooth(appContext!!))
+        if (confirmBluetooth(applicationContext))
             startBluetooth()
 
-        if (confirmTexts(appContext!!)) {
+        if (confirmTexts(applicationContext)) {
             startSmsSentLogger()
             startMmsSentLogger()
         } else if (PersistentData.getTextsEnabled()) {
             sendBroadcast(Timer.checkForSMSEnabledIntent)
         }
-        if (confirmCalls(appContext!!))
+        if (confirmCalls(applicationContext))
             startCallLogger()
         else if (PersistentData.getCallsEnabled())
             sendBroadcast(Timer.checkForCallsEnabledIntent)
 
         //Only do the following if the device is registered
         if (PersistentData.getIsRegistered()) {
-            DeviceInfo.initialize(appContext) //if at registration this has already been initialized. (we don't care.)
+            DeviceInfo.initialize(applicationContext) //if at registration this has already been initialized. (we don't care.)
             startTimers()
         }
     }
@@ -134,7 +159,7 @@ class MainService : Service() {
         chan.lightColor = Color.BLUE
         chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         chan.setSound(null, null)
-        val manager = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(chan)
     }
 
@@ -174,20 +199,20 @@ class MainService : Service() {
 
     /** Initializes the sms logger.  */
     fun startSmsSentLogger() {
-        val smsSentLogger = SmsSentLogger(Handler(), appContext)
+        val smsSentLogger = SmsSentLogger(Handler(), applicationContext)
         this.contentResolver.registerContentObserver(
                 Uri.parse("content://sms/"), true, smsSentLogger)
     }
 
     fun startMmsSentLogger() {
-        val mmsMonitor = MMSSentLogger(Handler(), appContext)
+        val mmsMonitor = MMSSentLogger(Handler(), applicationContext)
         this.contentResolver.registerContentObserver(
                 Uri.parse("content://mms/"), true, mmsMonitor)
     }
 
     /** Initializes the call logger.  */
     private fun startCallLogger() {
-        val callLogger = CallLogger(Handler(), appContext)
+        val callLogger = CallLogger(Handler(), applicationContext)
         this.contentResolver.registerContentObserver(
                 Uri.parse("content://call_log/calls/"), true, callLogger)
     }
@@ -197,7 +222,6 @@ class MainService : Service() {
      *  registered programatically. They do not work if registered in the app's manifest. Same for
      *  the ACTION_POWER_SAVE_MODE_CHANGED and ACTION_DEVICE_IDLE_MODE_CHANGED filters, though they
      *  are for monitoring deeper power state changes in 5.0 and 6.0, respectively.  */
-    @SuppressLint("InlinedApi")
     private fun startPowerStateListener() {
         if (powerStateListener == null) {
             val filter = IntentFilter()
@@ -209,63 +233,52 @@ class MainService : Service() {
                 filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
             powerStateListener = PowerStateListener()
             registerReceiver(powerStateListener, filter)
-            PowerStateListener.start(appContext)
+            PowerStateListener.start(applicationContext)
         }
     }
 
     /** Gets, sets, and pushes the FCM token to the backend.  */
     fun initializeFireBaseIDToken() {
-        val errorMessage = "Unable to get FCM token, will not be able to receive push notifications."
-
-        // Set up the oncomplete listener for the FCM getter code, then wait until registered to
-        // actually push it to the server or else the post request will error.
-
-        // This inline function was autoconverted from Java Runnable() syntax, note that the thread
-        // name used is waaaay at the end
-        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(OnCompleteListener {
-            task: Task<InstanceIdResult> ->
-
-            // If the task failed, log the error and return, we will catch in the firebase
+        // Set up the oncomplete listener for the FCM getter code, which in turn sets up a thread
+        // that will wait until the participant is registered to actually push it off to the server.
+        val fcm_closure = OnCompleteListener { task: Task<InstanceIdResult> ->
+            // If the task failed, log the error and return, we will resend in the firebase
             // token-changed code, or the FCM_TIMER periodic event.
             if (!task.isSuccessful) {
-                Log.e("FCM", errorMessage, task.exception)
-                TextFileManager.writeDebugLogStatement("$errorMessage(1)")
+                Log.e("FCM", FCM_ERROR_MESSAGE, task.exception)
+                TextFileManager.writeDebugLogStatement("$FCM_ERROR_MESSAGE(1)")
                 return@OnCompleteListener
             }
 
-            // Get new Instance ID token
+            // Get new Instance ID token - literally can't access task.result in blocker_closure ...?!
             val taskResult = task.result
             if (taskResult == null) {
-                TextFileManager.writeDebugLogStatement("$errorMessage(2)")
+                TextFileManager.writeDebugLogStatement("$FCM_ERROR_MESSAGE(2)")
                 return@OnCompleteListener
             }
 
-            //We need to wait until the participant is registered to send the fcm token.
-            val token = taskResult.token
-            val outerNotificationBlockerThread = Thread(Runnable {
+            // We need to wait until the participant is registered to send the fcm token.
+            // (This is a Runnable because we need to return early in an error case with @Runnable)
+            val blocker_closure = Runnable {
                 while (!PersistentData.getIsRegistered()) {
                     try {
                         Thread.sleep(1000)
                     } catch (ignored: InterruptedException) {
-                        TextFileManager.writeDebugLogStatement("$errorMessage(3)")
+                        TextFileManager.writeDebugLogStatement("$FCM_ERROR_MESSAGE(3)")
                         return@Runnable
                     }
                 }
-                PersistentData.setFCMInstanceID(token)
-                PostRequest.sendFCMInstanceID(token)
-            }, "outerNotificationBlockerThread")
-            outerNotificationBlockerThread.start()
-        })
-    }
+                PersistentData.setFCMInstanceID(taskResult.token)
+                PostRequest.sendFCMInstanceID(taskResult.token)
+            }
 
-    /* Sends the FCM token to the backend. Automatically sets an alarm to run perioditaccally.
-	   based on the FCM_TIMER variable. */
-    // fun sendFcmToken() {
-    //     val fcm_token = PersistentData.getFCMInstanceID()
-    //     if (fcm_token != null)
-    //         PostRequest.sendFCMInstanceID(fcm_token)
-    //     timer!!.setupExactSingleAlarm(FCM_TIMER.toLong(), Timer.sendCurrentFCMTokenIntent)
-    // }
+            // kick off the blocker thread
+            Thread(blocker_closure, "fcm_blocker_thread").start()
+        }
+
+        // setup oncomplete listener
+        FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener(fcm_closure)
+    }
 
     /*#############################################################################
 	####################            Timer Logic             #######################
@@ -273,13 +286,14 @@ class MainService : Service() {
 
     fun startTimers() {
         Log.i("BackgroundService", "running startTimer logic.")
-        val now = run_all_app_logic()
+        printv("run_all_app_logic - startTimers")
+        run_all_app_logic()
 
         // if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event,
         // set up the next Bluetooth-on alarm. (Bluetooth needs to run at absolute points in time,
         // it should not be started if a scheduled event is missed.)
         if (PersistentData.getBluetoothEnabled()) {
-            if (confirmBluetooth(appContext!!) && !timer!!.alarmIsSet(Timer.bluetoothOnIntent))
+            if (confirmBluetooth(applicationContext) && !timer!!.alarmIsSet(Timer.bluetoothOnIntent))
                 timer!!.setupExactSingleAbsoluteTimeAlarm(
                         PersistentData.getBluetoothTotalDuration(),
                         PersistentData.getBluetoothGlobalOffset(),
@@ -311,36 +325,34 @@ class MainService : Service() {
      * Note: every condition has a return statement at the end; this is because the trigger survey
      * notification action requires a fairly expensive dive into PersistantData JSON unpacking. */
     private val timerReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(appContext: Context, intent: Intent) {
+        override fun onReceive(applicationContext: Context, intent: Intent) {
             Log.e("BackgroundService", "Received broadcast: $intent")
             // Don't change this log to have a "correct" comma.
             TextFileManager.getDebugLogFile().writeEncrypted(
                     System.currentTimeMillis().toString() + " Received Broadcast: " + intent.toString())
 
             val broadcastAction = intent.action
-
+            printv("run_all_app_logic - timerReceiver")
             run_all_app_logic()
 
-            /* Bluetooth timers are unlike GPS and Accelerometer because it uses an absolute-point-in-time
-             * as a trigger, and therefore we don't need to store most-recent-timer state.
-			 * The Bluetooth-on action sets the corresponding Bluetooth-off timer, the
-			 * Bluetooth-off action sets the next Bluetooth-on timer.*/if (broadcastAction == appContext.getString(R.string.turn_bluetooth_on)) {
-            if (!PersistentData.getBluetoothEnabled()) {
-                    Log.e("BackgroundService", "invalid Bluetooth on received")
+            /* Bluetooth timers are unlike GPS and Accelerometer because it uses an
+             * absolute-point-in-time as a trigger, and therefore we don't need to store
+             * most-recent-timer state. The Bluetooth-on action sets the corresponding Bluetooth-off
+             * timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
+            if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_on)) {
+                if (!PersistentData.getBluetoothEnabled())
+                        return
+                    if (checkBluetoothPermissions(applicationContext)) {
+                        if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
+                    } else {
+                        TextFileManager.writeDebugLogStatement("user has not provided permission for Bluetooth.")
+                    }
+                    timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
                     return
-                }
-                if (checkBluetoothPermissions(appContext)) {
-                    if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
-                } else {
-                    TextFileManager.getDebugLogFile().writeEncrypted(
-                            System.currentTimeMillis().toString() + " user has not provided permission for Bluetooth.")
-                }
-                timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
-                return
             }
 
-            if (broadcastAction == appContext.getString(R.string.turn_bluetooth_off)) {
-                if (checkBluetoothPermissions(appContext) && bluetoothListener != null)
+            if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_off)) {
+                if (checkBluetoothPermissions(applicationContext) && bluetoothListener != null)
                     bluetoothListener!!.disableBLEScan()
                 timer!!.setupExactSingleAbsoluteTimeAlarm(
                         PersistentData.getBluetoothTotalDuration(),
@@ -352,27 +364,27 @@ class MainService : Service() {
 
             // I don't know if we pull this one out
             // Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 
-            if (broadcastAction == appContext.getString(R.string.signout_intent)) {
+            if (broadcastAction == applicationContext.getString(R.string.signout_intent)) {
                 //FIXME: does this need to run on the main thread in do_signout_check?
                 PersistentData.logout()
-                val loginPage = Intent(appContext, LoginActivity::class.java) // yup that is still java
+                val loginPage = Intent(applicationContext, LoginActivity::class.java) // yup that is still java
                 loginPage.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                appContext.startActivity(loginPage)
+                applicationContext.startActivity(loginPage)
                 return
             }
 
             // leave the SMS/MMS/calls logic as-is, it is like this to ensure they are never
             // enabled until the particiant presses the accept button.
-            if (broadcastAction == appContext.getString(R.string.check_for_sms_enabled)) {
-                if (confirmTexts(appContext)) {
+            if (broadcastAction == applicationContext.getString(R.string.check_for_sms_enabled)) {
+                if (confirmTexts(applicationContext)) {
                     startSmsSentLogger()
                     startMmsSentLogger()
                 } else if (PersistentData.getTextsEnabled())
                     timer!!.setupExactSingleAlarm(30000L, Timer.checkForSMSEnabledIntent)
             }
             // logic for the call (metadata) logger
-            if (broadcastAction == appContext.getString(R.string.check_for_calls_enabled)) {
-                if (confirmCalls(appContext)) {
+            if (broadcastAction == applicationContext.getString(R.string.check_for_calls_enabled)) {
+                if (confirmCalls(applicationContext)) {
                     startCallLogger()
                 } else if (PersistentData.getCallsEnabled())
                     timer!!.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabledIntent)
@@ -383,7 +395,7 @@ class MainService : Service() {
             // for that survey, schedule the next alarm.
             if (PersistentData.getSurveyIds().contains(broadcastAction)) {
 				// Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
-                displaySurveyNotification(appContext, broadcastAction!!)
+                displaySurveyNotification(applicationContext, broadcastAction!!)
                 SurveyScheduler.scheduleSurvey(broadcastAction)
                 return
             }
@@ -413,16 +425,16 @@ class MainService : Service() {
             periodicity_in_milliseconds: Long,
             do_action: () -> Unit,
     ) {
-        val t1 = System.currentTimeMillis()
+        // val t1 = System.currentTimeMillis()
         val most_recent_event_time = PersistentData.getMostRecentAlarmTime(identifier_string)
         if (now - most_recent_event_time > periodicity_in_milliseconds) {
-            printe("'$identifier_string' - time to trigger")
+            // printe("'$identifier_string' - time to trigger")
             do_action()  // TODO: stick this on a queue
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
-            printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
+            // printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
         } else {
-            printi("'$identifier_string' - not yet time to trigger")
-            printv("'$identifier_string - not trigger - ${System.currentTimeMillis() - t1}")
+            // printi("'$identifier_string' - not yet time to trigger")
+            // printv("'$identifier_string - not trigger - ${System.currentTimeMillis() - t1}")
         }
     }
 
@@ -436,24 +448,24 @@ class MainService : Service() {
             on_action: () -> Unit,
             off_action: () -> Unit
     ) {
-        val t1 = System.currentTimeMillis()
+        // val t1 = System.currentTimeMillis()
         if (is_running && now <= should_turn_off_at) {
-            printw("'$identifier_string' is running, not time to turn of")
-            printv("'$identifier_string - is running - ${System.currentTimeMillis() - t1}")
+            // printw("'$identifier_string' is running, not time to turn of")
+            // printv("'$identifier_string - is running - ${System.currentTimeMillis() - t1}")
             return
         }
 
         // running, should be off, off is in the past
         if (is_running && should_turn_off_at < now) {  // THIS LINE SHOULD HAVE AN IDE WARNING -- it disappeared?
-            printi("'$identifier_string' time to turn off")
+            // printi("'$identifier_string' time to turn off")
             off_action()  // e.g. accelerometerListener.turn_off()
-            printv("'$identifier_string - turn off - ${System.currentTimeMillis() - t1}")
+            // printv("'$identifier_string - turn off - ${System.currentTimeMillis() - t1}")
         }
 
         // not_running,  should turn on is still in the future, do nothing
         if (!is_running && should_turn_on_again_at >= now) {
-            printw("'$identifier_string' correctly off")
-            printv("'$identifier_string - correctly off - ${System.currentTimeMillis() - t1}")
+            // printw("'$identifier_string' correctly off")
+            // printv("'$identifier_string - correctly off - ${System.currentTimeMillis() - t1}")
             return
         }
 
@@ -462,9 +474,9 @@ class MainService : Service() {
             // always get the current time, the now value could be stale - unlikely but possible
             // we care that we get data, not that data be rigidly accurate to a clock.
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
-            printe("'$identifier_string' turn it on!")
+            // printe("'$identifier_string' turn it on!")
             on_action()  //TODO: stick this on a queue
-            printv("'$identifier_string - on action - ${System.currentTimeMillis() - t1}")
+            // printv("'$identifier_string - on action - ${System.currentTimeMillis() - t1}")
         }
     }
 
@@ -478,7 +490,6 @@ class MainService : Service() {
 
         // These are currently syncronous (block) unless they say otherwise, profiling was done
         // on a Pixel 6. No-action always measures 0-1ms.
-        val t1 = System.currentTimeMillis()
         do_new_files_check(now)  // always 10s of ms (30-70ms)
         accelerometer_logic(now)
         gyro_logic(now)  // on action ~20-50ms, off action 10-20ms
@@ -488,9 +499,10 @@ class MainService : Service() {
         do_wifi_logic_check(now)  // on action <10-40ms
         do_upload_logic_check(now)  // asynchronous, runs network request on a threa, single digit ms.
         do_new_surveys_check(now)  // asynchronous, runs network request on a thread, single digit ms.
+        do_new_device_settings_check(now) // asynchronous, runs network request on a thread, single digit ms.
         do_survey_notifications_check(now)  // 1 survey notification <10-30ms.
         // highest total time was 159ms, but insufficient data points to be confident.
-        printv("run_all_app_logic - ${System.currentTimeMillis() - t1}")
+        printv("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
         return now
     }
     // TODO: if we make this use rtc time that will solve time-reset issues.  Could also run a sanity check.
@@ -605,7 +617,6 @@ class MainService : Service() {
         // upload waits until registration  --  probably remove this
         if (!PersistentData.getIsRegistered())
             return
-
         val upload_string = applicationContext.getString(R.string.upload_data_files_intent)
         val periodicity = PersistentData.getUploadDataFilesFrequency()
         val do_uploads_action = {
@@ -652,12 +663,22 @@ class MainService : Service() {
         do_an_event_session_check(now, event_string, periodicity, dowwnload_surveys_action)
     }
 
+    fun do_new_device_settings_check(now: Long) {
+        // only run after registration
+        if (!PersistentData.getIsRegistered())
+            return
+        val event_string = getString(R.string.check_for_new_device_settings_intent)
+        val dowwnload_device_settings_action = {
+            SetDeviceSettings.dispatchUpdateDeviceSettings()
+        }
+        do_an_event_session_check(now, event_string, DEVICE_SETTINGS_UPDATE_PERIODICITY, dowwnload_device_settings_action)
+    }
+
     fun do_survey_notifications_check(now: Long) {
         // checks for the current expected state for survey notifications, and the app state for
         // scheduled alarms.
         val t1 = System.currentTimeMillis()
         var counter = 0
-        printe("survey notification check!")
         for (surveyId in PersistentData.getSurveyIds()) {
             var app_state_says_on = PersistentData.getSurveyNotificationState(surveyId)
             var alarm_in_past = PersistentData.getMostRecentSurveyAlarmTime(surveyId) < now
@@ -666,7 +687,7 @@ class MainService : Service() {
             // the behavior is that it ... replaces all the notifications.  we can make this better.
             if (app_state_says_on || alarm_in_past) {
                 // this calls PersistentData.setSurveyNotificationState
-                displaySurveyNotification(appContext!!, surveyId)
+                displaySurveyNotification(applicationContext, surveyId)
                 counter++
             }
 
@@ -694,7 +715,7 @@ class MainService : Service() {
     //     val signout_check = {
     //         PersistentData.logout()
     //         // FIXME: this operation may crash if it is not on the main thread, need to test it
-    //         val loginPage = Intent(appContext, LoginActivity::class.java)  // yup that is still java
+    //         val loginPage = Intent(applicationContext, LoginActivity::class.java)  // yup that is still java
     //         loginPage.flags = Intent.FLAG_ACTIVITY_NEW_TASK
     //         startActivity(loginPage)
     //     }
@@ -732,7 +753,7 @@ class MainService : Service() {
 
         // if it has been FOREGROUND_SERVICE_TIMER or longer since the last time we started the
         // foreground service notification, start it again.
-        if (foregroundServiceLastStarted == 0L || millisecondsSincePrevious > FOREGROUND_SERVICE_TIMER) {
+        if (foregroundServiceLastStarted == 0L || millisecondsSincePrevious > FOREGROUND_SERVICE_NOTIFICATION_TIMER) {
             val intent_to_start_foreground_service = Intent(applicationContext, MainService::class.java)
             val intent_flags = pending_intent_flag_fix(PendingIntent.FLAG_UPDATE_CURRENT) // no flags
             val onStartCommandPendingIntent = PendingIntent.getService(
@@ -753,6 +774,7 @@ class MainService : Service() {
 
         // onStartCommand is called every 30 seconds due to repeating high-priority-or-whatever
         // alarms, so we will stick a core logic check here.
+        printv("run_all_app_logic - onStartCommand")
         run_all_app_logic()
 
         // We want this service to continue running until it is explicitly stopped, so return sticky.
@@ -795,7 +817,7 @@ class MainService : Service() {
     }
 
     /** Sets a timer that starts the service if it is not running after a half second.  */
-    private fun restartService() {
+    fun restartService() {
         val restartServiceIntent = Intent(applicationContext, this.javaClass)
         restartServiceIntent.setPackage(packageName)
         val restartServicePendingIntent = PendingIntent.getService(
@@ -810,6 +832,14 @@ class MainService : Service() {
                 SystemClock.elapsedRealtime() + 500,
                 restartServicePendingIntent
         )
+    }
+
+    /** We sometimes need to restart the background service */
+    fun exit_and_restart_background_service() {
+        TextFileManager.writeDebugLogStatement("manually restarting background service")
+        // if this takes more than 500ms to restart, the app will ~crash... hmm.  This is fine.
+        restartService()
+        System.exit(0)
     }
 
     // static assets
@@ -830,29 +860,29 @@ class MainService : Service() {
         /** create timers that will trigger events throughout the program, and
          * register the custom Intents with the controlMessageReceiver.  */
         @JvmStatic
-        fun registerTimers(appContext: Context) {
+        fun registerTimers(applicationContext: Context) {
             timer = Timer(localHandle!!)
             val filter = IntentFilter()
-            // filter.addAction(appContext.getString(R.string.turn_accelerometer_off))
-            // filter.addAction(appContext.getString(R.string.turn_accelerometer_on))
-            // filter.addAction(appContext.getString(R.string.turn_ambient_audio_off))
-            // filter.addAction(appContext.getString(R.string.turn_ambient_audio_on))
-            // filter.addAction(appContext.getString(R.string.turn_gyroscope_on))
-            // filter.addAction(appContext.getString(R.string.turn_gyroscope_off))
-            filter.addAction(appContext.getString(R.string.turn_bluetooth_on))
-            filter.addAction(appContext.getString(R.string.turn_bluetooth_off))
-            // filter.addAction(appContext.getString(R.string.turn_gps_on))
-            // filter.addAction(appContext.getString(R.string.turn_gps_off))
-            filter.addAction(appContext.getString(R.string.signout_intent))
-            filter.addAction(appContext.getString(R.string.voice_recording))
-            // filter.addAction(appContext.getString(R.string.run_wifi_log))
-            // filter.addAction(appContext.getString(R.string.upload_data_files_intent))
-            // filter.addAction(appContext.getString(R.string.create_new_data_files_intent))
-            filter.addAction(appContext.getString(R.string.check_for_new_surveys_intent))
-            filter.addAction(appContext.getString(R.string.check_for_sms_enabled))
-            filter.addAction(appContext.getString(R.string.check_for_calls_enabled))
-            // filter.addAction(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
-            filter.addAction(appContext.getString(R.string.fcm_upload))
+            // filter.addAction(applicationContext.getString(R.string.turn_accelerometer_off))
+            // filter.addAction(applicationContext.getString(R.string.turn_accelerometer_on))
+            // filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_off))
+            // filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_on))
+            // filter.addAction(applicationContext.getString(R.string.turn_gyroscope_on))
+            // filter.addAction(applicationContext.getString(R.string.turn_gyroscope_off))
+            filter.addAction(applicationContext.getString(R.string.turn_bluetooth_on))
+            filter.addAction(applicationContext.getString(R.string.turn_bluetooth_off))
+            // filter.addAction(applicationContext.getString(R.string.turn_gps_on))
+            // filter.addAction(applicationContext.getString(R.string.turn_gps_off))
+            filter.addAction(applicationContext.getString(R.string.signout_intent))
+            filter.addAction(applicationContext.getString(R.string.voice_recording))
+            // filter.addAction(applicationContext.getString(R.string.run_wifi_log))
+            // filter.addAction(applicationContext.getString(R.string.upload_data_files_intent))
+            // filter.addAction(applicationContext.getString(R.string.create_new_data_files_intent))
+            filter.addAction(applicationContext.getString(R.string.check_for_new_surveys_intent))
+            filter.addAction(applicationContext.getString(R.string.check_for_sms_enabled))
+            filter.addAction(applicationContext.getString(R.string.check_for_calls_enabled))
+            // filter.addAction(applicationContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
+            filter.addAction(applicationContext.getString(R.string.fcm_upload))
             filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             filter.addAction("crashBeiwe")
             filter.addAction("enterANR")
@@ -860,7 +890,7 @@ class MainService : Service() {
             for (surveyId in PersistentData.getSurveyIds()) {
                 filter.addAction(surveyId)
             }
-            appContext.registerReceiver(localHandle!!.timerReceiver, filter)
+            applicationContext.registerReceiver(localHandle!!.timerReceiver, filter)
         }
 
         /**Refreshes the logout timer.

@@ -76,6 +76,9 @@ public class AudioRecorderCommon extends SessionActivity {
      * After recording, the app will present the user with the play button. */
 	@Override
 	public void onCreate( Bundle savedInstanceState ) {
+		// set app to know user is taking a survey right now.
+		PersistentData.setTakingSurvey();
+		
 		super.onCreate( savedInstanceState );
 		setContentView( R.layout.activity_audio_recorder );
         surveyId = getIntent().getStringExtra("surveyId");
@@ -84,9 +87,9 @@ public class AudioRecorderCommon extends SessionActivity {
 		MarkDownTextView textbox = (MarkDownTextView) findViewById(R.id.record_activity_textview );
 		textbox.setText( getPromptText(surveyId, getApplicationContext() ) );
         // Handle file path issues with this variable
-
+		
         unencryptedTempAudioFilePath = getApplicationContext().getFilesDir().getAbsolutePath() + "/" + unencryptedTempAudioFileName;
-
+		
     	playButton = (Button) findViewById(R.id.play_button);
     	recordingButton = (Button) findViewById(R.id.recording_button);
 		saveButton = (Button) findViewById(R.id.done_button);
@@ -122,6 +125,7 @@ public class AudioRecorderCommon extends SessionActivity {
 			}
 			// TODO: show an error message if there was a recording and it failed to be encrypted
 		}
+		PersistentData.setNotTakingSurvey();
 	}
 	
 	private static String getPromptText(String surveyId, Context appContext) {

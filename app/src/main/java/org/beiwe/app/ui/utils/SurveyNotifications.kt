@@ -233,7 +233,7 @@ object SurveyNotifications {
 
     /**Tries to determine the type of audio survey.  If it is an Enhanced audio survey AudioRecorderEnhancedActivity.class is returned,
      * any other outcome (including an inability to determine type) returns AudioRecorderActivity.class instead.  */
-    fun getAudioSurveyClass(surveyId: String?): Class<*> {
+    fun getAudioSurveyClass(surveyId: String): Class<*> {
         try {
             val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
             if (surveySettings.getString("audio_survey_type") == "raw")

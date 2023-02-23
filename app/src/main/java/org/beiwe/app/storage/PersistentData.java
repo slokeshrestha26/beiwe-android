@@ -1,4 +1,5 @@
 package org.beiwe.app.storage;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -35,6 +36,7 @@ public class PersistentData {
 	private static final String IS_REGISTERED = "IsRegistered";
 	private static final String STUDY_NAME = "study_name";
 	private static final String STUDY_ID = "study_id";
+	private static final String IS_TAKING_SURVEY ="is_taking_survey";
 	
 	private static final String LOGIN_EXPIRATION = "loginExpirationTimestamp";
 	private static final String PCP_PHONE_KEY = "primary_care";
@@ -93,13 +95,25 @@ public class PersistentData {
 		isInitialized = true;
 	}
 
-	// convenience method(s) for different types but all with the same name, makes everything easier.
+	// convenience methods for different types but all with the same name, makes everything easier.
+	
+	/* Boolean specifically returns true if the value was changed, false if it was not changed. This
+	/* is because we need to be able to detect when a sensor is enabled/disabled from study device
+	/* settings has changed. */
+	private static Boolean putCommit(String name, boolean b) {
+		Boolean prior_value = null;
+		if (pref.contains(name))
+			prior_value = pref.getBoolean(name, true);  // default value can't be null for booleans (fair enough)
+		
+		editor.putBoolean(name, b);
+		editor.commit();
+		
+		// return True if it changed
+		if (prior_value == null) return true;
+		else return prior_value != b;
+	}
 	private static void putCommit(String name, long l) {
 		editor.putLong(name, l);
-		editor.commit();
-	}
-	private static void putCommit(String name, boolean b) {
-		editor.putBoolean(name, b);
 		editor.commit();
 	}
 	private static void putCommit(String name, String s) {
@@ -138,21 +152,16 @@ public class PersistentData {
 	}
 
 	// IS_REGISTERED
-	public static boolean getIsRegistered () {
-		if (pref == null) Log.w("LoginManager", "FAILED AT ISREGISTERED");
-		return pref.getBoolean(IS_REGISTERED, false);
-	}
-	public static void setIsRegistered (boolean value) {
-		putCommit(IS_REGISTERED, value);
-	}
+	public static boolean getIsRegistered () { return pref.getBoolean(IS_REGISTERED, false); }
+	public static void setIsRegistered (boolean value) { putCommit(IS_REGISTERED, value); }
 
-	public static void setLastRequestedPermission(String value)  {
-		putCommit(LastRequestedPermission, value);
-	}
-	public static String getLastRequestedPermission() {
-		return pref.getString(LastRequestedPermission, "");
-	}
-
+	public static void setLastRequestedPermission(String value)  { putCommit(LastRequestedPermission, value); }
+	public static String getLastRequestedPermission() { return pref.getString(LastRequestedPermission, "");}
+	
+	public static Boolean getTakingSurvey() { return pref.getBoolean(IS_TAKING_SURVEY, false); }
+	public static void setTakingSurvey() { putCommit(IS_TAKING_SURVEY, true); }
+	public static void setNotTakingSurvey() { putCommit(IS_TAKING_SURVEY, false); }
+	
 	/*######################################################################################
 	##################################### Passwords ########################################
 	######################################################################################*/
@@ -188,33 +197,34 @@ public class PersistentData {
 	/*#####################################################################################
 	################################# Listener Settings ###################################
 	#####################################################################################*/
+	// most of these need to return a value if they change so we can restart the background service when device settings change
 	
 	public static boolean getAccelerometerEnabled(){ return pref.getBoolean(ACCELEROMETER_ENABLED, false); }
-	public static void setAccelerometerEnabled(boolean enabled) { putCommit(ACCELEROMETER_ENABLED, enabled); }
+	public static boolean setAccelerometerEnabled(boolean enabled) { return putCommit(ACCELEROMETER_ENABLED, enabled); }
 	
 	public static boolean getAllowUploadOverCellularData(){ return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false); }
-	public static void setAllowUploadOverCellularData(boolean enabled) { putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled); }
+	public static void setAllowUploadOverCellularData(boolean enabled) {  putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled); }
 	
 	public static boolean getAmbientAudioEnabled(){ return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false); }
-	public static void setAmbientAudioCollectionIsEnabled(boolean enabled) { putCommit(AMBIENT_AUDIO_ENABLED, enabled); }
+	public static boolean setAmbientAudioCollectionIsEnabled(boolean enabled) { return putCommit(AMBIENT_AUDIO_ENABLED, enabled); }
 	
 	public static boolean getBluetoothEnabled(){ return pref.getBoolean(BLUETOOTH_ENABLED, false); }
-	public static void setBluetoothEnabled(boolean enabled) { putCommit(BLUETOOTH_ENABLED, enabled); }
+	public static boolean setBluetoothEnabled(boolean enabled) { return putCommit(BLUETOOTH_ENABLED, enabled); }
 	
 	public static boolean getCallsEnabled(){ return pref.getBoolean(CALLS_ENABLED, false); }
-	public static void setCallsEnabled(boolean enabled) { putCommit(CALLS_ENABLED, enabled); }
+	public static boolean setCallsEnabled(boolean enabled) { return putCommit(CALLS_ENABLED, enabled); }
 	
 	public static boolean getGpsEnabled(){ return pref.getBoolean(GPS_ENABLED, false); }
-	public static void setGpsEnabled(boolean enabled) { putCommit(GPS_ENABLED, enabled); }
+	public static boolean setGpsEnabled(boolean enabled) { return putCommit(GPS_ENABLED, enabled); }
 	
 	public static boolean getGyroscopeEnabled(){return pref.getBoolean(GYROSCOPE_ENABLED, false); }
-	public static void setGyroscopeEnabled(boolean enabled) { putCommit(GYROSCOPE_ENABLED, enabled); }
+	public static boolean setGyroscopeEnabled(boolean enabled) { return putCommit(GYROSCOPE_ENABLED, enabled); }
 	
 	public static boolean getPowerStateEnabled(){ return pref.getBoolean(POWER_STATE_ENABLED, false); }
-	public static void setPowerStateEnabled(boolean enabled) { putCommit(POWER_STATE_ENABLED, enabled); }
+	public static boolean setPowerStateEnabled(boolean enabled) { return putCommit(POWER_STATE_ENABLED, enabled); }
 	
 	public static boolean getTextsEnabled(){ return pref.getBoolean(TEXTS_ENABLED, false); }
-	public static void setTextsEnabled(boolean enabled) { putCommit(TEXTS_ENABLED, enabled); }
+	public static boolean setTextsEnabled(boolean enabled) { return putCommit(TEXTS_ENABLED, enabled); }
 	
 	public static boolean getWifiEnabled(){ return pref.getBoolean(WIFI_ENABLED, false); }
 	public static void setWifiEnabled(boolean enabled) { putCommit(WIFI_ENABLED, enabled); }
@@ -365,14 +375,10 @@ public class PersistentData {
 	###########################################################################################*/
 
 	public static String getPrimaryCareNumber() { return pref.getString(PCP_PHONE_KEY, ""); }
-	public static void setPrimaryCareNumber( String phoneNumber) {
-		putCommit(PCP_PHONE_KEY, phoneNumber );
-	}
+	public static void setPrimaryCareNumber( String phoneNumber) { putCommit(PCP_PHONE_KEY, phoneNumber ); }
 
 	public static String getPasswordResetNumber() { return pref.getString(PASSWORD_RESET_NUMBER_KEY, ""); }
-	public static void setPasswordResetNumber( String phoneNumber ){
-		putCommit(PASSWORD_RESET_NUMBER_KEY, phoneNumber );
-	}
+	public static void setPasswordResetNumber( String phoneNumber ){ putCommit(PASSWORD_RESET_NUMBER_KEY, phoneNumber ); }
 
 	/*###########################################################################################
 	###################################### Survey Info ##########################################
@@ -520,8 +526,8 @@ public class PersistentData {
 		}
 	}
 
-	public static void setUseAnonymizedHashing(boolean useAnonymizedHashing) {
-		putCommit(USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing);
+	public static boolean setUseAnonymizedHashing(boolean useAnonymizedHashing) {
+		return putCommit(USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing);
 	}
 	public static boolean getUseAnonymizedHashing() {
 		//If not present, default to safe hashing
@@ -559,20 +565,16 @@ public class PersistentData {
 		if(longitudeOffset == 0.0f && getUseGpsFuzzing()) {
 			// create random longitude offset between (-180, -10) or (10, 180)
 			float newLongitudeOffset = (float)(10 + Math.random()*340);
-			if(newLongitudeOffset > 180) {
+			if(newLongitudeOffset > 180)
 				newLongitudeOffset = (newLongitudeOffset-170) * -1;
-			}
 			putCommit(LONGITUDE_OFFSET_KEY, newLongitudeOffset);
 			return newLongitudeOffset;
 		}
-		else {
+		else
 			return longitudeOffset;
-		}
 	}
 
-	public static void setUseGpsFuzzing(boolean useFuzzyGps) {
-		putCommit(USE_GPS_FUZZING_KEY, useFuzzyGps);
-	}
+	public static boolean setUseGpsFuzzing(boolean useFuzzyGps) { return putCommit(USE_GPS_FUZZING_KEY, useFuzzyGps); }
 	private static boolean getUseGpsFuzzing() {
 		return pref.getBoolean(USE_GPS_FUZZING_KEY, false);
 	}
@@ -584,19 +586,8 @@ public class PersistentData {
 	private static final String CALL_CLINICIAN_BUTTON_ENABLED_KEY = "call_clinician_button_enabled";
 	private static final String CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY = "call_research_assistant_button_enabled";
 
-	public static boolean getCallClinicianButtonEnabled() {
-		return pref.getBoolean(CALL_CLINICIAN_BUTTON_ENABLED_KEY, false);
-	}
-
-	public static void setCallClinicianButtonEnabled(boolean enabled) {
-		putCommit(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled);
-	}
-
-	public static boolean getCallResearchAssistantButtonEnabled() {
-		return pref.getBoolean(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, false);
-	}
-
-	public static void setCallResearchAssistantButtonEnabled(boolean enabled) {
-		putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled);
-	}
+	public static boolean getCallClinicianButtonEnabled() { return pref.getBoolean(CALL_CLINICIAN_BUTTON_ENABLED_KEY, false); }
+	public static void setCallClinicianButtonEnabled(boolean enabled) { putCommit(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled); }
+	public static boolean getCallResearchAssistantButtonEnabled() { return pref.getBoolean(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, false); }
+	public static void setCallResearchAssistantButtonEnabled(boolean enabled) { putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled); }
 }

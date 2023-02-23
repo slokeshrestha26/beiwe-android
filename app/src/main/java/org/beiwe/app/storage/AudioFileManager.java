@@ -23,7 +23,7 @@ public class AudioFileManager {
     /** Filename includes the time the recording is encrypted. */
     public static String generateNewEncryptedAudioFileName(String surveyId, String filenameExtension) {
 		String timecode = ((Long)(System.currentTimeMillis() / 1000L)).toString();
-		String patientId = PersistentData.getPatientID();
+	    String patientId = PersistentData.getPatientID();
 		return patientId + "_voiceRecording_" + surveyId + "_" + timecode + filenameExtension;
     }
 	

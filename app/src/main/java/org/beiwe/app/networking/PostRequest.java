@@ -142,7 +142,7 @@ public class PostRequest {
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("Cache-Control", "no-cache");
-		connection.setConnectTimeout(5000);
+		connection.setConnectTimeout(15000);
 		connection.setReadTimeout(15000);
 		return connection;
 	}
@@ -169,7 +169,7 @@ public class PostRequest {
 	 * @return a String containing return data
 	 * @throws IOException on network requests io exceptions can occur */
 	private static String readResponse (HttpsURLConnection connection) throws IOException {
-		Integer responseCode = connection.getResponseCode();
+		Integer responseCode = (Integer) connection.getResponseCode();
 		if (responseCode == 200) {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(new DataInputStream(connection.getInputStream())));
 			String line;
