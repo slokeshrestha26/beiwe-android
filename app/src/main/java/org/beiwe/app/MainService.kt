@@ -877,6 +877,7 @@ class MainService : Service() {
             filter.addAction(applicationContext.getString(R.string.check_for_calls_enabled))
             filter.addAction(applicationContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
             filter.addAction(applicationContext.getString(R.string.fcm_upload))
+            filter.addAction(applicationContext.getString(R.string.check_for_new_device_settings_intent))
             filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             filter.addAction("crashBeiwe")
             filter.addAction("enterANR")

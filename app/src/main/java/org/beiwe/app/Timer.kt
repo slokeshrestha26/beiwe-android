@@ -47,7 +47,7 @@ class Timer(mainService: MainService) {
         lateinit var checkIfAmbientAudioRecordingIsEnabledIntent: Intent
         lateinit var checkForCallsEnabledIntent: Intent
         lateinit var sendCurrentFCMTokenIntent: Intent
-
+        lateinit var checkForNewDeviceSettingsIntent: Intent
         // a MutableMap<String, Intent> for intent lookup.
         val intent_map = mutableMapOf<String, Intent>()
 
@@ -90,6 +90,7 @@ class Timer(mainService: MainService) {
         checkForCallsEnabledIntent = setupIntent(appContext.getString(R.string.check_for_calls_enabled))
         checkIfAmbientAudioRecordingIsEnabledIntent = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
         sendCurrentFCMTokenIntent = setupIntent(appContext.getString(R.string.fcm_upload))
+        checkForNewDeviceSettingsIntent = setupIntent(appContext.getString(R.string.check_for_new_device_settings_intent))
     }
 
     /* ###############################################################################################
