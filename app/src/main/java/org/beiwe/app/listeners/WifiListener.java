@@ -53,7 +53,7 @@ public class WifiListener {
 			} // and provide a debug log statement for data researchers if we cannot get scan data right now.
 		} else {
 //			Log.d("WIFI", "YAP SKIPPING DUE TO DISABLEMENT.");
-			TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " wifi is not available for scanning at this time.");
+			TextFileManager.writeDebugLogStatement("wifi is not available for scanning at this time.");
 		}
 	}
 }

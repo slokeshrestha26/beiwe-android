@@ -63,6 +63,13 @@
 			android:onClick="clearNotifications"
 			android:text="Clear Notifications" />
 
+		<Button
+			android:id="@+id/buttonDeviceSettings"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="updateDeviceSettings"
+			android:text="Download current device settings" />
+
 		<TextView
 		    android:id="@+id/debugtext5"
 		    android:layout_width="wrap_content"

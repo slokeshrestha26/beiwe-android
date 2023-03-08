@@ -18,12 +18,6 @@ fun alarmsAreExactInThisApiVersion(): Boolean {
     return Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT
 }
 
-/** Snippet for our common intent setup pattern */
-private fun setupIntent(action: String): Intent {
-    val newIntent = Intent()
-    newIntent.action = action
-    return newIntent
-}
 
 /** The Timer class provides a meeans of setting various timers.  These are used by the BackgroundService
  * for devices that must be turned on/off, and timing the user to automatically logout after a period of time.
@@ -31,28 +25,39 @@ private fun setupIntent(action: String): Intent {
 class Timer(mainService: MainService) {
     companion object {
         // Control Message Intents
-        // lateinit var accelerometerOffIntent: Intent
-        // lateinit var accelerometerOnIntent: Intent
-        // lateinit var ambientAudioOffIntent: Intent
-        // lateinit var ambientAudioOnIntent: Intent
-        // lateinit var gyroscopeOffIntent: Intent
-        // lateinit var gyroscopeOnIntent: Intent
+        lateinit var accelerometerOffIntent: Intent
+        lateinit var accelerometerOnIntent: Intent
+        lateinit var ambientAudioOffIntent: Intent
+        lateinit var ambientAudioOnIntent: Intent
+        lateinit var gyroscopeOffIntent: Intent
+        lateinit var gyroscopeOnIntent: Intent
         lateinit var bluetoothOffIntent: Intent
         lateinit var bluetoothOnIntent: Intent
 
-        // lateinit var gpsOffIntent: Intent
-        // lateinit var gpsOnIntent: Intent
+        lateinit var gpsOffIntent: Intent
+        lateinit var gpsOnIntent: Intent
         lateinit var signoutIntent: Intent
 
         lateinit var wifiLogIntent: Intent
-        // lateinit var encryptAmbientAudioIntent: Intent
-        // lateinit var uploadDatafilesIntent: Intent
-        // lateinit var createNewDataFilesIntent: Intent
-        // lateinit var checkForNewSurveysIntent: Intent
+        lateinit var encryptAmbientAudioIntent: Intent
+        lateinit var uploadDatafilesIntent: Intent
+        lateinit var createNewDataFilesIntent: Intent
+        lateinit var checkForNewSurveysIntent: Intent
         lateinit var checkForSMSEnabledIntent: Intent
-        // lateinit var checkIfAmbientAudioRecordingIsEnabledIntent: Intent
+        lateinit var checkIfAmbientAudioRecordingIsEnabledIntent: Intent
         lateinit var checkForCallsEnabledIntent: Intent
         lateinit var sendCurrentFCMTokenIntent: Intent
+
+        // a MutableMap<String, Intent> for intent lookup.
+        val intent_map = mutableMapOf<String, Intent>()
+
+        /** Snippet for our common intent setup pattern, includes adding the intents to our intent map */
+        fun setupIntent(action: String): Intent {
+            val newIntent = Intent()
+            newIntent.action = action
+            intent_map[action] = newIntent
+            return newIntent
+        }
     }
 
     private val alarmManager: AlarmManager
@@ -64,26 +69,26 @@ class Timer(mainService: MainService) {
         alarmManager = mainService.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // double alarm intents
-        // accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off))
-        // accelerometerOnIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_on))
-        // ambientAudioOffIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_off))
-        // ambientAudioOnIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_on))
-        // gyroscopeOffIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_off))
-        // gyroscopeOnIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_on))
+        accelerometerOffIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_off))
+        accelerometerOnIntent = setupIntent(appContext.getString(R.string.turn_accelerometer_on))
+        ambientAudioOffIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_off))
+        ambientAudioOnIntent = setupIntent(appContext.getString(R.string.turn_ambient_audio_on))
+        gyroscopeOffIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_off))
+        gyroscopeOnIntent = setupIntent(appContext.getString(R.string.turn_gyroscope_on))
         bluetoothOffIntent = setupIntent(appContext.getString(R.string.turn_bluetooth_off))
         bluetoothOnIntent = setupIntent(appContext.getString(R.string.turn_bluetooth_on))
-        // gpsOffIntent = setupIntent(appContext.getString(R.string.turn_gps_off))
-        // gpsOnIntent = setupIntent(appContext.getString(R.string.turn_gps_on))
+        gpsOffIntent = setupIntent(appContext.getString(R.string.turn_gps_off))
+        gpsOnIntent = setupIntent(appContext.getString(R.string.turn_gps_on))
 
         // Set up event triggering alarm intents
         signoutIntent = setupIntent(appContext.getString(R.string.signout_intent))
         wifiLogIntent = setupIntent(appContext.getString(R.string.run_wifi_log))
-        // uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent))
-        // createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent))
-        // checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent))
+        uploadDatafilesIntent = setupIntent(appContext.getString(R.string.upload_data_files_intent))
+        createNewDataFilesIntent = setupIntent(appContext.getString(R.string.create_new_data_files_intent))
+        checkForNewSurveysIntent = setupIntent(appContext.getString(R.string.check_for_new_surveys_intent))
         checkForSMSEnabledIntent = setupIntent(appContext.getString(R.string.check_for_sms_enabled))
         checkForCallsEnabledIntent = setupIntent(appContext.getString(R.string.check_for_calls_enabled))
-        // checkIfAmbientAudioRecordingIsEnabledIntent = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
+        checkIfAmbientAudioRecordingIsEnabledIntent = setupIntent(appContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
         sendCurrentFCMTokenIntent = setupIntent(appContext.getString(R.string.fcm_upload))
     }
 
@@ -96,6 +101,13 @@ class Timer(mainService: MainService) {
     fun setupExactSingleAlarm(milliseconds: Long, intentToBeBroadcast: Intent): Long {
         val triggerTime = System.currentTimeMillis() + milliseconds
 
+        val flags = pending_intent_flag_fix(0) // no flags
+        val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
+        setExactAlarm(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+        return triggerTime
+    }
+
+    fun setupSingleAlarmAt(triggerTime: Long, intentToBeBroadcast: Intent): Long {
         val flags = pending_intent_flag_fix(0) // no flags
         val pendingIntent = PendingIntent.getBroadcast(appContext, 0, intentToBeBroadcast, flags)
         setExactAlarm(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)

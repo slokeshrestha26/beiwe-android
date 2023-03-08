@@ -33,19 +33,18 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
             gyroSensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
             if (gyroSensorManager == null) {
                 Log.e("Gyroscope Problems", "gyroSensorManager does not exist? (1)")
-                TextFileManager.getDebugLogFile().writeEncrypted("gyroSensorManager does not exist? (1)")
+                TextFileManager.writeDebugLogStatement("gyroSensorManager does not exist? (1)")
                 exists = false
             }
 
             gyroSensor = gyroSensorManager?.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
             if (gyroSensor == null) {
                 Log.e("Gyroscope Problems", "gyroSensor does not exist? (2)")
-                TextFileManager.getDebugLogFile().writeEncrypted("gyroSensor does not exist? (2)")
+                TextFileManager.writeDebugLogStatement("gyroSensor does not exist? (2)")
                 exists = false
             }
             // only runs once per app launch
-            TextFileManager.getDebugLogFile().writeEncrypted(
-                    System.currentTimeMillis().toString() + " gyroscope sensor info: $gyroSensor")
+            TextFileManager.writeDebugLogStatement("gyroscope sensor info: $gyroSensor")
         }
     }
 
@@ -61,7 +60,7 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
 
         if (!gyroSensorManager!!.registerListener(this, gyroSensor, delay_period_microseconds)) {
             Log.e("Gyroscope", "Gyroscope is broken")
-            TextFileManager.getDebugLogFile().writeEncrypted("Trying to start gyroscope session, device cannot find gyroscope.")
+            TextFileManager.writeDebugLogStatement("Trying to start gyroscope session, device cannot find gyroscope.")
         } else
             running = true
     }

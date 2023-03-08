@@ -12,6 +12,7 @@ import org.beiwe.app.networking.SurveyDownloader
 import org.beiwe.app.session.SessionActivity
 import org.beiwe.app.storage.EncryptionEngine
 import org.beiwe.app.storage.PersistentData
+import org.beiwe.app.storage.SetDeviceSettings
 import org.beiwe.app.storage.TextFileManager
 import org.beiwe.app.survey.JsonSkipLogic
 import org.beiwe.app.ui.user.MainMenuActivity
@@ -296,6 +297,10 @@ class DebugInterfaceActivity : SessionActivity() {
     //network operations
     fun uploadDataFiles(view: View?) {
         PostRequest.uploadAllFiles()
+    }
+
+    fun updateDeviceSettings(view: View?) {
+        SetDeviceSettings.dispatchUpdateDeviceSettings()
     }
 
     fun runSurveyDownload(view: View?) {

@@ -113,7 +113,7 @@ class MainService : Service() {
     // namespace hack, see comment
     fun get_periodic_run_app_logic(): () -> Unit = periodic_run_app_logic
     val periodic_run_app_logic: () -> Unit = {
-        printv("run_all_app_logic - ThreadHandler")
+        printd("run_all_app_logic - ThreadHandler")
         run_all_app_logic()
         // in the scope of this closure "periodic_run_app_logic" doesn't exist, we need to access it, not referency it.
         background_handler.postDelayed(get_periodic_run_app_logic(), THREADHANDLER_PERIODICITY)
@@ -186,7 +186,7 @@ class MainService : Service() {
                 // TODO: Track down why this error occurs, cleanup.  The above check should be for
                 //  the (new) doesBluetoothCapabilityExist function instead of isBluetoothEnabled
                 Log.e("Main Service", BLLUETOOTH_MESSAGE_1)
-                TextFileManager.getDebugLogFile().writeEncrypted(BLLUETOOTH_MESSAGE_1)
+                TextFileManager.writeDebugLogStatement(BLLUETOOTH_MESSAGE_1)
             }
         } else {
             if (PersistentData.getBluetoothEnabled()) {
@@ -286,7 +286,7 @@ class MainService : Service() {
 
     fun startTimers() {
         Log.i("BackgroundService", "running startTimer logic.")
-        printv("run_all_app_logic - startTimers")
+        printd("run_all_app_logic - startTimers")
         run_all_app_logic()
 
         // if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event,
@@ -328,11 +328,10 @@ class MainService : Service() {
         override fun onReceive(applicationContext: Context, intent: Intent) {
             Log.e("BackgroundService", "Received broadcast: $intent")
             // Don't change this log to have a "correct" comma.
-            TextFileManager.getDebugLogFile().writeEncrypted(
-                    System.currentTimeMillis().toString() + " Received Broadcast: " + intent.toString())
+            TextFileManager.writeDebugLogStatement("Received Broadcast: " + intent.toString())
 
             val broadcastAction = intent.action
-            printv("run_all_app_logic - timerReceiver")
+            printd("run_all_app_logic - timerReceiver")
             run_all_app_logic()
 
             /* Bluetooth timers are unlike GPS and Accelerometer because it uses an
@@ -429,22 +428,32 @@ class MainService : Service() {
         val most_recent_event_time = PersistentData.getMostRecentAlarmTime(identifier_string)
         if (now - most_recent_event_time > periodicity_in_milliseconds) {
             // printe("'$identifier_string' - time to trigger")
-            do_action()  // TODO: stick this on a queue
+            do_action()  // TODO: stick this on a queue?
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
-            // printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
+            // TODO: this purely mimicks the old behavior that was of printing the broadcast, refine it.
+            TextFileManager.writeDebugLogStatement(
+                    "Received Broadcast: " + Timer.intent_map[identifier_string]!!.toString())
+
+        // printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
         } else {
             // printi("'$identifier_string' - not yet time to trigger")
             // printv("'$identifier_string - not trigger - ${System.currentTimeMillis() - t1}")
         }
     }
 
-    /* abstracted timing logic for sessions that have a duration to their recording session */
+    /* Abstracted timing logic for sessions that have a duration to their recording session. All
+     * events that have a timed on-off pattern run through this logic. We check the event's current
+     * state, recorded (PersistentData) status, compare that to the current timer values for what
+     * the state SHOULD be, and also set off timers to in an attempt to get a well run_all_app_logic
+     * check. (we pad with an extra second to ensure that check hits an inflection point where
+     * action is required.) */
     fun do_an_on_off_session_check(
             now: Long,
             is_running: Boolean,
             should_turn_off_at: Long,
             should_turn_on_again_at: Long,
             identifier_string: String,
+            intent_off_string: String,
             on_action: () -> Unit,
             off_action: () -> Unit
     ) {
@@ -456,13 +465,16 @@ class MainService : Service() {
         }
 
         // running, should be off, off is in the past
-        if (is_running && should_turn_off_at < now) {  // THIS LINE SHOULD HAVE AN IDE WARNING -- it disappeared?
+        if (is_running && should_turn_off_at < now) {
             // printi("'$identifier_string' time to turn off")
-            off_action()  // e.g. accelerometerListener.turn_off()
+            off_action()  // TODO: stick this on a queue?
+            val should_turn_on_again_at_safe = should_turn_on_again_at + 1000 // add a second to ensure we pass the timer
+            print("setting ON TIMER for $identifier_string to $should_turn_on_again_at_safe")
+            timer!!.setupSingleAlarmAt(should_turn_on_again_at_safe, Timer.intent_map[identifier_string]!!)
             // printv("'$identifier_string - turn off - ${System.currentTimeMillis() - t1}")
         }
 
-        // not_running,  should turn on is still in the future, do nothing
+        // not_running, should turn on is still in the future, do nothing
         if (!is_running && should_turn_on_again_at >= now) {
             // printw("'$identifier_string' correctly off")
             // printv("'$identifier_string - correctly off - ${System.currentTimeMillis() - t1}")
@@ -470,12 +482,15 @@ class MainService : Service() {
         }
 
         // not running, should be on, (on is in the past)
-        if (!is_running && should_turn_on_again_at < now) {  // THIS LINE SHOULD HAVE AN IDE WARNING
-            // always get the current time, the now value could be stale - unlikely but possible
-            // we care that we get data, not that data be rigidly accurate to a clock.
+        if (!is_running && should_turn_on_again_at < now) {
+            // always get the current time, the now value could be stale - unlikely but possible we
+            // care that we get data, not that data be rigidly accurate to a clock.
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
             // printe("'$identifier_string' turn it on!")
-            on_action()  //TODO: stick this on a queue
+            on_action()  //TODO: stick this on a queue?
+            val should_turn_off_at_safe = should_turn_off_at + 1000  // add a second to ensure we pass the timer
+            print("setting OFF TIMER for $identifier_string to $should_turn_off_at_safe")
+            timer!!.setupSingleAlarmAt(should_turn_off_at_safe, Timer.intent_map[intent_off_string]!!)
             // printv("'$identifier_string - on action - ${System.currentTimeMillis() - t1}")
         }
     }
@@ -487,6 +502,9 @@ class MainService : Service() {
     @Synchronized
     fun run_all_app_logic(): Long {
         val now = System.currentTimeMillis()
+        // ALL of these actions wait until the participant is registered
+        if (!PersistentData.getIsRegistered())
+            return now
 
         // These are currently syncronous (block) unless they say otherwise, profiling was done
         // on a Pixel 6. No-action always measures 0-1ms.
@@ -502,9 +520,10 @@ class MainService : Service() {
         do_new_device_settings_check(now) // asynchronous, runs network request on a thread, single digit ms.
         do_survey_notifications_check(now)  // 1 survey notification <10-30ms.
         // highest total time was 159ms, but insufficient data points to be confident.
-        printv("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
+        printd("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
         return now
     }
+
     // TODO: if we make this use rtc time that will solve time-reset issues.  Could also run a sanity check.
     // TODO: test default (should be zero? out of PersistentData) cases.
 
@@ -515,6 +534,7 @@ class MainService : Service() {
 
         // assemble all the variables we need for on-off with duration
         val on_string = getString(R.string.turn_accelerometer_on)
+        val off_string = getString(R.string.turn_accelerometer_off)
         val most_recent_on = PersistentData.getMostRecentAlarmTime(on_string)
         val should_turn_off_at = most_recent_on + PersistentData.getAccelerometerOnDuration()
         val should_turn_on_again_at = should_turn_off_at + PersistentData.getAccelerometerOffDuration()
@@ -524,6 +544,7 @@ class MainService : Service() {
                 should_turn_off_at,
                 should_turn_on_again_at,
                 on_string,
+                off_string,
                 accelerometerListener!!.accelerometer_on_action,
                 accelerometerListener!!.accelerometer_off_action
         )
@@ -536,6 +557,7 @@ class MainService : Service() {
 
         // assemble all the variables we need for on-off with duration
         val on_string = getString(R.string.turn_gyroscope_on)
+        val off_string = getString(R.string.turn_gyroscope_off)
         val most_recent_on = PersistentData.getMostRecentAlarmTime(on_string)
         val should_turn_off_at = most_recent_on + PersistentData.getGyroscopeOnDuration()
         val should_turn_on_again_at = should_turn_off_at + PersistentData.getGyroscopeOffDuration()
@@ -545,6 +567,7 @@ class MainService : Service() {
                 should_turn_off_at,
                 should_turn_on_again_at,
                 on_string,
+                off_string,
                 gyroscopeListener!!.gyro_on_action,
                 gyroscopeListener!!.gyro_off_action
         )
@@ -557,6 +580,7 @@ class MainService : Service() {
 
         // assemble all the variables we need for on-off with duration
         val on_string = getString(R.string.turn_gps_on)
+        val off_string = getString(R.string.turn_gps_off)
         val most_recent_on = PersistentData.getMostRecentAlarmTime(on_string)
         val should_turn_off_at = most_recent_on + PersistentData.getGpsOnDuration()
         val should_turn_on_again_at = should_turn_off_at + PersistentData.getGpsOffDuration()
@@ -566,6 +590,7 @@ class MainService : Service() {
                 should_turn_off_at,
                 should_turn_on_again_at,
                 on_string,
+                off_string,
                 gpsListener!!.gps_on_action,
                 gpsListener!!.gps_off_action
         )
@@ -579,6 +604,7 @@ class MainService : Service() {
             return
 
         val on_string = getString(R.string.turn_ambient_audio_on)
+        val off_string = getString(R.string.turn_ambient_audio_off)
         val most_recent_on = PersistentData.getMostRecentAlarmTime(on_string)
         val should_turn_off_at = most_recent_on + PersistentData.getAmbientAudioOnDuration()
         val should_turn_on_again_at = should_turn_off_at + PersistentData.getAmbientAudioOffDuration()
@@ -592,6 +618,7 @@ class MainService : Service() {
                 should_turn_off_at,
                 should_turn_on_again_at,
                 on_string,
+                off_string,
                 ambient_audio_on,
                 AmbientAudioListener.ambient_audio_off_action
         )
@@ -614,9 +641,6 @@ class MainService : Service() {
     }
 
     fun do_upload_logic_check(now: Long) {
-        // upload waits until registration  --  probably remove this
-        if (!PersistentData.getIsRegistered())
-            return
         val upload_string = applicationContext.getString(R.string.upload_data_files_intent)
         val periodicity = PersistentData.getUploadDataFilesFrequency()
         val do_uploads_action = {
@@ -626,9 +650,6 @@ class MainService : Service() {
     }
 
     fun do_fcm_upload_logic_check(now: Long) {
-        // only run after registration
-        if (!PersistentData.getIsRegistered())
-            return
         // we can just literally hardcode this one, sendFcmToken is this plus a timer
         val event_string = applicationContext.getString(R.string.fcm_upload)
         val send_fcm_action = {
@@ -640,9 +661,6 @@ class MainService : Service() {
     }
 
     fun do_new_files_check(now: Long) {
-        // only run after registration
-        if (!PersistentData.getIsRegistered())
-            return
         val event_string = getString(R.string.create_new_data_files_intent)
         val periodicity = PersistentData.getCreateNewDataFilesFrequency()
         val new_files_action = {
@@ -652,9 +670,6 @@ class MainService : Service() {
     }
 
     fun do_new_surveys_check(now: Long) {
-        // only run after registration
-        if (!PersistentData.getIsRegistered())
-            return
         val event_string = getString(R.string.check_for_new_surveys_intent)
         val periodicity = PersistentData.getCheckForNewSurveysFrequency()
         val dowwnload_surveys_action = {
@@ -664,9 +679,6 @@ class MainService : Service() {
     }
 
     fun do_new_device_settings_check(now: Long) {
-        // only run after registration
-        if (!PersistentData.getIsRegistered())
-            return
         val event_string = getString(R.string.check_for_new_device_settings_intent)
         val dowwnload_device_settings_action = {
             SetDeviceSettings.dispatchUpdateDeviceSettings()
@@ -674,11 +686,11 @@ class MainService : Service() {
         do_an_event_session_check(now, event_string, DEVICE_SETTINGS_UPDATE_PERIODICITY, dowwnload_device_settings_action)
     }
 
+    /** Checks for the current expected state for survey notifications, and the app state for
+     *  scheduled alarms. */
     fun do_survey_notifications_check(now: Long) {
-        // checks for the current expected state for survey notifications, and the app state for
-        // scheduled alarms.
-        val t1 = System.currentTimeMillis()
-        var counter = 0
+        // val t1 = System.currentTimeMillis()
+        // var counter = 0
         for (surveyId in PersistentData.getSurveyIds()) {
             var app_state_says_on = PersistentData.getSurveyNotificationState(surveyId)
             var alarm_in_past = PersistentData.getMostRecentSurveyAlarmTime(surveyId) < now
@@ -688,7 +700,7 @@ class MainService : Service() {
             if (app_state_says_on || alarm_in_past) {
                 // this calls PersistentData.setSurveyNotificationState
                 displaySurveyNotification(applicationContext, surveyId)
-                counter++
+                // counter++
             }
 
             //TODO: fix this naming mismatch.
@@ -702,26 +714,8 @@ class MainService : Service() {
             if (!timer!!.alarmIsSet(Intent(surveyId)))
                 SurveyScheduler.scheduleSurvey(surveyId)
         }
-        printv("$counter survey notifications took ${System.currentTimeMillis() - t1} ms")
+        // printv("$counter survey notifications took ${System.currentTimeMillis() - t1} ms")
     }
-
-    // fun do_signout_check(now: Long) {
-    //     // only run after registration
-    //     if (!PersistentData.getIsRegistered())
-    //         return
-    //     val event_string = getString(R.string.signout_intent)
-    //     val periodicity = PersistentData.getCheckForNewSurveysFrequency()
-    //
-    //     val signout_check = {
-    //         PersistentData.logout()
-    //         // FIXME: this operation may crash if it is not on the main thread, need to test it
-    //         val loginPage = Intent(applicationContext, LoginActivity::class.java)  // yup that is still java
-    //         loginPage.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    //         startActivity(loginPage)
-    //     }
-    //     // nnnnoope this one uses a per-activity mechanism.... hmm
-    //     // do_an_event_session_check(now, event_string, periodicity, dowwnload_surveys_action)
-    // }
 
     /*##########################################################################################
 	############## code related to onStartCommand and binding to an activity ###################
@@ -746,7 +740,7 @@ class MainService : Service() {
     /** The BackgroundService is meant to be all the time, so we return START_STICKY  */
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
-        TextFileManager.getDebugLogFile().writeEncrypted(
+        TextFileManager.writeDebugLogStatement(
                 System.currentTimeMillis().toString() + " started with flag " + flags)
         val now = System.currentTimeMillis()
         val millisecondsSincePrevious = now - foregroundServiceLastStarted
@@ -774,7 +768,7 @@ class MainService : Service() {
 
         // onStartCommand is called every 30 seconds due to repeating high-priority-or-whatever
         // alarms, so we will stick a core logic check here.
-        printv("run_all_app_logic - onStartCommand")
+        printd("run_all_app_logic - onStartCommand")
         run_all_app_logic()
 
         // We want this service to continue running until it is explicitly stopped, so return sticky.
@@ -863,25 +857,25 @@ class MainService : Service() {
         fun registerTimers(applicationContext: Context) {
             timer = Timer(localHandle!!)
             val filter = IntentFilter()
-            // filter.addAction(applicationContext.getString(R.string.turn_accelerometer_off))
-            // filter.addAction(applicationContext.getString(R.string.turn_accelerometer_on))
-            // filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_off))
-            // filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_on))
-            // filter.addAction(applicationContext.getString(R.string.turn_gyroscope_on))
-            // filter.addAction(applicationContext.getString(R.string.turn_gyroscope_off))
+            filter.addAction(applicationContext.getString(R.string.turn_accelerometer_off))
+            filter.addAction(applicationContext.getString(R.string.turn_accelerometer_on))
+            filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_off))
+            filter.addAction(applicationContext.getString(R.string.turn_ambient_audio_on))
+            filter.addAction(applicationContext.getString(R.string.turn_gyroscope_on))
+            filter.addAction(applicationContext.getString(R.string.turn_gyroscope_off))
             filter.addAction(applicationContext.getString(R.string.turn_bluetooth_on))
             filter.addAction(applicationContext.getString(R.string.turn_bluetooth_off))
-            // filter.addAction(applicationContext.getString(R.string.turn_gps_on))
-            // filter.addAction(applicationContext.getString(R.string.turn_gps_off))
+            filter.addAction(applicationContext.getString(R.string.turn_gps_on))
+            filter.addAction(applicationContext.getString(R.string.turn_gps_off))
             filter.addAction(applicationContext.getString(R.string.signout_intent))
             filter.addAction(applicationContext.getString(R.string.voice_recording))
-            // filter.addAction(applicationContext.getString(R.string.run_wifi_log))
-            // filter.addAction(applicationContext.getString(R.string.upload_data_files_intent))
-            // filter.addAction(applicationContext.getString(R.string.create_new_data_files_intent))
+            filter.addAction(applicationContext.getString(R.string.run_wifi_log))
+            filter.addAction(applicationContext.getString(R.string.upload_data_files_intent))
+            filter.addAction(applicationContext.getString(R.string.create_new_data_files_intent))
             filter.addAction(applicationContext.getString(R.string.check_for_new_surveys_intent))
             filter.addAction(applicationContext.getString(R.string.check_for_sms_enabled))
             filter.addAction(applicationContext.getString(R.string.check_for_calls_enabled))
-            // filter.addAction(applicationContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
+            filter.addAction(applicationContext.getString(R.string.check_if_ambient_audio_recording_is_enabled))
             filter.addAction(applicationContext.getString(R.string.fcm_upload))
             filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             filter.addAction("crashBeiwe")
@@ -901,7 +895,7 @@ class MainService : Service() {
         fun startAutomaticLogoutCountdownTimer() {
             if (timer == null) {
                 Log.e("bacgroundService", "timer is null, BackgroundService may be about to crash, the Timer was null when the BackgroundService was supposed to be fully instantiated.")
-                TextFileManager.getDebugLogFile().writeEncrypted("our not-quite-race-condition encountered, Timer was null when the BackgroundService was supposed to be fully instantiated")
+                TextFileManager.writeDebugLogStatement("our not-quite-race-condition encountered, Timer was null when the BackgroundService was supposed to be fully instantiated")
             }
             timer!!.setupExactSingleAlarm(PersistentData.getTimeBeforeAutoLogout(), Timer.signoutIntent)
             PersistentData.loginOrRefreshLogin()

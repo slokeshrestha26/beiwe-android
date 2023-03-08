@@ -33,18 +33,18 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
             accelSensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
             if (accelSensorManager == null) {
                 Log.e("Accelerometer Problems", "accelSensorManager does not exist? (1)")
-                TextFileManager.getDebugLogFile().writeEncrypted("accelSensorManager does not exist? (1)")
+                TextFileManager.writeDebugLogStatement("accelSensorManager does not exist? (1)")
                 exists = false
             }
 
             accelSensor = accelSensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             if (accelSensor == null) {
                 Log.e("Accelerometer Problems", "accelSensor does not exist? (2)")
-                TextFileManager.getDebugLogFile().writeEncrypted("accelSensor does not exist? (2)")
+                TextFileManager.writeDebugLogStatement("accelSensor does not exist? (2)")
                 exists = false
             }
             // only runs once per app launch
-            TextFileManager.getDebugLogFile().writeEncrypted(
+            TextFileManager.writeDebugLogStatement(
                     System.currentTimeMillis().toString() + " accelerometer sensor info: $accelSensor")
         }
     }
@@ -63,7 +63,7 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
             Log.e("Accelerometer", "Accelerometer is broken")
             // this one happens occasionally, for 5% of users, across many manufacturers (samsung, motorola, HMD, HUAWEI, Yulong, LGE, OnePlus, Google, OPPO)
             // The other log statements do not.
-            TextFileManager.getDebugLogFile().writeEncrypted("Trying to start Accelerometer session, device cannot find accelerometer.")
+            TextFileManager.writeDebugLogStatement("Trying to start Accelerometer session, device cannot find accelerometer.")
         }
         else
             running = true

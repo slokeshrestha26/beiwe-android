@@ -168,7 +168,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
     override fun onProviderEnabled(arg0: String) {} //Log.d("A location provider was enabled.", arg0); }
 
     private fun makeDebugLogStatement(message: String) {
-        TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis().toString() + " " + message)
+        TextFileManager.writeDebugLogStatement(message)
         Log.w("GPS recording warning", message)
     }
 }

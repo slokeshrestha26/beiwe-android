@@ -132,8 +132,7 @@ public class TextFileManager {
 		return surveyAnswers;
 	}
 	
-	//(the persistent files)
-	public static TextFileManager getDebugLogFile () {
+	public static TextFileManager getDebugLogFile () {  // can't be private because it's used in the debug activity
 		checkAvailableWithTimeout("debugLogFile");
 		return debugLogFile;
 	}

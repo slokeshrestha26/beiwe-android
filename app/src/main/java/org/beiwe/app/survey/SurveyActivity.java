@@ -62,7 +62,7 @@ public class SurveyActivity extends SessionActivity implements
 			// Record the time that the survey was first visible to the user
 			SurveyTimingsRecorder.recordSurveyFirstDisplayed(surveyId);
 			// Onnela lab requested this line in the debug log
-			TextFileManager.getDebugLogFile().writeEncrypted(initialViewMoment + " opened survey " + surveyId + ".");
+			TextFileManager.writeDebugLogStatement(initialViewMoment + " opened survey " + surveyId + ".");
 			hasLoadedBefore = true;
 		}
 	}

@@ -58,7 +58,7 @@ public class CallLogger extends ContentObserver {
 			//http://stackoverflow.com/questions/13080540/what-causes-androids-contentresolver-query-to-return-null
 			textsDBQuery = appContext.getContentResolver().query(allCalls, null, null, null, android.provider.CallLog.Calls.DEFAULT_SORT_ORDER);
 			if (textsDBQuery == null) {
-				TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " restarting Beiwe due to bug in Android's phone call database API.");
+				TextFileManager.writeDebugLogStatement(System.currentTimeMillis() + " restarting Beiwe due to bug in Android's phone call database API.");
 				throw new NullPointerException("the user's call logging database was broken, did not succeed in connecting on the second try."); }
 		}
 		textsDBQuery.moveToFirst();

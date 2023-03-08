@@ -424,7 +424,7 @@ public class PostRequest {
 				
 				if (stopTime < System.currentTimeMillis()) {
 					Log.w("UPLOAD STUFF", "shutting down upload due to time limit, we should never reach this.");
-					TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis() + " upload time limit of 1 hr reached, there are likely files still on the phone that have not been uploaded.");
+					TextFileManager.writeDebugLogStatement("upload time limit of 1 hr reached, there are likely files still on the phone that have not been uploaded.");
 					CrashHandler.writeCrashlog(new Exception("Upload took longer than 1 hour"), appContext);
 					return;
 				}

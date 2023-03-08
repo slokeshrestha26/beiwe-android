@@ -93,7 +93,7 @@ object SurveyNotifications {
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.voice_recording_icon))
             notificationBuilder.setGroup(surveyId)
         } else {
-            TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis().toString() + " " + " encountered unknown survey type: " + PersistentData.getSurveyType(surveyId) + ", cannot schedule survey.")
+            TextFileManager.writeDebugLogStatement("encountered unknown survey type: " + PersistentData.getSurveyType(surveyId) + ", cannot schedule survey.")
             return
         }
         
@@ -130,7 +130,7 @@ object SurveyNotifications {
 
         // Check if notifications have been disabled
         if (!notificationManager.areNotificationsEnabled()) {
-            TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis().toString() + " " + "Participant has blocked notifications (1)")
+            TextFileManager.writeDebugLogStatement("Participant has blocked notifications (1)")
             Log.e("SurveyNotifications", "Participant has blocked notifications (1)")
         }
     }
@@ -162,7 +162,7 @@ object SurveyNotifications {
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.voice_recording_icon))
             notificationBuilder.setGroup(surveyId)
         } else {
-            TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis().toString() + " " + " encountered unknown survey type: " + PersistentData.getSurveyType(surveyId) + ", cannot schedule survey.")
+            TextFileManager.writeDebugLogStatement("encountered unknown survey type: " + PersistentData.getSurveyType(surveyId) + ", cannot schedule survey.")
             return
         }
         activityIntent.putExtra("surveyId", surveyId)
@@ -196,7 +196,7 @@ object SurveyNotifications {
 
         // Check if notifications have been disabled
         if (!notificationManager.areNotificationsEnabled()) {
-            TextFileManager.getDebugLogFile().writeEncrypted(System.currentTimeMillis().toString() + " " + "Participant has blocked notifications (2)")
+            TextFileManager.writeDebugLogStatement("Participant has blocked notifications (2)")
             Log.e("SurveyNotifications", "Participant has blocked notifications (2)")
         }
     }
