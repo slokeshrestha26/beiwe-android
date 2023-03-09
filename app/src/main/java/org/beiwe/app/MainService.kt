@@ -37,20 +37,23 @@ import org.beiwe.app.ui.utils.SurveyNotifications.displaySurveyNotification
 import java.util.*
 
 
-// notification channel constants (to be moved elsewhere)
+// Notification Channel constants
 const val NOTIFICATION_CHANNEL_ID = "_service_channel"
 const val NOTIFICATION_CHANNEL_NAME = "Beiwe Data Collection" // user facing name, seen if they hold press the notification
 
-// timer constants all internal values require milliseconds
-const val FCM_TIMER = 1000L * 60 * 120 // 2 hours between sending fcm updates
-const val DEVICE_SETTINGS_UPDATE_PERIODICITY = 1000L * 60 * 60 * 2 // 2 hours between checking for updated device settings updates
-const val FOREGROUND_SERVICE_NOTIFICATION_TIMER = 1000L * 60 * 60 * 6 // 6 hours for a foreground service notification
-const val FOREGROUND_SERVICE_RESTART_PERIODICITY = 1000L * 30 // set to 30 seconds because we are very greedy about this.
+// Timer constants
+const val FCM_TIMER = 1000L * 60 * 30 // 30 minutes between sending fcm checkins
+const val DEVICE_SETTINGS_UPDATE_PERIODICITY = 1000L * 60 * 30  // 30 between checking for updated device settings updates
+
+// set our repeating timers to 30 seconds (threadhandler is offset by half the period)
+const val FOREGROUND_SERVICE_RESTART_PERIODICITY = 1000L * 30
 const val THREADHANDLER_PERIODICITY = 1000L * 30
+
+// 6 hours for a foreground service notification, this is JUST the notification, not the service itself.
+const val FOREGROUND_SERVICE_NOTIFICATION_TIMER = 1000L * 60 * 60 * 6
 
 const val BLLUETOOTH_MESSAGE_1 = "bluetooth Failure, device should not have gotten to this line of code"
 const val BLLUETOOTH_MESSAGE_2 = "Device does not support bluetooth LE, bluetooth features disabled."
-
 const val FCM_ERROR_MESSAGE  = "Unable to get FCM token, will not be able to receive push notifications."
 
 
@@ -389,7 +392,8 @@ class MainService : Service() {
                     timer!!.setupExactSingleAlarm(30000L, Timer.checkForCallsEnabledIntent)
             }
 
-            // TODO: convert to state-based check logic
+            // TODO: convert to state-based check logic - for now this can stay here, I believe it
+            //  will result in only some notifictation ~weirdness
             // checks if the action is the id of a survey (expensive), if so pop up the notification
             // for that survey, schedule the next alarm.
             if (PersistentData.getSurveyIds().contains(broadcastAction)) {
@@ -417,6 +421,10 @@ class MainService : Service() {
     ########################## Application State Logic #############################
     ##############################################################################*/
 
+    // TODO: if we make this use rtc time that will solve time-reset issues.  Could also run a sanity check.
+    // TODO: test default (should be zero? out of PersistentData) cases.
+    // TODO: is there an advantage to sticking the callables onto a queue that is then consumed? leaning no.
+
     /* Abstract function, checks the time, runs the action, sets the next time. */
     fun do_an_event_session_check(
             now: Long,
@@ -428,7 +436,7 @@ class MainService : Service() {
         val most_recent_event_time = PersistentData.getMostRecentAlarmTime(identifier_string)
         if (now - most_recent_event_time > periodicity_in_milliseconds) {
             // printe("'$identifier_string' - time to trigger")
-            do_action()  // TODO: stick this on a queue?
+            do_action()
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
             // TODO: this purely mimicks the old behavior that was of printing the broadcast, refine it.
             TextFileManager.writeDebugLogStatement(
@@ -467,7 +475,7 @@ class MainService : Service() {
         // running, should be off, off is in the past
         if (is_running && should_turn_off_at < now) {
             // printi("'$identifier_string' time to turn off")
-            off_action()  // TODO: stick this on a queue?
+            off_action()
             val should_turn_on_again_at_safe = should_turn_on_again_at + 1000 // add a second to ensure we pass the timer
             print("setting ON TIMER for $identifier_string to $should_turn_on_again_at_safe")
             timer!!.setupSingleAlarmAt(should_turn_on_again_at_safe, Timer.intent_map[identifier_string]!!)
@@ -487,7 +495,7 @@ class MainService : Service() {
             // care that we get data, not that data be rigidly accurate to a clock.
             PersistentData.setMostRecentAlarmTime(identifier_string, System.currentTimeMillis())
             // printe("'$identifier_string' turn it on!")
-            on_action()  //TODO: stick this on a queue?
+            on_action()
             val should_turn_off_at_safe = should_turn_off_at + 1000  // add a second to ensure we pass the timer
             print("setting OFF TIMER for $identifier_string to $should_turn_off_at_safe")
             timer!!.setupSingleAlarmAt(should_turn_off_at_safe, Timer.intent_map[intent_off_string]!!)
@@ -523,9 +531,6 @@ class MainService : Service() {
         printd("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
         return now
     }
-
-    // TODO: if we make this use rtc time that will solve time-reset issues.  Could also run a sanity check.
-    // TODO: test default (should be zero? out of PersistentData) cases.
 
     fun accelerometer_logic(now: Long) {
         // accelerometer may not exist, or be disabled for the study
