@@ -3,7 +3,7 @@ package org.beiwe.app.networking;
 import android.os.AsyncTask;
 import android.util.Log;
 
-//TODO: Low priority: Eli. Redoc.
+//TODO: Purge all uses of AsyncTask
 
 /**HTTPAsync is a... special AsyncTask for handling network (HTTP) requests using our PostRequest class.
  * HTTPAsync handles the asynchronous requirement for UI threads, and automatically handles user

@@ -102,16 +102,16 @@ public class AudioRecorderEnhancedActivity extends AudioRecorderCommon{
     		recorder = null; //release memory...
     		recordingThread = null;
     	}
-    	//TODO: Eli. low priority. is it too much of a hassle to stick these on a separate thread?  These files will get big if they are wav recordings, causing bad UE.
-    	//We need to do this because the the RAW file is not formatted correctly for playback
-    	AudioFileManager.copyToWaveFile( unencryptedRawAudioFilePath, unencryptedTempAudioFilePath,
-                     					 SAMPLE_RATE, BIT_DEPTH, BUFFER_SIZE );
+    	
+	    // TODO: review encryption + this copy step for out of memory conditions and improvements, it is quite bad.
+    	// We need copy to wave file because the the RAW file is not formatted correctly for playback by all media players
+    	AudioFileManager.copyToWaveFile(
+			unencryptedRawAudioFilePath, unencryptedTempAudioFilePath, SAMPLE_RATE, BIT_DEPTH, BUFFER_SIZE
+	    );
     	AudioFileManager.delete(unencryptedRawAudioFileName);
-	    //File has been copy, can now display the button.
+	    // File has been copied, can now display the button.
 	    displayPlaybackButton();
-        // Encrypt the audio file as soon as recording is finished
-        new EncryptAudioFileTask().execute();
-        //TODO: Eli. Low priority. in cases where long audio recordings are taken the with uncompressed files there is the possibility of an out-of-memory error.
+        new EncryptAudioFileTask().execute();  // TODO: port to use a thread
     }
     
     /**Writes data from the AudioRecord to a file.

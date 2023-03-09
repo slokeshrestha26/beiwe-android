@@ -1,7 +1,5 @@
 package org.beiwe.app.survey;
 
-// TODO: Low priority. Josh. is it OK to not use support.v4?
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
@@ -322,15 +320,13 @@ public class QuestionFragment extends Fragment {
     }
 
 
-    /**
-     * Creates a question with an open-response, text-input field
+    /**Creates a question with an open-response, text-input field
      * @param questionText The text of the question
      * @param inputTextType The type of answer (number, text, etc.)
-     * @return LinearLayout question and answer
-     */
+     * @return LinearLayout question and answer */
     private LinearLayout createFreeResponseQuestion(LayoutInflater inflater, String questionID,
                                                    String questionText, TextFieldType.Type inputTextType) {
-        //TODO: Josh. Give open response questions autofocus and make the keyboard appear
+        //TODO: Give open response questions autofocus and make the keyboard appear
         LinearLayout question = (LinearLayout) inflater.inflate(R.layout.survey_open_response_question, null);
 
         // Set the text of the question itself
@@ -545,7 +541,7 @@ public class QuestionFragment extends Fragment {
             this.questionDescription = questionDescription;
         }
 
-        // TODO: Josh. replace this with a listener on the Next button; that'd probably make more sense
+        // TODO: replace this with a listener on the Next button; that'd probably make more sense
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if (hasFocus) {

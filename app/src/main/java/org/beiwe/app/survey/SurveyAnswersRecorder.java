@@ -40,7 +40,6 @@ public class SurveyAnswersRecorder {
 	public static Integer getAnswerIntegerValue(View questionLayout, QuestionType.Type questionType) {
 		if (questionType == QuestionType.Type.SLIDER) {
 			return getNullableIntAnswerFromSliderQuestion(questionLayout);
-			//TODO: Josh. Check if a slider in beiwe can be a floating point value.
 		} else if (questionType == QuestionType.Type.RADIO_BUTTON) {
             return getIndexOfSelectedRadioButton(questionLayout);
 		} else {

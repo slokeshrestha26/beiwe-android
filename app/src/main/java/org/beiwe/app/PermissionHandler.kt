@@ -143,14 +143,6 @@ object PermissionHandler {
         return checkAccessReadContacts(context) && checkAccessReadSms(context) && checkAccessReceiveMms(context) && checkAccessReceiveSms(context)
     }
 
-    // TODO: for unknown reasons, at some point in the past, the checkwifipermissions function
-    //  included checkAccessCoarseLocation. This has been removed and tested on chris' android 6.0
-    //  phone and the nexus 7 tablet and does not appear to be necessary.
-    // TODO: We may need to re-enable this function because course location is required for wifi on
-    //  Google Pixel phone as of Android 8.1.0
-
-// old function call, probably can be cleared out.
-//     public static boolean checkWifiPermissions( Context context ) { return ( checkAccessWifiState(context) && checkAccessNetworkState(context) && checkAccessCoarseLocation(context) ) ; }
     @JvmStatic
     fun checkWifiPermissions(context: Context): Boolean {
         return checkAccessWifiState(context) && checkAccessNetworkState(context)

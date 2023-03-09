@@ -18,8 +18,6 @@ import java.util.Set;
 
 /** Created by elijones on 12/1/16. */
 
-//TODO: implement a serialization and/or iterable output blob.  need to see what survey anwsers actually look like to determine all the values it needs
-
 public class JsonSkipLogic {
 
 	/*############################# Assets ###################################*/
@@ -196,10 +194,9 @@ public class JsonSkipLogic {
 		// rather than optimized code length or performance.
 
 		//We'll get the NOT out of the way first.
-		//todo: Eli. test not, it may not be in the reference.
 		if ( comparator.equals("not") ) {
 			//we need to pass in the Json _Object_ of the next layer in
-//			Log.d("json logic", "evaluating as NOT (invert)");
+			// Log.d("json logic", "evaluating as NOT (invert)");
 			return !parseLogicTree(questionId, logic.getJSONObject(comparator) );
 		}
 
@@ -213,14 +210,14 @@ public class JsonSkipLogic {
 			//get array of logic operations
 			JSONArray manyLogics = logic.getJSONArray(comparator);
 			List<Boolean> results = new ArrayList<Boolean>(manyLogics.length());
-//			Log.v("json logic", "evaluating as boolean, " + manyLogics.length() + " things to process...");
+			// Log.v("json logic", "evaluating as boolean, " + manyLogics.length() + " things to process...");
 
 			//iterate over array, get the booleans into a list
 			for (int i = 0; i < manyLogics.length(); i++) { //jsonArrays are not iterable...
 				results.add( parseLogicTree(questionId, manyLogics.getJSONObject(i) ) );
 			} //results now contains the boolean evaluation of all nested logics.
 
-//			Log.v("json logic", "returning inside of " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") after processing logic for boolean.");
+			// Log.v("json logic", "returning inside of " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") after processing logic for boolean.");
 
 			//And. if anything is false, return false. If those all pass, return true.
 			if ( comparator.equals("and") ) {

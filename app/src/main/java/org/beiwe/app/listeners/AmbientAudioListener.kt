@@ -127,7 +127,7 @@ object AmbientAudioListener {
         TextFileManager.writeDebugLogStatement(FILE_ERROR + currentlyWritingEncryptedFilename)
     }
 
-    //TODO: make this a job?
+    //TODO: make this thread, not an asynctask
     private class EncryptAmbientAudioFileTask : AsyncTask<Void?, Void?, Void?>() {
         override fun onPreExecute() {
             // Before doing anything else, set the filename of the encrypted file. This tells

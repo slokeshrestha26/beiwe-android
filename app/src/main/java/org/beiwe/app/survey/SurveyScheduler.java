@@ -135,7 +135,11 @@ public class SurveyScheduler {
 			days++; //advance to next day...
 		}
 		/* Warning: for some reason... if you try to throw a null pointer exception in here the app freezes. */
-		//TODO: Low priority. Eli/Josh.  determine why the app stalls when nullpointerexceptions are thrown on... non gui threads?  insert a null pointer exception here and comment out the remainer of the function to see what I am talking about.
+		
+		//TODO: determine why the app stalls when nullpointerexceptions are thrown on... non gui
+		// threads?  insert a null pointer exception here and comment out the remainer of the
+		// function to see what I am talking about.
+		
 		// throw new NullPointerException("totally arbitrary message");
 		if (firstPossibleAlarmTime == null) {
 			return null;

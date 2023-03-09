@@ -64,8 +64,7 @@ public class GraphActivity extends SessionActivity {
 //		browser.setFitsSystemWindows(true);
 //		browser.setOverScrollMode(android.view.View.OVER_SCROLL_ALWAYS);
 		browser.setNetworkAvailable(true);
-
-		//TODO: Low priority. Eli. find a way to Kill this use of securityparameters, make securityparameters private.
+		
 		String postData = PostRequest.securityParameters(null);
 		String graphUrl = addWebsitePrefix(getApplicationContext().getString(R.string.graph_url));
 		browser.postUrl(graphUrl, EncodingUtils.getBytes(postData, "BASE64"));

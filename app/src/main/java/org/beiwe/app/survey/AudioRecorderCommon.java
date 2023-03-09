@@ -123,7 +123,6 @@ public class AudioRecorderCommon extends SessionActivity {
 			if (everEncrypted) {
 				Toast.makeText(getApplicationContext(), PersistentData.getSurveySubmitSuccessToastText(), Toast.LENGTH_LONG).show();
 			}
-			// TODO: show an error message if there was a recording and it failed to be encrypted
 		}
 		PersistentData.setNotTakingSurvey();
 	}
@@ -135,7 +134,6 @@ public class AudioRecorderCommon extends SessionActivity {
 		} catch (JSONException e) {
 			Log.e("Audio Survey", "audio survey received either no or invalid prompt text.");
 			e.printStackTrace();
-			//TODO: Low Priority. Eli/Josh.  update the default prompt string to be... not a question?
 			return appContext.getString(R.string.record_activity_default_message);
 		}
     }

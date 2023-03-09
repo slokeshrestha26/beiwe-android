@@ -29,11 +29,13 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
-/** PostRequest is our class for handling all HTTP operations we need; they are all in the form of HTTP post requests. 
- * All HTTP connections are HTTPS, and automatically include a password and identifying information. 
- * @author Josh, Eli, Dor */
+/** PostRequest is our class for handling all HTTP operations we need; they are all in the form of
+ * HTTP post requests. All HTTP connections are HTTPS, and automatically include a password and
+ * identifying information. @author Josh, Eli, Dor */
 
-//TODO: Low priority. Eli. clean this up and update docs. It does not adequately state that it puts into any request automatic security parameters, and it is not obvious why some of the functions exist (minimal http thing)
+//TODO: need to clean up all of postrequuest, redoc. It does not adequately state that it puts into
+//  any request automatic security parameters, and it is not obvious why some of the functions exist
+//  (minimal http thing)
 public class PostRequest {
 	private static Context appContext;
 	
