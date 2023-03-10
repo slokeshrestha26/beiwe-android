@@ -43,9 +43,10 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
                 TextFileManager.writeDebugLogStatement("accelSensor does not exist? (2)")
                 exists = false
             }
+            // TODO: reenable after we get the data formatting correct / as dev log item
             // only runs once per app launch
-            TextFileManager.writeDebugLogStatement(
-                    System.currentTimeMillis().toString() + " accelerometer sensor info: $accelSensor")
+            // TextFileManager.writeDebugLogStatement(
+            //         System.currentTimeMillis().toString() + " accelerometer sensor info: $accelSensor")
         }
     }
 

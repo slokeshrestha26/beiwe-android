@@ -43,8 +43,9 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
                 TextFileManager.writeDebugLogStatement("gyroSensor does not exist? (2)")
                 exists = false
             }
+            // TODO: reenable after we get the data formatting correct / as dev log item
             // only runs once per app launch
-            TextFileManager.writeDebugLogStatement("gyroscope sensor info: $gyroSensor")
+            // TextFileManager.writeDebugLogStatement("gyroscope sensor info: $gyroSensor")
         }
     }
 
