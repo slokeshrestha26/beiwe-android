@@ -534,7 +534,7 @@ class MainService : Service() {
 
     fun accelerometer_logic(now: Long) {
         // accelerometer may not exist, or be disabled for the study
-        if (!PersistentData.getAccelerometerEnabled() || accelerometerListener!!.exists)
+        if (!PersistentData.getAccelerometerEnabled() || !accelerometerListener!!.exists)
             return
 
         // assemble all the variables we need for on-off with duration
