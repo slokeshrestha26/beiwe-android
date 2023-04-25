@@ -269,6 +269,13 @@
 			android:text="(dev) Log Alarm Time Info"/>
 
 		<Button
+			android:id="@+id/getActiveNotifications"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:onClick="getActiveNotifications"
+			android:text="(dev) Log Notification State"/>
+
+		<Button
 			android:id="@+id/buttonFeaturesEnabled"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

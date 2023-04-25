@@ -34,6 +34,7 @@ import org.beiwe.app.storage.TextFileManager
 import org.beiwe.app.survey.SurveyScheduler
 import org.beiwe.app.ui.user.LoginActivity
 import org.beiwe.app.ui.utils.SurveyNotifications.displaySurveyNotification
+import org.beiwe.app.ui.utils.SurveyNotifications.isNotificationActive
 import java.util.*
 
 
@@ -702,7 +703,7 @@ class MainService : Service() {
 
             // we don't currently have logic to determine if a notification is actually visible,
             // the behavior is that it ... replaces all the notifications.  we can make this better.
-            if (app_state_says_on || alarm_in_past) {
+            if ((app_state_says_on || alarm_in_past) && !isNotificationActive(applicationContext, surveyId)) {
                 // this calls PersistentData.setSurveyNotificationState
                 displaySurveyNotification(applicationContext, surveyId)
                 // counter++

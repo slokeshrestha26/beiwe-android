@@ -17,6 +17,7 @@ import org.beiwe.app.storage.TextFileManager
 import org.beiwe.app.survey.JsonSkipLogic
 import org.beiwe.app.ui.user.MainMenuActivity
 import org.beiwe.app.ui.utils.SurveyNotifications
+import org.beiwe.app.ui.utils.SurveyNotifications.isNotificationActive
 import org.json.JSONArray
 import org.json.JSONException
 import java.security.spec.InvalidKeySpecException
@@ -173,6 +174,15 @@ class DebugInterfaceActivity : SessionActivity() {
             )
             printi("survey timings", "(first element is Sunday): " + PersistentData.getSurveyTimes(surveyId))
 
+        }
+    }
+
+    fun getActiveNotifications(view: View?) {
+        val ids = PersistentData.getSurveyIds()
+        for (surveyId in ids) {
+            print("survey id: " + surveyId)
+            print("should be active: " + PersistentData.getSurveyNotificationState(surveyId))
+            print("is active: " + isNotificationActive(applicationContext, surveyId))
         }
     }
 

@@ -18,6 +18,7 @@ import androidx.core.app.NotificationCompat
 import android.app.NotificationChannel
 import android.content.Context
 import android.graphics.Color
+import android.service.notification.StatusBarNotification
 import android.util.Log
 import org.beiwe.app.pending_intent_flag_fix
 import org.json.JSONObject
@@ -229,6 +230,17 @@ object SurveyNotifications {
         val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(surveyId.hashCode())
         PersistentData.setSurveyNotificationState(surveyId, false)
+    }
+
+    fun isNotificationActive(appContext: Context, surveyId: String): Boolean {
+        val notificationManager = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // loop over notifications and check if any of them are the surveyId passed in
+        for (notification: StatusBarNotification in notificationManager.activeNotifications) {
+            if (notification.id == surveyId.hashCode()) {
+                return true
+            }
+        }
+        return false
     }
 
     /**Tries to determine the type of audio survey.  If it is an Enhanced audio survey AudioRecorderEnhancedActivity.class is returned,
