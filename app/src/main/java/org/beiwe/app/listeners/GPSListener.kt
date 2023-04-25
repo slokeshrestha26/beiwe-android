@@ -143,8 +143,8 @@ class GPSListener(private val appContext: Context) : LocationListener {
     override fun onLocationChanged(location: Location) {
         // val javaTimeCode = System.currentTimeMillis()
         //order: time, latitude, longitude, altitude, horizontal_accuracy\n
-        printe(System.currentTimeMillis())
-        printe(location.elapsedRealtimeNanos / 1_000_000)
+        // printe(System.currentTimeMillis())
+        // printe(location.elapsedRealtimeNanos / 1_000_000)
 
         // we record the system boot time once and use that as a reference.
         val javaTimeCode = DeviceInfo.boot_time_milli + (location.elapsedRealtimeNanos / 1_000_000)
