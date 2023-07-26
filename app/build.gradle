@@ -127,6 +127,8 @@ next: probably new formatting for the hardware information for gps, accel, gyro
 
 android {
 
+
+    namespace 'org.beiwe.app'
     signingConfigs {
         config {
             storeFile file(keystoreProperties['storeFile'])
