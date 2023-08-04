@@ -60,14 +60,16 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
     override fun goToNextQuestion(dataFromOldQuestion: QuestionData?) {
         // store the answer from the previous question
         surveyLogic!!.setAnswer(dataFromOldQuestion)
-        val isRequired = surveyLogic!!.currentQuentionRequired
-        printe("goToNextQuestion - getCurrentQuentionRequired:$isRequired")
-        printe("goToNextQuestion - dataFromOldQuestion: " + dataFromOldQuestion + " - " + (dataFromOldQuestion == null))
+        val isRequired = surveyLogic!!.currentQuestionRequired
+        // printe("goToNextQuestion - getCurrentQuestionRequired:$isRequired")
+        // printe("goToNextQuestion - dataFromOldQuestion: " + dataFromOldQuestion)
+
         if (dataFromOldQuestion != null) {
             dataFromOldQuestion.pprint()
         } else{
             printe("goToNextQuestion - dataFromOldQuestion is null")
         }
+
         if (isRequired != null && isRequired && (dataFromOldQuestion == null || !dataFromOldQuestion.questionIsAnswered())) {
             Toast.makeText(this, "This question is required.", Toast.LENGTH_SHORT).show()
             return
@@ -143,13 +145,14 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
             }
             // construct the survey's skip logic.
             //(param 2: If randomization is enabled do not run the skip logic for the survey.)
-            surveyLogic = JsonSkipLogic(jsonQuestions, !randomize, applicationContext)
+            surveyLogic = JsonSkipLogic(jsonQuestions!!, !randomize, applicationContext)
         } catch (e: JSONException) {
             e.printStackTrace()
         }
     }
 
-    val currentQuestionData: QuestionData
+    // we need a reference on the activity to the current question fragment
+    val currentQuestionData: QuestionData?
         get() = surveyLogic!!.currentQuestionData
 
     /**Called when the user presses "Submit" at the end of the survey,
