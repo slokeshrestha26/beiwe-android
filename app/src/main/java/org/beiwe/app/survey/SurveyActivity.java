@@ -1,5 +1,8 @@
 package org.beiwe.app.survey;
 
+import static org.beiwe.app.UtilsKt.print;
+import static org.beiwe.app.UtilsKt.printe;
+
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,40 +25,34 @@ import org.json.JSONObject;
  * @author Josh Zagorsky, Eli Jones */
 
 public class SurveyActivity extends SessionActivity implements
-        QuestionFragment.OnGoToNextQuestionListener,
-        SurveySubmitFragment.OnSubmitButtonClickedListener {
+	QuestionFragment.OnGoToNextQuestionListener,
+	SurveySubmitFragment.OnSubmitButtonClickedListener {
 	private String surveyId;
-	private JsonSkipLogic surveySkipLogic;
+	private JsonSkipLogic surveyLogic;
 	private boolean hasLoadedBefore = false;
 	private long initialViewMoment;
 	private QuestionFragment questionFragment;
-
+	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate (Bundle savedInstanceState) {
 		PersistentData.setTakingSurvey();
 		super.onCreate(savedInstanceState);
 		initialViewMoment = System.currentTimeMillis();
 		setContentView(R.layout.activity_survey);
 		Intent triggerIntent = getIntent();
 		surveyId = triggerIntent.getStringExtra("surveyId");
-//		if (savedInstanceState == null) {
-//			Bundle extras = getIntent().getExtras();
-//			if (extras != null) {
-//				answers = new ArrayList<>();
-//			}
-//		}
 	}
-
+	
 	@Override
-	protected void onDestroy() {
+	protected void onDestroy () {
 		super.onDestroy();
 		PersistentData.setNotTakingSurvey();
 	}
-
+	
 	@Override
-	protected void doBackgroundDependentTasks() {
+	protected void doBackgroundDependentTasks () {
 		super.doBackgroundDependentTasks();
-		if (!hasLoadedBefore ) {
+		if (!hasLoadedBefore) {
 			setUpQuestions(surveyId);
 			// Run the logic as if we had just pressed next without answering a hypothetical question -1
 			goToNextQuestion(null);
@@ -66,67 +63,82 @@ public class SurveyActivity extends SessionActivity implements
 			hasLoadedBefore = true;
 		}
 	}
-
-
+	
+	
 	@Override
-    public void goToNextQuestion(QuestionData dataFromOldQuestion) {
+	public void goToNextQuestion (QuestionData dataFromOldQuestion) {
 		// store the answer from the previous question
-		if (dataFromOldQuestion != null) {
-			surveySkipLogic.setAnswer(dataFromOldQuestion);
+		surveyLogic.setAnswer(dataFromOldQuestion);
+		
+		Boolean isRequired = surveyLogic.getCurrentQuentionRequired();
+		// printe("goToNextQuestion - getCurrentQuentionRequired:" + isRequired);
+		// printe("goToNextQuestion - dataFromOldQuestion: " + dataFromOldQuestion + " - " + (dataFromOldQuestion == null) );
+		// if (dataFromOldQuestion != null)
+		// 	dataFromOldQuestion.pprint();
+		// else printe("goToNextQuestion - dataFromOldQuestion is null");
+		
+		if (isRequired != null && isRequired && (dataFromOldQuestion == null || !dataFromOldQuestion.questionIsAnswered())) {
+			Toast.makeText(this, "This question is required.", Toast.LENGTH_SHORT).show();
+			return;
 		}
-
-	    JSONObject nextQuestion = surveySkipLogic.getNextQuestion();
-        // If you've run out of questions, display the Submit button
-        if (nextQuestion == null) { displaySurveySubmitFragment(); }
-        else { displaySurveyQuestionFragment(nextQuestion, surveySkipLogic.onFirstQuestion()); }
-    }
-
-
-	@Override
-	public void onBackPressed() {
-        super.onBackPressed();
-		// In order oto do that we need to execute the fragment's getAnswer function.
-		// surveySkipLogic.setAnswer( questionFragment.getAnswer(...) );
-		surveySkipLogic.goBackOneQuestion();
+		
+		JSONObject nextQuestion = surveyLogic.getNextQuestion();
+		
+		// If you've run out of questions, display the Submit button
+		if (nextQuestion == null) {
+			displaySurveySubmitFragment();
+		} else {
+			displaySurveyQuestionFragment(nextQuestion, surveyLogic.onFirstQuestion());
+		}
 	}
-
-
-    private void displaySurveyQuestionFragment(JSONObject jsonQuestion, Boolean isFirstQuestion) {
+	
+	
+	@Override
+	public void onBackPressed () {
+		super.onBackPressed();
+		// In order oto do that we need to execute the fragment's getAnswer function.
+		// surveyLogic.setAnswer( questionFragment.getAnswer(...) );
+		surveyLogic.goBackOneQuestion();
+	}
+	
+	
+	private void displaySurveyQuestionFragment (JSONObject jsonQuestion, Boolean isFirstQuestion) {
 		// Create a question fragment with the attributes of the question
 		questionFragment = new QuestionFragment();
 		questionFragment.setArguments(QuestionJSONParser.getQuestionArgsFromJSONString(jsonQuestion));
-
+		
 		// Put the fragment into the view
 		FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        if (isFirstQuestion) {
-            fragmentTransaction.add(R.id.questionFragmentGoesHere, questionFragment);
-        } else {
-            fragmentTransaction.replace(R.id.questionFragmentGoesHere, questionFragment);
-            fragmentTransaction.addToBackStack(null);
-        }
+		if (isFirstQuestion) {
+			fragmentTransaction.add(R.id.questionFragmentGoesHere, questionFragment);
+		} else {
+			fragmentTransaction.replace(R.id.questionFragmentGoesHere, questionFragment);
+			fragmentTransaction.addToBackStack(null);
+		}
 		fragmentTransaction.commit();
 	}
-
-
-    private void displaySurveySubmitFragment() {
+	
+	
+	private void displaySurveySubmitFragment () {
 		Bundle args = new Bundle();
-		args.putStringArrayList("unansweredQuestions", surveySkipLogic.getUnansweredQuestions());
-
+		args.putStringArrayList("unansweredQuestions", surveyLogic.getUnansweredQuestions());
+		
 		SurveySubmitFragment submitFragment = new SurveySubmitFragment();
 		submitFragment.setArguments(args);
-
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.questionFragmentGoesHere, submitFragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-    }
-
-
-	private void setUpQuestions(String surveyId) {
+		
+		FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+		fragmentTransaction.replace(R.id.questionFragmentGoesHere, submitFragment);
+		fragmentTransaction.addToBackStack(null);
+		fragmentTransaction.commit();
+	}
+	
+	
+	private void setUpQuestions (String surveyId) {
 		// Get survey settings
 		Boolean randomizeWithMemory = false;
 		Boolean randomize = false;
 		int numberQuestions = 0;
+		
 		try {
 			JSONObject surveySettings = new JSONObject(PersistentData.getSurveySettings(surveyId));
 			randomizeWithMemory = surveySettings.optBoolean(getString(R.string.randomizeWithMemory), false);
@@ -136,37 +148,45 @@ public class SurveyActivity extends SessionActivity implements
 			Log.e("Survey Activity", "There was an error parsing survey settings");
 			e.printStackTrace();
 		}
-
+		
 		try { // Get survey content as an array of questions; each question is a JSON object
 			JSONArray jsonQuestions = new JSONArray(PersistentData.getSurveyContent(surveyId));
 			// If randomizing the question order, reshuffle the questions in the JSONArray
-			if (randomize && !randomizeWithMemory) { jsonQuestions = JSONUtils.shuffleJSONArray(jsonQuestions, numberQuestions); }
-			if (randomize && randomizeWithMemory) { jsonQuestions = JSONUtils.shuffleJSONArrayWithMemory(jsonQuestions, numberQuestions, surveyId); }
+			if (randomize && !randomizeWithMemory) {
+				jsonQuestions = JSONUtils.shuffleJSONArray(jsonQuestions, numberQuestions);
+			}
+			if (randomize && randomizeWithMemory) {
+				jsonQuestions = JSONUtils.shuffleJSONArrayWithMemory(jsonQuestions, numberQuestions, surveyId);
+			}
 			//construct the survey's skip logic.
 			//(param 2: If randomization is enabled do not run the skip logic for the survey.)
-			surveySkipLogic = new JsonSkipLogic(jsonQuestions, !randomize, getApplicationContext());
-		} catch (JSONException e) { e.printStackTrace(); }
+			surveyLogic = new JsonSkipLogic(jsonQuestions, !randomize, getApplicationContext());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
-
-	public QuestionData getCurrentQuestionData(){ return surveySkipLogic.getCurrentQuestionData(); }
-
+	
+	public QuestionData getCurrentQuestionData () {
+		return surveyLogic.getCurrentQuestionData();
+	}
+	
 	/**Called when the user presses "Submit" at the end of the survey,
 	 * saves the answers, and takes the user back to the main page. */
 	@Override
-	public void submitButtonClicked() {
+	public void submitButtonClicked () {
 		SurveyTimingsRecorder.recordSubmit(getApplicationContext());
-
+		
 		// Write the data to a SurveyAnswers file
 		SurveyAnswersRecorder answersRecorder = new SurveyAnswersRecorder();
 		// Show a Toast telling the user either "Thanks, success!" or "Oops, there was an error"
 		String toastMsg = null;
-		if (answersRecorder.writeLinesToFile(surveyId, surveySkipLogic.getQuestionsForSerialization())) {
+		if (answersRecorder.writeLinesToFile(surveyId, surveyLogic.getQuestionsForSerialization())) {
 			toastMsg = PersistentData.getSurveySubmitSuccessToastText();
 		} else {
 			toastMsg = getApplicationContext().getResources().getString(R.string.survey_submit_error_message);
 		}
 		Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
-
+		
 		// Close the Activity
 		startActivity(new Intent(getApplicationContext(), MainMenuActivity.class));
 		SurveyNotifications.dismissNotification(getApplicationContext(), surveyId);

@@ -63,6 +63,7 @@
 
     <!-- Survey Activity Strings -->
     <string name="survey_next_button_text">Prossimo"</string>
+    <string name="survey_back_button_text">Indietro`</string>
     <string name="survey_submit_button">Invia questionario</string>
     <string name="default_survey_submit_success_message">Grazie per aver completato il sondaggio. Un medico non vedrà immediatamente le tue risposte, quindi se hai bisogno di aiuto o stai pensando di farti del male, contatta il tuo medico. Puoi anche premere il pulsante \"Chiama il medico\".</string>
     <string name="survey_submit_error_message">Questionario non salvata</string>

@@ -64,6 +64,7 @@
 
     <!-- Survey Activity Strings -->
     <string name="survey_next_button_text">Weiter</string>
+    <string name="survey_back_button_text">Zurück`</string>
     <string name="survey_submit_button">Befragung abschicken</string>
     <string name="default_survey_submit_success_message">Vielen Dank für die Beantwortung der Fragen. Ein Mitglied des Forschungsteams kann Ihre Antworten nicht sofort einsehen. Wenn Sie also Hilfe benötigen oder daran denken, sich selbst zu verletzen, wenden Sie sich bitte an Ihren Arzt. Sie können auch auf die Schaltfläche \"Forschungsteam kontaktieren\" klicken.</string>
     <string name="survey_submit_error_message">Ein unbekannter Fehler ist bei Beiwe aufgetreten</string>

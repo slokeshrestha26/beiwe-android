@@ -431,7 +431,7 @@ public class PostRequest {
 					return;
 				}
 			}
-			Log.i("DOING UPLOAD STUFF", "DONE WITH UPLOAD");
+			// Log.i("DOING UPLOAD STUFF", "DONE WITH UPLOAD");
 		}
 	}
 	
