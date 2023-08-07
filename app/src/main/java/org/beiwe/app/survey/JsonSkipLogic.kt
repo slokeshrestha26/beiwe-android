@@ -11,6 +11,10 @@ import java.util.Collections
 import java.util.Locale
 
 /** Created by elijones on 12/1/16.  */
+
+/**@param jsonQuestions The content of the "content" key in a survey
+ * @param runDisplayLogic A boolean value for whether skip Logic should be run on this survey.
+ * @throws JSONException thrown if there are any questions without question ids. */
 class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private val appContext: Context) {
     private val QuestionAnswer: HashMap<String?, QuestionData>
     private val QuestionSkipLogic: HashMap<String, JSONObject>
@@ -20,10 +24,6 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     private var currentQuestion: Int
     private val runDisplayLogic: Boolean
 
-    /**@param jsonQuestions The content of the "content" key in a survey
-     * @param runDisplayLogic A boolean value for whether skip Logic should be run on this survey.
-     * @param applicationContext An application context is required in order to extend exception handling.
-     * @throws JSONException thrown if there are any questions without question ids. */
     init {
         val MAX_SIZE = jsonQuestions.length()
         var questionId: String
@@ -62,16 +62,21 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         currentQuestion = -1 // set the current question to -1, makes getNextQuestionID less annoying.
     }
 
-    /** @return the QuestionData object for the current question, null otherwise*/
+    /** @return the QuestionData object for the current question, null otherwise. */
     val currentQuestionData: QuestionData?
-        get() = if (currentQuestion >= QuestionOrder.size) {
-            null
-        } else QuestionAnswer[QuestionOrder[currentQuestion]]
+        get() {
+            if (currentQuestion < QuestionOrder.size)
+                return QuestionAnswer[QuestionOrder[currentQuestion]]
+            return  null
+        }
 
+    /** @return the question id string for the current question, null otherwise. */
     val currentQuestionRequired: Boolean?
-        get() = if (currentQuestion >= QuestionOrder.size || currentQuestion < 0) {
-            null
-        } else QuestionRequired[QuestionOrder[currentQuestion]]
+        get() {
+            if (currentQuestion < QuestionOrder.size && currentQuestion >= 0)
+                return QuestionRequired[QuestionOrder[currentQuestion]]
+            return null
+        }
 
     /** Determines question should be displayed next.
      * @return a question id string, null if there is no next item.*/
@@ -95,26 +100,26 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
         // if we would overflow the list (>= size) we are done, return null.
         if (currentQuestion >= QuestionOrder.size) {
-			// Log.w("json logic", "overflowed...");
+            // Log.w("json logic", "overflowed...");
             return null
         }
         // if display logic has been disabled we skip logic processing and return the next question
         if (!runDisplayLogic) {
-			// Log.d("json logic", "runDisplayLogic set to true! doing all questions!");
+            // Log.d("json logic", "runDisplayLogic set to true! doing all questions!");
             return Questions[QuestionOrder[currentQuestion]]
         }
         val questionId = QuestionOrder[currentQuestion]
         //		Log.v("json logic", "starting question " + QuestionOrder.indexOf(questionId) + " (" + questionId + "))");
         // if questionId does not have skip logic we display it.
         if (!QuestionSkipLogic.containsKey(questionId)) {
-			// Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.");
+            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.");
             return Questions[questionId]
         }
         return if (shouldQuestionDisplay(questionId)) {
-			// Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.");
+            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.");
             Questions[questionId]
         } else {
-			// Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
+            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
             /* If it didn't meet any of the above conditions (and didn't display a question), call
 			this function recursively, and keep doing that until you reach a question that should
 			display. */
@@ -122,8 +127,9 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         }
     }
 
-    val nextQuestion: JSONObject?
-        get() = getQuestion(true)
+    fun nextQuestion(): JSONObject? {
+        return getQuestion(true)
+    }
 
     fun goBackOneQuestion(): JSONObject? {
         return getQuestion(false)

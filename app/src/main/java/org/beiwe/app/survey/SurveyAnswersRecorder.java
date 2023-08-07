@@ -176,7 +176,7 @@ public class SurveyAnswersRecorder {
 			View childView = checkboxesList.getChildAt(i);
 			if (childView instanceof CheckBox) {
 				CheckBox checkBox = (CheckBox) childView;
-
+				// print("checkbox: " + checkBox.getText() + " is checked: " + checkBox.isChecked());
 				// If this CheckBox is selected, add it to the list of selected answers
 				if (checkBox.isChecked()) {
 					answersList += checkBox.getText().toString() + ", ";

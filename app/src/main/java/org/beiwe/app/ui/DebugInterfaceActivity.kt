@@ -435,73 +435,73 @@ class DebugInterfaceActivity : SessionActivity() {
         var i = 0
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
         i++
-        steve.nextQuestion
+        steve.nextQuestion()
         printv("debug", "" + i)
     }
 
