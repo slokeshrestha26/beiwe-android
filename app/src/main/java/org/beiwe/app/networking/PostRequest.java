@@ -385,7 +385,7 @@ public class PostRequest {
 			return;
 		}
 		
-		Log.i("DOING UPLOAD STUFF", "DOING UPLOAD STUFF");
+		// Log.i("DOING UPLOAD STUFF", "DOING UPLOAD STUFF");
 		// Run the HTTP POST on a separate thread
 		Thread uploaderThread = new Thread(new Runnable() {
 			@Override

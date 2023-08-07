@@ -30,6 +30,7 @@ class QuestionFragment : Fragment() {
     var goToNextQuestionListener: OnGoToNextQuestionListener? = null
     var questionData: QuestionData? = null
     var questionType: QuestionType.Type? = null
+    var the_questionLayout: View? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         /* XML views inflated by an Activity render with the app's default style (set in the
@@ -40,13 +41,14 @@ class QuestionFragment : Fragment() {
         val fragmentQuestionLayout = inflater.inflate(R.layout.fragment_question, null) as ScrollView
         val questionContainer = fragmentQuestionLayout.findViewById<View>(R.id.questionContainer) as FrameLayout
         val questionLayout = createQuestion(inflater, arguments)
+        this.the_questionLayout = questionLayout // the view is mutable and can change??
         questionContainer.addView(questionLayout)
 
         // Set an onClickListener for the next and back button (need to cast)
         val nextButton = fragmentQuestionLayout.findViewById<View>(R.id.nextButton) as Button
         val backButton = fragmentQuestionLayout.findViewById<View>(R.id.backButton) as Button
         nextButton.setOnClickListener {
-            goToNextQuestionListener!!.goToNextQuestion(getAnswer(questionLayout, questionType))
+            goToNextQuestionListener!!.goToNextQuestion(getAnswer(questionLayout, questionType!!))
         }
         backButton.setOnClickListener {
             activity.onBackPressed() // very easy
@@ -77,7 +79,7 @@ class QuestionFragment : Fragment() {
         goToNextQuestionListener = activity as OnGoToNextQuestionListener
     }
 
-    private fun getAnswer(questionLayout: View, questionType: QuestionType.Type?): QuestionData? {
+    private fun getAnswer(questionLayout: View, questionType: QuestionType.Type): QuestionData? {
         val answerString = SurveyAnswersRecorder.getAnswerString(questionLayout, questionType)
         if (answerString != null) {
             questionData!!.answerString = answerString
@@ -119,13 +121,16 @@ class QuestionFragment : Fragment() {
         return inflater.inflate(R.layout.survey_info_textbox, null)
     }
 
-    private fun conditionallyPrepareExistingAnswers() {
+    private fun prepareExistingAnswers() {
         /* We need to check whether questionData already has an object assigned to it, which occurs
         when the back button gets pressed and pops the backstack.  When the next button is pressed
         we pull any answer that has been saved by the activity.
         This operation may do nothing (re-set value to null) if there is no answer, that is fine. */
         if (questionData == null) {
+            print("prepareExistingAnswers - questionData is null")
             questionData = (activity as SurveyActivity).currentQuestionData
+        } else {
+            print("prepareExistingAnswers - questionData is NOT null")
         }
     }
 
@@ -156,8 +161,10 @@ class QuestionFragment : Fragment() {
      * @param questionText The text of the question to be asked
      * @return LinearLayout A slider bar
      */
-    private fun createSliderQuestion(inflater: LayoutInflater, questionID: String?,
-                                     questionText: String?, min: Int, max: Int): LinearLayout {
+    private fun createSliderQuestion(
+            inflater: LayoutInflater, questionID: String?,
+            questionText: String?, min: Int, max: Int,
+    ): LinearLayout {
         var min = min
         var max = max
         val question = inflater.inflate(R.layout.survey_slider_question, null) as LinearLayout
@@ -179,7 +186,7 @@ class QuestionFragment : Fragment() {
         // Set the slider's range and default/starting value
         slider.max = max - min
         slider.min = min
-        conditionallyPrepareExistingAnswers()
+        prepareExistingAnswers()
         if (questionData != null && questionData!!.answerInteger != null) {
             slider.progress = questionData!!.answerInteger!!
             slider.markAsTouched()
@@ -237,7 +244,7 @@ class QuestionFragment : Fragment() {
             }
             radioGroup.addView(radioButton)
         }
-        conditionallyPrepareExistingAnswers()
+        prepareExistingAnswers()
         if (questionData != null && questionData!!.answerInteger != null) {
             radioGroup.check(radioGroup.getChildAt(questionData!!.answerInteger!!).id)
         } else {
@@ -250,12 +257,10 @@ class QuestionFragment : Fragment() {
         return question
     }
 
-    /**
-     * Creates a question with an array of checkboxes
+    /**Creates a question with an array of checkboxes
      * @param questionText The text of the question
      * @param options Each string in options[] will caption one checkbox
-     * @return LinearLayout a question with a list of checkboxes
-     */
+     * @return LinearLayout a question with a list of checkboxes */
     private fun createCheckboxQuestion(inflater: LayoutInflater, questionID: String?, questionText: String?, options: Array<String?>?): LinearLayout {
         val question = inflater.inflate(R.layout.survey_checkbox_question, null) as LinearLayout
         val checkboxesList = question.findViewById<View>(R.id.checkboxesList) as LinearLayout
@@ -266,7 +271,7 @@ class QuestionFragment : Fragment() {
             questionTextView.setText(questionText)
         }
         var checkedAnswers: Array<String?>? = null
-        conditionallyPrepareExistingAnswers()
+        prepareExistingAnswers()
         if (questionData != null && questionData!!.answerString != null) {
             val answerString = questionData!!.answerString
             if (answerString!!.length > 2) {
@@ -306,33 +311,35 @@ class QuestionFragment : Fragment() {
     /**Creates a question with an open-response, text-input field
      * @param questionText The text of the question
      * @param inputTextType The type of answer (number, text, etc.)
-     * @return LinearLayout question and answer
-     */
-    private fun createFreeResponseQuestion(inflater: LayoutInflater, questionID: String?,
-                                           questionText: String?, inputTextType: TextFieldType.Type): LinearLayout {
-        //TODO: Give open response questions autofocus and make the keyboard appear
+     * @return LinearLayout question and answer */
+    private fun createFreeResponseQuestion(
+            inflater: LayoutInflater, questionID: String?,
+            questionText: String?, inputTextType: TextFieldType.Type,
+    ): LinearLayout {
+        // TODO: Give open response questions autofocus and make the keyboard appear
         val question = inflater.inflate(R.layout.survey_open_response_question, null) as LinearLayout
 
         // Set the text of the question itself
         val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
+
         if (questionText != null) {
             questionTextView.setText(questionText)
         }
-        var editText: EditText? = null
-        editText = when (inputTextType) {
+
+        val editText: EditText = when (inputTextType) {
             TextFieldType.Type.NUMERIC -> inflater.inflate(R.layout.survey_free_number_input, null) as EditText
             TextFieldType.Type.SINGLE_LINE_TEXT -> inflater.inflate(R.layout.survey_free_text_input, null) as EditText
             TextFieldType.Type.MULTI_LINE_TEXT -> inflater.inflate(R.layout.survey_multiline_text_input, null) as EditText
-            else -> inflater.inflate(R.layout.survey_free_text_input, null) as EditText
+            // else -> inflater.inflate(R.layout.survey_free_text_input, null) as EditText
         }
 
         /* Improvement idea: if you want to add date and time pickers as input
 		 * types, here's a start: http://stackoverflow.com/a/14933515 */
 
-        /* Improvement idea: when the user presses Enter, jump to the next
-		 * input field */conditionallyPrepareExistingAnswers()
+        /* Improvement idea: when the user presses Enter, jump to the next input field */
+        prepareExistingAnswers()
         if (questionData != null && questionData!!.answerString != null) {
-            editText!!.setText(questionData!!.answerString)
+            editText.setText(questionData!!.answerString)
         } else {
             // Create text strings that represent the question and its answer choices
             val options = "Text-field input type = $inputTextType"
@@ -340,7 +347,7 @@ class QuestionFragment : Fragment() {
         }
 
         // Set the text field to listen for and record user input
-        editText!!.onFocusChangeListener = OpenResponseListener(questionData!!)
+        editText.onFocusChangeListener = OpenResponseListener(questionData!!)
         val textFieldContainer = question.findViewById<View>(R.id.textFieldContainer) as LinearLayout
         textFieldContainer.addView(editText)
         return question
@@ -350,8 +357,7 @@ class QuestionFragment : Fragment() {
      * Adds a numeric scale above a Slider Question
      * @param question the Slider Question that needs a number scale
      * @param min the lowest number on the scale
-     * @param max the highest number on the scale
-     */
+     * @param max the highest number on the scale */
     private fun addNumbersLabelingToSlider(inflater: LayoutInflater, question: LinearLayout, min: Int, max: Int) {
         // Replace the numbers label placeholder view (based on http://stackoverflow.com/a/3760027)
         var numbersLabel = question.findViewById(R.id.numbersPlaceholder) as View
@@ -393,13 +399,11 @@ class QuestionFragment : Fragment() {
         question.addView(numbersLabel, index)
     }
 
-    /**
-     * Make the "thumb" (the round circle/progress knob) of a Slider almost invisible until the user
+    /** Make the "thumb" (the round circle/progress knob) of a Slider almost invisible until the user
      * touches it.  This way the user is forced to answer every slider question; otherwise, we would
      * not be able to tell the difference between a user ignoring a slider and a user choosing to
      * leave a slider at the default value.  This makes it like there is no default value.
-     * @param slider
-     */
+     * @param slider */
     @SuppressLint("ClickableViewAccessibility")
     private fun makeSliderInvisibleUntilTouched(slider: SeekBarEditableThumb) {
         // Before the user has touched the slider, make the "thumb" transparent/ almost invisible
@@ -407,20 +411,21 @@ class QuestionFragment : Fragment() {
 		 * slider question in the survey sometimes appears with a black thumb (once you touch it,
 		 * it turns into a white thumb). */
         slider.markAsUntouched()
-        slider.setOnTouchListener { v, event -> // When the user touches the slider, make the "thumb" opaque and fully visible
+
+        slider.setOnTouchListener { v, event ->
+            // When the user touches the slider, make the "thumb" opaque and fully visible
             val slider = v as SeekBarEditableThumb
             slider.markAsTouched()
             false
         }
     }
-    /**************************** ANSWER LISTENERS  */
+
+    /**************************** ANSWER LISTENERS ********************************************* */
+
     /** Listens for a touch/answer to a Slider Question, and records the answer  */
     private inner class SliderListener(var questionDescription: QuestionData) : OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {}
-        override fun onStartTrackingTouch(seekBar: SeekBar) {
-            /* Improvement idea: record when the user started touching the
-			 * slider bar, not just when they let go of it */
-        }
+        override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
         override fun onStopTrackingTouch(seekBar: SeekBar) {
             var answer = ""
@@ -431,6 +436,7 @@ class QuestionFragment : Fragment() {
                 seekBar.progress
             }
             SurveyTimingsRecorder.recordAnswer(answer, questionDescription)
+            (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
         }
     }
 
@@ -440,6 +446,7 @@ class QuestionFragment : Fragment() {
             val selectedButton = group.findViewById<View>(checkedId) as RadioButton
             if (selectedButton.isChecked) {
                 SurveyTimingsRecorder.recordAnswer(selectedButton.text.toString(), questionDescription)
+                (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
             } else {
                 /* It should not be possible to un-check a radio button, but if
 				 * that happens, record the answer as an empty string */
@@ -451,11 +458,14 @@ class QuestionFragment : Fragment() {
     /** Listens for a touch/answer to a Checkbox Question, and records the answer  */
     private inner class CheckboxListener(var questionDescription: QuestionData) : View.OnClickListener {
         override fun onClick(view: View) {
-            // If it's a CheckBox and its parent is a LinearLayout
+            // If it's a CheckBox and its parent is a LinearLayout...
             if (view is CheckBox && view.getParent() is LinearLayout) {
                 val checkboxesList = view.getParent() as LinearLayout
                 val answersList = SurveyAnswersRecorder.getSelectedCheckboxes(checkboxesList)
                 SurveyTimingsRecorder.recordAnswer(answersList, questionDescription)
+                // if (the_questionLayout != null) {
+                (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
+                // }
             }
         }
     }
@@ -486,6 +496,7 @@ class QuestionFragment : Fragment() {
                 if (v is EditText) {
                     val answer = v.text.toString()
                     SurveyTimingsRecorder.recordAnswer(answer, questionDescription)
+                    (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
                 }
             }
         }

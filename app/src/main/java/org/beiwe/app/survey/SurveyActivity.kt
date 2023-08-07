@@ -23,11 +23,11 @@ import org.json.JSONObject
  * @author Josh Zagorsky, Eli Jones
  */
 class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitButtonClickedListener {
-    private var surveyId: String? = null
-    private var surveyLogic: JsonSkipLogic? = null
-    private var hasLoadedBefore = false
-    private var initialViewMoment: Long = 0
-    private var questionFragment: QuestionFragment? = null
+    var surveyId: String? = null
+    var surveyLogic: JsonSkipLogic? = null
+    var hasLoadedBefore = false
+    var initialViewMoment: Long = 0
+    var questionFragment: QuestionFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PersistentData.setTakingSurvey()

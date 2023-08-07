@@ -117,7 +117,7 @@ class MainService : Service() {
     // namespace hack, see comment
     fun get_periodic_run_app_logic(): () -> Unit = periodic_run_app_logic
     val periodic_run_app_logic: () -> Unit = {
-        printd("run_all_app_logic - ThreadHandler")
+        // printd("run_all_app_logic - ThreadHandler")
         run_all_app_logic()
         // in the scope of this closure "periodic_run_app_logic" doesn't exist, we need to access it, not referency it.
         background_handler.postDelayed(get_periodic_run_app_logic(), THREADHANDLER_PERIODICITY)
@@ -290,7 +290,7 @@ class MainService : Service() {
 
     fun startTimers() {
         Log.i("BackgroundService", "running startTimer logic.")
-        printd("run_all_app_logic - startTimers")
+        // printd("run_all_app_logic - startTimers")
         run_all_app_logic()
 
         // if Bluetooth recording is enabled and there is no scheduled next-bluetooth-enable event,
@@ -335,7 +335,7 @@ class MainService : Service() {
             TextFileManager.writeDebugLogStatement("Received Broadcast: " + intent.toString())
 
             val broadcastAction = intent.action
-            printd("run_all_app_logic - timerReceiver")
+            // printd("run_all_app_logic - timerReceiver")
             run_all_app_logic()
 
             /* Bluetooth timers are unlike GPS and Accelerometer because it uses an
@@ -529,7 +529,7 @@ class MainService : Service() {
         do_new_device_settings_check(now) // asynchronous, runs network request on a thread, single digit ms.
         do_survey_notifications_check(now)  // 1 survey notification <10-30ms.
         // highest total time was 159ms, but insufficient data points to be confident.
-        printd("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
+        // printd("run_all_app_logic total time - ${System.currentTimeMillis() - now}")
         return now
     }
 
@@ -774,7 +774,7 @@ class MainService : Service() {
 
         // onStartCommand is called every 30 seconds due to repeating high-priority-or-whatever
         // alarms, so we will stick a core logic check here.
-        printd("run_all_app_logic - onStartCommand")
+        // printd("run_all_app_logic - onStartCommand")
         run_all_app_logic()
 
         // We want this service to continue running until it is explicitly stopped, so return sticky.
