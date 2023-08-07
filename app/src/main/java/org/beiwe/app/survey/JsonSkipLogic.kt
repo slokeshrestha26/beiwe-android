@@ -67,7 +67,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         get() {
             if (currentQuestion < QuestionOrder.size)
                 return QuestionAnswer[QuestionOrder[currentQuestion]]
-            return  null
+            return null
         }
 
     /** @return the question id string for the current question, null otherwise. */
@@ -84,47 +84,48 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         if (goForward) currentQuestion++ else currentQuestion--
 
         // if currentQuestion is set to anything less than zero, reset to zero (shouldn't occur)
-        if (currentQuestion < 0) {
+        if (currentQuestion < 0)
             currentQuestion = 0
-        }
 
         // if it is the first question it should invariably display.
         if (currentQuestion == 0) {
 //			Log.i("json logic", "skipping logic and displaying first question");
-            return if (QuestionOrder.size == 0) {
-                null
-            } else {
-                Questions[QuestionOrder[0]]
-            }
+            if (QuestionOrder.size == 0)
+                return null
+            else
+                return Questions[QuestionOrder[0]]
         }
 
         // if we would overflow the list (>= size) we are done, return null.
-        if (currentQuestion >= QuestionOrder.size) {
-            // Log.w("json logic", "overflowed...");
+        // Log.w("json logic", "overflowed...");
+        if (currentQuestion >= QuestionOrder.size)
             return null
-        }
+
         // if display logic has been disabled we skip logic processing and return the next question
         if (!runDisplayLogic) {
             // Log.d("json logic", "runDisplayLogic set to true! doing all questions!");
             return Questions[QuestionOrder[currentQuestion]]
         }
+
         val questionId = QuestionOrder[currentQuestion]
-        //		Log.v("json logic", "starting question " + QuestionOrder.indexOf(questionId) + " (" + questionId + "))");
+        // Log.v("json logic", "starting question " + QuestionOrder.indexOf(questionId) + " (" + questionId + "))");
         // if questionId does not have skip logic we display it.
         if (!QuestionSkipLogic.containsKey(questionId)) {
             // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.");
             return Questions[questionId]
         }
-        return if (shouldQuestionDisplay(questionId)) {
+
+        if (shouldQuestionDisplay(questionId)) {
             // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.");
-            Questions[questionId]
-        } else {
-            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
-            /* If it didn't meet any of the above conditions (and didn't display a question), call
-			this function recursively, and keep doing that until you reach a question that should
-			display. */
-            getQuestion(goForward)
+            return Questions[questionId]
         }
+
+        // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
+        /* If it didn't meet any of the above conditions (and didn't display a question), call
+        this function recursively, and keep doing that until you reach a question that should
+        display. */
+        return getQuestion(goForward)
+
     }
 
     fun nextQuestion(): JSONObject? {
@@ -146,11 +147,12 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
      * @return Boolean result of the logic */
     private fun shouldQuestionDisplay(questionId: String): Boolean {
         try {
-            val question = QuestionSkipLogic[questionId]
             // If the survey display logic object is null or empty, display
-            return if (question == null || question.length() == 0) {
+            val question = QuestionSkipLogic[questionId]
+            return if (question == null || question.length() == 0)
                 true
-            } else parseLogicTree(questionId, question)
+            else
+                parseLogicTree(questionId, question)
         } catch (e: JSONException) {
             Log.w("json exception while doing a logic parse", "=============================================================================================================================================")
             e.printStackTrace()
@@ -195,21 +197,17 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
             // And. if anything is false, return false. If those all pass, return true.
             if (comparator == "and") {
                 Log.d("logic meanderings", "$questionId AND bools: $results")
-                for (bool in results) {
-                    if (!bool) {
+                for (bool in results)
+                    if (!bool)
                         return false
-                    }
-                }
                 return true
             }
             // Or. if anything is true, return true. If those all pass, return false.
             if (comparator == "or") {
                 Log.d("logic meanderings", "$questionId OR bools: $results")
-                for (bool in results) {
-                    if (bool) {
+                for (bool in results)
+                    if (bool)
                         return true
-                    }
-                }
                 return false
             }
         }
@@ -224,7 +222,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
      * @throws JSONException */
     @Throws(JSONException::class)
     private fun runNumericLogic(comparator: String, parameters: JSONArray): Boolean {
-//		Log.d("json logic", "inside numeric logic: " + comparator + ", " + parameters.toString());
+        // Log.d("json logic", "inside numeric logic: " + comparator + ", " + parameters.toString());
         val targetQuestionId = parameters.getString(0)
         if (!QuestionAnswer.containsKey(targetQuestionId)) {
             return false
@@ -235,36 +233,28 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 //		Log.d("logic...", "evaluating useranswer " + userAnswer + comparator + surveyValue);
 
         // If we encounter an unanswered question, that evaluates as false. (defined in the spec.)
-        if (userAnswer == null) {
+        if (userAnswer == null)
             return false
-        }
-        if (comparator == "<") {
+        if (comparator == "<")
             return userAnswer < surveyValue && !isEqual(userAnswer, surveyValue)
-        }
-        if (comparator == ">") {
+        if (comparator == ">")
             return userAnswer > surveyValue && !isEqual(userAnswer, surveyValue)
-        }
-        if (comparator == "<=") {
-            return userAnswer <= surveyValue || isEqual(userAnswer, surveyValue)
-        } // the <= is slightly redundant, its fine.
-        if (comparator == ">=") {
-            return userAnswer >= surveyValue || isEqual(userAnswer, surveyValue)
-        } // the >= is slightly redundant, its fine.
-        if (comparator == "==") {
+        if (comparator == "<=")
+            return userAnswer <= surveyValue || isEqual(userAnswer, surveyValue) // the <= is slightly redundant, its fine.
+        if (comparator == ">=")
+            return userAnswer >= surveyValue || isEqual(userAnswer, surveyValue) // the >= is slightly redundant, its fine.
+        if (comparator == "==")
             return isEqual(userAnswer, surveyValue)
-        }
-        if (comparator == "!=") {
+        if (comparator == "!=")
             return !isEqual(userAnswer, surveyValue)
-        }
         throw NullPointerException("numeric logic fail")
     }
 
     // coerce values to numerics for all non-checkbox questions (they have a json list)
     @SuppressLint("DefaultLocale")
     fun setAnswer(questionData: QuestionData?) {
-        if (questionData == null) {
+        if (questionData == null)
             return
-        }
 
         // Numeric free response questions will get converted to floats in addition to their string representation.
         if (questionData.type == QuestionType.Type.FREE_RESPONSE) {
@@ -274,41 +264,37 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                 } catch (e: NumberFormatException) {
                     questionData.answerDouble = null
                 }
-            } else {
-                // make sure to set double to null if string is null
-                questionData.answerDouble = null
             }
+            // make sure to set double to null if string is null
+            questionData.answerDouble = null
         }
 
         // sliders comes in as integers, convert to float, convert to string... why float?
         // but make sure to clear out when null. anyway
         if (questionData.type == QuestionType.Type.SLIDER) {
-            if (questionData.answerInteger != null) {
+            if (questionData.answerInteger != null)
                 questionData.answerDouble = java.lang.Double.valueOf(questionData.answerInteger!!.toDouble())
-            } else {
+            else
                 questionData.answerDouble = null
-            }
             // and then this next line depends on the double being set... again why.
-            if (questionData.answerDouble != null) {
+            if (questionData.answerDouble != null)
                 questionData.answerString = "" + questionData.answerInteger
-            } else {
+            else
                 questionData.answerString = null
-            }
         }
 
         // comes in as an integer, coerce to float, coerce to string... trillionth time why?
         // and again enforce nullness
         if (questionData.type == QuestionType.Type.RADIO_BUTTON) {
-            if (questionData.answerInteger != null) {
+            if (questionData.answerInteger != null)
                 questionData.answerDouble = java.lang.Double.valueOf(questionData.answerInteger!!.toDouble())
-            } else {
+            else
                 questionData.answerDouble = null
-            }
-            if (questionData.answerDouble != null) {
+
+            if (questionData.answerDouble != null)
                 questionData.answerString = "" + questionData.answerInteger
-            } else {
+            else
                 questionData.answerString = null
-            }
         }
         QuestionAnswer[questionData.id] = questionData
     }
@@ -317,7 +303,8 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     val questionsForSerialization: List<QuestionData?>
         get() {
             val answers: MutableList<QuestionData?> = ArrayList(QuestionOrder.size)
-            for (questionId in QuestionOrder) if (QuestionAnswer.containsKey(questionId)) answers.add(QuestionAnswer[questionId])
+            for (questionId in QuestionOrder)
+                if (QuestionAnswer.containsKey(questionId)) answers.add(QuestionAnswer[questionId])
             return answers
         }
 
@@ -367,21 +354,18 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                     question = QuestionAnswer[questionId]
 
                     // INFO_TEXT_BOX - skip it.
-                    if (question!!.type == QuestionType.Type.INFO_TEXT_BOX) {
+                    if (question!!.type == QuestionType.Type.INFO_TEXT_BOX)
                         continue
-                    }
                     // check if should display, store value
                     questionWouldDisplay = shouldQuestionDisplay(questionId)
-                    if (questionWouldDisplay) { // If would display, increment question number.
+                    if (questionWouldDisplay) // If would display, increment question number.
                         questionDisplayNumber++
-                    } else { // If would not display not, skip it without incrementing.
+                    else // If would not display not, skip it without incrementing.
                         continue
-                    }
 
                     // If question is actually unanswered construct a display string.
-                    if (!question.questionIsAnswered()) {
+                    if (!question.questionIsAnswered())
                         unanswered.add("Question " + questionDisplayNumber + ": " + question.text)
-                    }
                 }
             }
             return unanswered
