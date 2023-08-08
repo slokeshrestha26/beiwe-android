@@ -403,7 +403,7 @@ public class PostRequest {
 			//long stopTime = System.currentTimeMillis() + PersistentData.getUploadDataFilesFrequencyMilliseconds();
 			long stopTime = System.currentTimeMillis() + 1000 * 60 * 60; //One hour to upload files
 			String[] files = TextFileManager.getAllUploadableFiles();
-			Log.i("uploading", "uploading " + files.length + " files");
+			// Log.i("uploading", "uploading " + files.length + " files");
 			File file = null;
 			URL uploadUrl = null; //set up url, write a crash log and fail gracefully if this ever breaks.
 			try {

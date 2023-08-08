@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import org.beiwe.app.CrashHandler.Companion.writeCrashlog
+import org.beiwe.app.printe
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -61,6 +62,24 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         this.runDisplayLogic = runDisplayLogic
         currentQuestion = -1 // set the current question to -1, makes getNextQuestionID less annoying.
     }
+
+    fun pprint() {
+        if (currentQuestionJson == null) {
+            printe("can't print skiplogic current question, zeroth question.")
+        }
+        else {
+            printe("current question skip logic:")
+            printe(currentQuestionJson)
+        }
+    }
+
+    val currentQuestionJson: JSONObject?
+        get() {
+            if (currentQuestion < QuestionOrder.size && currentQuestion >= 0)
+                return Questions[QuestionOrder[currentQuestion]]
+            return null
+        }
+
 
     /** @return the QuestionData object for the current question, null otherwise. */
     val currentQuestionData: QuestionData?
@@ -125,7 +144,6 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         this function recursively, and keep doing that until you reach a question that should
         display. */
         return getQuestion(goForward)
-
     }
 
     fun nextQuestion(): JSONObject? {
@@ -251,51 +269,11 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     }
 
     // coerce values to numerics for all non-checkbox questions (they have a json list)
-    @SuppressLint("DefaultLocale")
+
     fun setAnswer(questionData: QuestionData?) {
         if (questionData == null)
             return
-
-        // Numeric free response questions will get converted to floats in addition to their string representation.
-        if (questionData.type == QuestionType.Type.FREE_RESPONSE) {
-            if (questionData.answerString != null) {
-                try {
-                    questionData.answerDouble = questionData.answerString!!.toDouble()
-                } catch (e: NumberFormatException) {
-                    questionData.answerDouble = null
-                }
-            }
-            // make sure to set double to null if string is null
-            questionData.answerDouble = null
-        }
-
-        // sliders comes in as integers, convert to float, convert to string... why float?
-        // but make sure to clear out when null. anyway
-        if (questionData.type == QuestionType.Type.SLIDER) {
-            if (questionData.answerInteger != null)
-                questionData.answerDouble = java.lang.Double.valueOf(questionData.answerInteger!!.toDouble())
-            else
-                questionData.answerDouble = null
-            // and then this next line depends on the double being set... again why.
-            if (questionData.answerDouble != null)
-                questionData.answerString = "" + questionData.answerInteger
-            else
-                questionData.answerString = null
-        }
-
-        // comes in as an integer, coerce to float, coerce to string... trillionth time why?
-        // and again enforce nullness
-        if (questionData.type == QuestionType.Type.RADIO_BUTTON) {
-            if (questionData.answerInteger != null)
-                questionData.answerDouble = java.lang.Double.valueOf(questionData.answerInteger!!.toDouble())
-            else
-                questionData.answerDouble = null
-
-            if (questionData.answerDouble != null)
-                questionData.answerString = "" + questionData.answerInteger
-            else
-                questionData.answerString = null
-        }
+        questionData.coerceAnswer()
         QuestionAnswer[questionData.id] = questionData
     }
 

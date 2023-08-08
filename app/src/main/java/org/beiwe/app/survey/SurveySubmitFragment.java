@@ -23,8 +23,6 @@ import java.util.ArrayList;
  */
 
 public class SurveySubmitFragment extends Fragment {
-    OnSubmitButtonClickedListener submitButtonClickedListener;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -40,6 +38,8 @@ public class SurveySubmitFragment extends Fragment {
         }
         return surveySubmitLayout;
     }
+
+    OnSubmitButtonClickedListener submitButtonClickedListener;
 
 
     // Interface for the "Submit" button to pass a signal back to the Activity

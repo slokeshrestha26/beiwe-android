@@ -21,7 +21,7 @@ object NetworkUtility {
         // If you're allowed to upload over cellular data, simply check whether the phone's
         // connected to the internet at all.
         if (PersistentData.getAllowUploadOverCellularData()) {
-            // Log.i("WIFICHECK", "ALLOW OVER CELLULAR!!!!");
+            // Log.i("WIFICHECK", "ALLOW OVER CELLULAR!!!!")
             if (networkIsAvailable(appContext)) return true
         }
 
@@ -41,7 +41,7 @@ object NetworkUtility {
 
     /** This is the function for running Android 6+ wifi connectivity checks.  */
     private fun wiFiConnectivityCheck(connManager: ConnectivityManager): Boolean {
-        Log.i("WIFICHECK", "Deprecated WiFi Connectivity Check")
+        // Log.i("WIFICHECK", "Deprecated WiFi Connectivity Check")
         val networks = connManager.allNetworks
 
         // this code has been around since the beginning of time, just leave it in.

@@ -29,9 +29,9 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
     var initialViewMoment: Long = 0
     var questionFragment: QuestionFragment? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(bundle: Bundle?) {
         PersistentData.setTakingSurvey()
-        super.onCreate(savedInstanceState)
+        super.onCreate(bundle) // reload saved instance state
         initialViewMoment = System.currentTimeMillis()
         setContentView(R.layout.activity_survey)
         val triggerIntent = intent
@@ -48,7 +48,7 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         if (!hasLoadedBefore) {
             setUpQuestions(surveyId)
             // Run the logic as if we had just pressed next without answering a hypothetical question -1
-            goToNextQuestion(null)
+            _go_to_next_question()
             // Record the time that the survey was first visible to the user
             SurveyTimingsRecorder.recordSurveyFirstDisplayed(surveyId)
             // Onnela lab requested this line in the debug log
@@ -57,26 +57,22 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         }
     }
 
-    override fun goToNextQuestion(dataFromOldQuestion: QuestionData?) {
-        // store the answer from the previous question
-        surveyLogic!!.setAnswer(dataFromOldQuestion)
-        val isRequired = surveyLogic!!.currentQuestionRequired
-        // printe("goToNextQuestion - getCurrentQuestionRequired:$isRequired")
-        // printe("goToNextQuestion - dataFromOldQuestion: " + dataFromOldQuestion)
-
-        if (dataFromOldQuestion != null) {
-            dataFromOldQuestion.pprint()
-        } else{
-            printe("goToNextQuestion - dataFromOldQuestion is null")
-        }
-
-        if (isRequired != null && isRequired && (dataFromOldQuestion == null || !dataFromOldQuestion.questionIsAnswered())) {
+    override fun goToNextQuestion(questionData: QuestionData) {
+        // in this context the dataFromCurrentQuestion is the data from the previous question.
+        // debugging...
+        questionData.coerceAnswer()
+        // questionData.pprint()
+        if (surveyLogic!!.currentQuestionRequired!! && !questionData.questionIsAnswered()) {
             Toast.makeText(this, "This question is required.", Toast.LENGTH_SHORT).show()
             return
         }
-        val nextQuestion = surveyLogic!!.nextQuestion
+        _go_to_next_question()
+    }
 
-        // If you've run out of questions, display the Submit button
+    /** code block that just goes to the next question */
+    fun _go_to_next_question() {
+        val nextQuestion = surveyLogic!!.nextQuestion()
+        // If you've run out of questions, display the Submit button, otherwise go to next question.
         if (nextQuestion == null) {
             displaySurveySubmitFragment()
         } else {
@@ -86,8 +82,10 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // In order oto do that we need to execute the fragment's getAnswer function.
-        // surveyLogic.setAnswer( questionFragment.getAnswer(...) );
+        // In order to do that we need to execute the fragment's getAnswer function.
+        // surveyLogic.setAnswer( questionFragment!!.getAnswer
+        // if (surveyLogic!!.currentQuestionData != null)
+        //     surveyLogic!!.currentQuestionData!!.pprint()
         surveyLogic!!.goBackOneQuestion()
     }
 
@@ -137,14 +135,13 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         try { // Get survey content as an array of questions; each question is a JSON object
             var jsonQuestions: JSONArray? = JSONArray(PersistentData.getSurveyContent(surveyId))
             // If randomizing the question order, reshuffle the questions in the JSONArray
-            if (randomize && !randomizeWithMemory) {
+            if (randomize && !randomizeWithMemory)
                 jsonQuestions = JSONUtils.shuffleJSONArray(jsonQuestions, numberQuestions)
-            }
-            if (randomize && randomizeWithMemory) {
+            if (randomize && randomizeWithMemory)
                 jsonQuestions = JSONUtils.shuffleJSONArrayWithMemory(jsonQuestions, numberQuestions, surveyId)
-            }
+
             // construct the survey's skip logic.
-            //(param 2: If randomization is enabled do not run the skip logic for the survey.)
+            // (param 2: If randomization is enabled do not run the skip logic for the survey.)
             surveyLogic = JsonSkipLogic(jsonQuestions!!, !randomize, applicationContext)
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -161,14 +158,13 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         SurveyTimingsRecorder.recordSubmit(applicationContext)
 
         // Write the data to a SurveyAnswers file
-        val answersRecorder = SurveyAnswersRecorder()
-        // Show a Toast telling the user either "Thanks, success!" or "Oops, there was an error"
-        var toastMsg: String? = null
-        toastMsg = if (answersRecorder.writeLinesToFile(surveyId, surveyLogic!!.questionsForSerialization)) {
+        val success = SurveyAnswersRecorder().writeLinesToFile(surveyId, surveyLogic!!.questionsForSerialization)
+        val toastMsg: String = if (success) {
             PersistentData.getSurveySubmitSuccessToastText()
         } else {
             applicationContext.resources.getString(R.string.survey_submit_error_message)
         }
+        // Show a Toast telling the user either "Thanks, success!" or "Oops, there was an error"
         Toast.makeText(applicationContext, toastMsg, Toast.LENGTH_LONG).show()
 
         // Close the Activity
