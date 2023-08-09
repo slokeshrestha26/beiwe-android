@@ -84,6 +84,7 @@ public class SurveySubmitFragment extends Fragment {
             adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, unansweredQuestions);
         }
         unansweredQuestionsListView.setAdapter(adapter);
+        
         // Attach the submit button to the bottom of the list
         LinearLayout submitButton = (LinearLayout) renderSubmitButton(inflater, "Submit Answers Anyway");
         unansweredQuestionsListView.addFooterView(submitButton);
@@ -101,6 +102,15 @@ public class SurveySubmitFragment extends Fragment {
                 submitButtonClickedListener.submitButtonClicked();
             }
         });
+        
+        Button backButton = (Button) submitButtonLayout.findViewById(R.id.backSubmitButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().onBackPressed();
+            }
+        });
         return submitButtonLayout;
     }
+    
 }

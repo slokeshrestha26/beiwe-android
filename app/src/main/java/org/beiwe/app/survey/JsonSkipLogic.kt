@@ -347,7 +347,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                         questionDisplayNumber++
                         // need to get the question json and then get the question text
                         val questionJson: JSONObject? = Questions[questionId]
-                        val questionText: = questionJson!!.optString("question_text") ?: ""
+                        val questionText = questionJson!!.optString("question_text") ?: ""
                         unanswered.add("Question " + questionDisplayNumber + ": " + questionText)
                     }
                 }
