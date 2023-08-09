@@ -1,6 +1,5 @@
 package org.beiwe.app.survey
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import org.beiwe.app.CrashHandler.Companion.writeCrashlog
@@ -107,7 +106,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
         // if it is the first question it should invariably display.
         if (currentQuestion == 0) {
-			// Log.i("json logic", "skipping logic and displaying first question");
+            // Log.i("json logic", "skipping logic and displaying first question");
             if (QuestionOrder.size == 0)
                 return null
             else
@@ -307,7 +306,6 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     val unansweredQuestions: ArrayList<String>
         get() {
             val unanswered = ArrayList<String>(QuestionOrder.size)
-            var question: QuestionData?
             var questionDisplayNumber = 0
             var questionWouldDisplay: Boolean
 
@@ -327,11 +325,12 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                     // The only way to catch that case is to run shouldQuestionDisplay on every QuestionData
                     // object in QuestionAnswers.
                     // There is one exception: INFO_TEXT_BOX questions are always ignored.
-                    question = QuestionAnswer[questionId]
+                    val questionData: QuestionData? = QuestionAnswer[questionId]
 
                     // INFO_TEXT_BOX - skip it.
-                    if (question!!.type == QuestionType.Type.INFO_TEXT_BOX)
+                    if (questionData!!.type == QuestionType.Type.INFO_TEXT_BOX)
                         continue
+
                     // check if should display, store value
                     questionWouldDisplay = shouldQuestionDisplay(questionId)
                     if (questionWouldDisplay) // If would display, increment question number.
@@ -340,8 +339,17 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                         continue
 
                     // If question is actually unanswered construct a display string.
-                    if (!question.questionIsAnswered())
-                        unanswered.add("Question " + questionDisplayNumber + ": " + question.text)
+                    if (!questionData.questionIsAnswered())
+                        unanswered.add("Question " + questionDisplayNumber + ": " + questionData.text)
+                } else {
+                    questionWouldDisplay = shouldQuestionDisplay(questionId)
+                    if (questionWouldDisplay) {
+                        questionDisplayNumber++
+                        // need to get the question json and then get the question text
+                        val questionJson: JSONObject? = Questions[questionId]
+                        val questionText: = questionJson!!.optString("question_text") ?: ""
+                        unanswered.add("Question " + questionDisplayNumber + ": " + questionText)
+                    }
                 }
             }
             return unanswered

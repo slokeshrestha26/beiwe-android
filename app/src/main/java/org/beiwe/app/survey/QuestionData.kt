@@ -56,7 +56,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
 
     /** @return False if the answerString is null, true if an answer exists. */
     fun questionIsAnswered(): Boolean {
-        return this.answerString != null
+        return this.answerString != null && this.answerString != ""
     }
 
     // some answers are fully contained in their answerString.

@@ -15,6 +15,7 @@ class QuestionType {
         TIME("time")
 
         // this was the initial version of the names of these three, but it looks like ios is using lower case identifiers
+        // confirmed: we don't match the ios app on these string values, except now we do for date/time
         // DATE("Date Question"),
         // DATE_TIME("Date and Time Question"),
         // TIME("Time Question")
