@@ -10,7 +10,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     var type: QuestionType.Type
     var text: String? = null
     var options: String? = null
-    var answerString: String? = null
+    public var answerString: String? = null
     var answerInteger: Int? = null
     var answerDouble: Double? = null
 
@@ -19,18 +19,19 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     var date_string: String? = null
 
     fun pprint() {
-        printe("QuestionData - " +
-                "id: " + id +
-                ", type: " + type +
-                ", text: " + text +
-                ", options: " + options +
-                ", answerString: " + answerString +
-                ", answerInteger: " + answerInteger +
-                ", answerDouble: " + answerDouble +
-                ", time_hour: " + time_hour +
-                ", time_minute: " + time_minute +
-                ", date_string: " + date_string
-        )
+        // print everything that has data in the object
+        var x = "QuestionData - "
+        x += if (this.id == null) "" else "id: $id, "
+        x += if (this.type == null) "" else "type: $type, "
+        x += if (this.text == null) "" else "text: $text, "
+        x += if (this.options == null) "" else "options: $options, "
+        x += if (this.answerString == null) "" else "answerString: $answerString, "
+        x += if (this.answerInteger == null) "" else "answerInteger: $answerInteger, "
+        x += if (this.answerDouble == null) "" else "answerDouble: $answerDouble, "
+        x += if (this.time_hour == null) "" else "time_hour: $time_hour, "
+        x += if (this.time_minute == null) "" else "time_minute: $time_minute, "
+        x += if (this.date_string == null) "" else "date_string: $date_string, "
+        printe(x)
     }
 
     init {
@@ -44,7 +45,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         when (this.type) {
             QuestionType.Type.FREE_RESPONSE -> this.setAnswerFreeResponse()
             QuestionType.Type.SLIDER -> this.setAnswerSlider()
-            QuestionType.Type.RADIO_BUTTON -> this.setAnswerRadioButton()
+            QuestionType.Type.RADIO_BUTTON -> answer_no_op()
             QuestionType.Type.INFO_TEXT_BOX -> answer_no_op()
             QuestionType.Type.CHECKBOX -> this.answer_no_op()
             QuestionType.Type.DATE -> this.setAnswerDate()
@@ -53,9 +54,9 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         }
     }
 
-    /** @return False if the answer is null, true if an answer exists. */
+    /** @return False if the answerString is null, true if an answer exists. */
     fun questionIsAnswered(): Boolean {
-        return answerString != null
+        return this.answerString != null
     }
 
     // some answers are fully contained in their answerString.
@@ -78,21 +79,6 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     /** Sliders comes in as integers, convert to float, convert to string... why float?
      * make sure to clear out when null. anyway */
     fun setAnswerSlider() {
-        if (this.answerInteger != null)
-            this.answerDouble = java.lang.Double.valueOf(this.answerInteger!!.toDouble())
-        else
-            this.answerDouble = null
-
-        // and then this next line depends on the double being set... why?
-        if (this.answerDouble != null)
-            this.answerString = "" + this.answerInteger
-        else
-            this.answerString = null
-    }
-
-    /** comes in as an integer, coerce to float, coerce to string... trillionth time why? and again
-     * enforce nullness */
-    fun setAnswerRadioButton() {
         if (this.answerInteger != null)
             this.answerDouble = java.lang.Double.valueOf(this.answerInteger!!.toDouble())
         else

@@ -6,19 +6,17 @@ package org.beiwe.app.survey
 class QuestionType {
     enum class Type(val stringName: String) {
         INFO_TEXT_BOX("Info Text Box"),
-
         SLIDER("Slider Question"),
-
         RADIO_BUTTON("Radio Button Question"),
-
         CHECKBOX("Checkbox Question"),
-
         FREE_RESPONSE("Open Response Question"),
+        DATE("date"),
+        DATE_TIME("date_time"),
+        TIME("time")
 
-        DATE("Date Question"),
-
-        DATE_TIME("Date and Time Question"),
-
-        TIME("Time Question");
+        // this was the initial version of the names of these three, but it looks like ios is using lower case identifiers
+        // DATE("Date Question"),
+        // DATE_TIME("Date and Time Question"),
+        // TIME("Time Question")
     }
 }

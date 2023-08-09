@@ -30,43 +30,61 @@ import java.util.Arrays
 
 
 class QuestionFragment : Fragment() {
-    var goToNextQuestionListener: OnGoToNextQuestionListener? = null
+    // can't late-init, it errors with:
+    // kotlin.UninitializedPropertyAccessException: lateinit property questionData has not been initialized
+    // but it is initialized correctly in each createquestion function and cannot be missing at real runtime.
     var questionData: QuestionData? = null
+
+    // late-init'd in onCreateView
+    lateinit var the_questionLayout: View
+
+    var goToNextQuestionListener: OnGoToNextQuestionListener? = null
     var questionType: QuestionType.Type? = null
-    var the_questionLayout: View? = null
+
+    var nextButtonPreAction: (() -> Unit)? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         /* XML views inflated by an Activity render with the app's default style (set in the
          * Manifest.XML), but for some reason, XML views inflated by this class don't render with
          * the app's default style, unless we set it manually: */
 
-        // Render the question and inflate the layout for this fragment
+        if (questionData == null) {
+            // this call can return null, that means the question has not loaded nor saved an answer
+            questionData = (activity as SurveyActivity).surveyLogic!!.currentQuestionData
+            // if (questionData == null)
+            //     printe("did not load a questionData object for question ${(activity as SurveyActivity).surveyLogic!!.currentQuestion + 1}")
+            // else
+            //     printe("loaded a questionData object! " + questionData)
+        }
+
+        // Render the question (inflate the layout) for this fragment
         val fragmentQuestionLayout = inflater.inflate(R.layout.fragment_question, null) as ScrollView
         val questionContainer = fragmentQuestionLayout.findViewById<View>(R.id.questionContainer) as FrameLayout
+
+        // questionAnswer will only be late-init'd during createQuestion, the_questionLayout here
         this.the_questionLayout = createQuestion(inflater, arguments)
-        questionContainer.addView(this.the_questionLayout!!)
+        questionContainer.addView(this.the_questionLayout)
 
         // Set an onClickListener for the next and back button (need to cast)
         val nextButton = fragmentQuestionLayout.findViewById<View>(R.id.nextButton) as Button
         val backButton = fragmentQuestionLayout.findViewById<View>(R.id.backButton) as Button
 
+        // next button has a pre-action, assign a closure to nextButtonPreAction in the
+        // createQuestion function and it will execute before the next button's regular action.
         nextButton.setOnClickListener {
-            if (next_button_pre_action != null)
-                next_button_pre_action!!()
-            goToNextQuestionListener!!.goToNextQuestion(getAnswer(this.the_questionLayout!!, questionType!!))
-            if (next_button_post_action != null)
-                next_button_post_action!!()
+            if (nextButtonPreAction != null)
+                nextButtonPreAction!!()
+            goToNextQuestionListener!!.goToNextQuestion(questionData!!)
+            // getAnswer(this.the_questionLayout, questionType!!)) // comment this out last
         }
         backButton.setOnClickListener {
             activity.onBackPressed()
         }
 
-        populateQuestionDataIfNull()
+        // conform to onCreateView's return type
         return fragmentQuestionLayout
     }
 
-    var next_button_pre_action: (() -> Unit)? = null
-    var next_button_post_action: (() -> Unit)? = null
 
     /* The following dual declaration is due to a change/deprecation in the Android Fragment
 	 * _handling_ code.  It is difficult to determine exactly which API version this change occurs
@@ -83,25 +101,31 @@ class QuestionFragment : Fragment() {
     /** This function will get called on NEW versions of Android (6+). ... and now that's been deprecated tooooo!  */
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        // printe("onAttach(Context) called")
         goToNextQuestionListener = context as OnGoToNextQuestionListener
     }
 
     /** This function will get called on OLD versions of Android (<6).  */
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
+        // printe("onAttach(Activity) called")
         goToNextQuestionListener = activity as OnGoToNextQuestionListener
     }
 
-    private fun getAnswer(questionLayout: View, questionType: QuestionType.Type): QuestionData {
-        val answerString = SurveyAnswersRecorder.getAnswerString(questionLayout, questionType)
-        if (answerString != null)
-            questionData!!.answerString = answerString
-        val answerIntegerValue = SurveyAnswersRecorder.getAnswerIntegerValue(questionLayout, questionType)
-        if (answerIntegerValue != null)
-            questionData!!.answerInteger = answerIntegerValue
-        populateQuestionDataIfNull()
-        return this.questionData!!
-    }
+
+    // extract the answer string from the question layout... this operation is not needed?
+    // private fun getAnswer(questionLayout: View, questionType: QuestionType.Type): QuestionData {
+    //     // get the string from the question layout, assign it to the questionData object
+    //     val answerString = SurveyAnswersRecorder.getAnswerString(questionLayout, questionType)
+    //     if (answerString != null)
+    //         questionData!!.answerString = answerString
+    //     // get the integer from the question layout, assign it to the questionData object
+    //     val answerIntegerValue = SurveyAnswersRecorder.answerIntegerValue(questionLayout, questionType)
+    //     if (answerIntegerValue != null)
+    //         questionData!!.answerInteger = answerIntegerValue
+    //
+    //     return this.questionData!!
+    // }
 
     // executes the correct instantiation logic for the question's ui element
     private fun createQuestion(inflater: LayoutInflater, args: Bundle): View {
@@ -112,7 +136,7 @@ class QuestionFragment : Fragment() {
 
         if (questionType == "info_text_box") {
             this.questionType = QuestionType.Type.INFO_TEXT_BOX
-            return createInfoTextbox(inflater, questionID, questionText)
+            return createInfoTextbox(inflater, questionText)
         } else if (questionType == "slider") {
             this.questionType = QuestionType.Type.SLIDER
             val min = args.getInt("min")
@@ -149,19 +173,19 @@ class QuestionFragment : Fragment() {
      * the back button gets pressed and pops the backstack.  When the next button is pressed we pull
      * any answer that has been saved by the activity.
      * This operation may do nothing (re-set value to null) if there is no answer, that is fine. */
-    private fun populateQuestionDataIfNull() {
-        if (questionData == null)
-            this.questionData = (activity as SurveyActivity).currentQuestionData
-    }
+    // private fun populateQuestionDataIfNull() {
+    //     if (questionData == null)
+    //         this.questionData = (activity as SurveyActivity).currentQuestionData
+    // }
 
     /** Creates an informational text view that does not have an answer type
      * @param infoText The informational text
      * @return TextView (to be displayed as question text) */
-    private fun createInfoTextbox(inflater: LayoutInflater, questionID: String?, infoText: String?): TextView {
-        // infotextboxes don't have answers, but it needs to be instantiated to avoid null pointer
+    private fun createInfoTextbox(inflater: LayoutInflater, infoText: String?): TextView {
+        // just blindly create a new questionData object, infotextboxes don't have answers.
         this.questionData = QuestionData(null, QuestionType.Type.INFO_TEXT_BOX, null, null)
 
-        var infoText = infoText //?
+        var infoText = infoText // needs to be a var to be reassigned in the try-catch
         val infoTextbox = inflater.inflate(R.layout.survey_info_textbox, null) as MarkDownTextView
 
         // Clean inputs
@@ -177,50 +201,56 @@ class QuestionFragment : Fragment() {
         return infoTextbox
     }
 
+    fun generateQuestionText(inflater: LayoutInflater, layout: Int, questionText: String?): LinearLayout {
+        // Set the text of the question itself
+        val question = inflater.inflate(layout, null) as LinearLayout
+        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
+        if (questionText != null)
+            questionTextView.setText(questionText)
+        return question
+    }
+
+
     /** Creates a slider with a range of discrete values
      * @param questionText The text of the question to be asked
      * @return LinearLayout A slider bar */
     private fun createSliderQuestion(
             inflater: LayoutInflater, questionID: String?, questionText: String?, min: Int, max: Int,
     ): LinearLayout {
+        // if min is greater than max, swap them
         var min = min
         var max = max
-        val question = inflater.inflate(R.layout.survey_slider_question, null) as LinearLayout
-        val slider = question.findViewById<View>(R.id.slider) as SeekBarEditableThumb
-
-        // Set the text of the question itself
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null)
-            questionTextView.setText(questionText)
-
-        // The min must be greater than the max, and the range must be at most 100.
-        // If the min and max don't fit that, reset min to 0 and max to 100.
-        if (min > max - 1 || max - min > 100) {
-            min = 0
-            max = 100
+        if (min > max) {
+            val temp_min = min
+            min = max
+            max = temp_min
         }
 
+        if (questionData == null) {
+            val options = "min = $min; max = $max" // options state min and max.
+            this.questionData = QuestionData(questionID, QuestionType.Type.SLIDER, questionText, options)
+        }
+
+        val question = generateQuestionText(inflater, R.layout.survey_slider_question, questionText)
+        val slider = question.findViewById<View>(R.id.slider) as SeekBarEditableThumb
         // Set the slider's range and default/starting value
         slider.max = max - min
         slider.min = min
-        populateQuestionDataIfNull()
-        if (questionData != null && questionData!!.answerInteger != null) {
-            slider.progress = questionData!!.answerInteger!!
+
+        // set the slider value based on the question data
+        if (this.questionData!!.answerInteger != null) {
+            slider.progress = this.questionData!!.answerInteger!!
             slider.markAsTouched()
         } else {
             // Make the slider invisible until it's touched (so there's effectively no default value)
-            slider.progress = 0
+            slider.progress = 0 // value irrelevant, user must Stop touching element to run answer logic
             makeSliderInvisibleUntilTouched(slider)
-            // Create text strings that represent the question and its answer choices
-            val options = "min = $min; max = $max"
-            questionData = QuestionData(questionID, QuestionType.Type.SLIDER, questionText, options)
         }
 
         // Add a label above the slider with numbers that mark points on a scale
         addNumbersLabelingToSlider(inflater, question, min, max)
-
         // Set the slider to listen for and record user input
-        slider.setOnSeekBarChangeListener(SliderListener(questionData!!))
+        slider.setOnSeekBarChangeListener(SliderListener(this.questionData!!))
         return question
     }
 
@@ -228,15 +258,15 @@ class QuestionFragment : Fragment() {
      * @param questionText The text of the question
      * @param answers An array of strings that are options matched with radio buttons
      * @return RadioGroup A vertical set of radio buttons */
-    private fun createRadioButtonQuestion(inflater: LayoutInflater, questionID: String?, questionText: String?, answers: Array<String?>?): LinearLayout {
-        var answers = answers
-        val question = inflater.inflate(R.layout.survey_radio_button_question, null) as LinearLayout
-        val radioGroup = question.findViewById<View>(R.id.radioGroup) as RadioGroup
+    private fun createRadioButtonQuestion(
+            inflater: LayoutInflater, questionID: String?, questionText: String?, answers: Array<String?>?,
+    ): LinearLayout {
+        if (questionData == null)
+            questionData = QuestionData(questionID, QuestionType.Type.RADIO_BUTTON, questionText, Arrays.toString(answers))
 
-        // Set the text of the question itself
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null)
-            questionTextView.setText(questionText)
+        val question = generateQuestionText(inflater, R.layout.survey_radio_button_question, questionText)
+        var answers = answers  // need to be a var to be reassigned in the try-catch for bad optionss
+        val radioGroup = question.findViewById<View>(R.id.radioGroup) as RadioGroup
 
         // If the array of answers is null or too short, replace it with an error message
         if (answers == null || answers.size < 2) {
@@ -249,24 +279,20 @@ class QuestionFragment : Fragment() {
             answers = replacementAnswers
         }
 
-        // Loop through the answer strings, and make each one a radio button option
+        // Loop through the answer strings, make each one a radio button option, set text
         for (i in answers.indices) {
             val radioButton = inflater.inflate(R.layout.survey_radio_button, null) as RadioButton
-            if (answers.get(i) != null) {
+            if (answers.get(i) != null)
                 radioButton.text = answers.get(i)
-            }
             radioGroup.addView(radioButton)
         }
-        populateQuestionDataIfNull()
-        if (questionData != null && questionData!!.answerInteger != null) {
-            radioGroup.check(radioGroup.getChildAt(questionData!!.answerInteger!!).id)
-        } else {
-            // Create text strings that represent the question and its answer choices
-            questionData = QuestionData(questionID, QuestionType.Type.RADIO_BUTTON, questionText, Arrays.toString(answers))
-        }
+
+        // set the radio button value based on the question data
+        if (this.questionData!!.answerInteger != null)
+            radioGroup.check(radioGroup.getChildAt(this.questionData!!.answerInteger!!).id)
 
         // Set the group of radio buttons to listen for and record user input
-        radioGroup.setOnCheckedChangeListener(RadioButtonListener(questionData!!))
+        radioGroup.setOnCheckedChangeListener(RadioButtonListener())
         return question
     }
 
@@ -274,32 +300,30 @@ class QuestionFragment : Fragment() {
      * @param questionText The text of the question
      * @param options Each string in options[] will caption one checkbox
      * @return LinearLayout a question with a list of checkboxes */
-    private fun createCheckboxQuestion(inflater: LayoutInflater, questionID: String?, questionText: String?, options: Array<String?>?): LinearLayout {
-        val question = inflater.inflate(R.layout.survey_checkbox_question, null) as LinearLayout
-        val checkboxesList = question.findViewById<View>(R.id.checkboxesList) as LinearLayout
+    private fun createCheckboxQuestion(
+            inflater: LayoutInflater, questionID: String?, questionText: String?, options: Array<String?>?,
+    ): LinearLayout {
+        if (questionData == null)
+            questionData = QuestionData(questionID, QuestionType.Type.CHECKBOX, questionText, Arrays.toString(options))
 
-        // Set the text of the question itself
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null) {
-            questionTextView.setText(questionText)
-        }
+        val question = generateQuestionText(inflater, R.layout.survey_checkbox_question, questionText)
+        val checkboxesList = question.findViewById<View>(R.id.checkboxesList) as LinearLayout
         var checkedAnswers: Array<String?>? = null
-        populateQuestionDataIfNull()
-        if (questionData != null && questionData!!.answerString != null) {
-            val answerString = questionData!!.answerString
-            if (answerString!!.length > 2)
+
+        // set the checkbox values based on the question data
+        if (this.questionData!!.answerString != null) {
+            val answerString = this.questionData!!.answerString
+            // If the answer string is long enough to contain answers, split it into an array
+            if (answerString!!.length > 2) {
                 checkedAnswers = answerString.substring(1, answerString.length - 1)
                         .split(", ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        } else {
-            // Create text strings that represent the question and its answer choices
-            questionData = QuestionData(questionID, QuestionType.Type.CHECKBOX, questionText, Arrays.toString(options))
+            }
         }
 
-        // Loop through the options strings, and make each one a checkbox option
+        // Loop through the options strings, and make each one a checkbox option (options should never be null
         if (options != null) {
             for (i in options.indices) {
                 val checkbox = inflater.inflate(R.layout.survey_checkbox, null) as CheckBox
-
                 // Set the text if it's provided; otherwise leave text as default error message
                 if (options[i] != null) {
                     checkbox.text = options[i]
@@ -309,7 +333,7 @@ class QuestionFragment : Fragment() {
                 }
 
                 // Make the checkbox listen for and record user input
-                checkbox.setOnClickListener(CheckboxListener(questionData!!))
+                checkbox.setOnClickListener(CheckboxListener())
                 // Add the checkbox to the list of checkboxes
                 checkboxesList.addView(checkbox)
             }
@@ -320,38 +344,34 @@ class QuestionFragment : Fragment() {
     private fun createDateTimeQuestion(
             inflater: LayoutInflater, questionID: String?, questionText: String?,
     ): LinearLayout {
-        val question = inflater.inflate(R.layout.survey_open_response_question, null) as LinearLayout
+        if (questionData == null)
+            questionData = QuestionData(questionID, QuestionType.Type.DATE_TIME, questionText, "")
 
-        // Set the text of the question itself
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null)
-            questionTextView.setText(questionText)
-
+        val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
         val time_picker = inflater.inflate(R.layout.survey_time_input, null) as TimePicker
         val date_picker = inflater.inflate(R.layout.survey_date_input, null) as DatePicker
         time_picker.setIs24HourView(false)
 
-        populateQuestionDataIfNull()
-
         // extract time values and date string values from questionData
-        if (questionData != null && questionData!!.answerString != null) {
-            time_picker.minute = questionData!!.time_minute!!
-            time_picker.hour = questionData!!.time_hour!!
+        if (this.questionData!!.answerString != null) {
+            // time is easy
+            time_picker.minute = this.questionData!!.time_minute!!
+            time_picker.hour = this.questionData!!.time_hour!!
 
-            val datetime_string = questionData!!.answerString
+            // date is harder
+            val datetime_string = this.questionData!!.answerString
             if (datetime_string != null) {
                 // split on a space, get first component
-                val just_the_date_string = datetime_string.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+                val just_the_date_string = datetime_string
+                        .split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+                // date is in the format YYYY-MM-DD
                 val date = LocalDate.parse(just_the_date_string, DateTimeFormatter.ISO_DATE)
-                date_picker.updateDate(date.year, date.monthValue - 1, date.dayOfMonth)
+                date_picker.updateDate(date.year, date.monthValue, date.dayOfMonth)
             }
-        } else {
-            // Create text strings that represent the question and its answer choices
-            questionData = QuestionData(questionID, QuestionType.Type.DATE_TIME, questionText, null)
         }
 
         // date/time entries don't work with onFocusChangeListener, so we have to hack into the next button
-        next_button_pre_action = {
+        nextButtonPreAction = {
             time_pre_action(time_picker, false)
             date_pre_action(date_picker)
         }
@@ -362,31 +382,25 @@ class QuestionFragment : Fragment() {
         return question
     }
 
-
     private fun createTimeQuestion(
             inflater: LayoutInflater, questionID: String?, questionText: String?,
     ): LinearLayout {
-        // Set the text of the question itself
-        val question = inflater.inflate(R.layout.survey_open_response_question, null) as LinearLayout
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null)
-            questionTextView.setText(questionText)
+        if (questionData == null)
+            questionData = QuestionData(questionID, QuestionType.Type.TIME, questionText, "")
 
+        // Set the text of the question itself
+        val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
         val time_picker = inflater.inflate(R.layout.survey_time_input, null) as TimePicker
         time_picker.setIs24HourView(false)
 
-        populateQuestionDataIfNull()
-
         // time components are at least easy to extract
-        if (questionData != null && questionData!!.answerString != null) {
-            time_picker.minute = questionData!!.time_minute!!
-            time_picker.hour = questionData!!.time_hour!!
-        } else {
-            questionData = QuestionData(questionID, QuestionType.Type.TIME, questionText, null)
+        if (this.questionData!!.answerString != null) {
+            time_picker.minute = this.questionData!!.time_minute!!
+            time_picker.hour = this.questionData!!.time_hour!!
         }
 
         // Time entries don't work with onFocusChangeListener, so we have to hack into the next button
-        next_button_pre_action = {
+        nextButtonPreAction = {
             time_pre_action(time_picker, true)
         }
 
@@ -398,91 +412,94 @@ class QuestionFragment : Fragment() {
     private fun createDateQuestion(
             inflater: LayoutInflater, questionID: String?, questionText: String?,
     ): LinearLayout {
-        // Set the text of the question itself
-        val question = inflater.inflate(R.layout.survey_open_response_question, null) as LinearLayout
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
-        if (questionText != null)
-            questionTextView.setText(questionText)
+        if (questionData == null)
+            questionData = QuestionData(questionID, QuestionType.Type.DATE, questionText, "")
 
+        val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
         val date_picker = inflater.inflate(R.layout.survey_date_input, null) as DatePicker
 
-        populateQuestionDataIfNull()
-        if (questionData != null && questionData!!.answerString != null) {
+        // extract the date string from questionData
+        if (this.questionData!!.answerString != null) {
             // extract the isoformat date string from the answer and set the value of the datepicker
-            val date_string = questionData!!.answerString
+            val date_string = this.questionData!!.answerString // could be the qd.date_string...
             val date = LocalDate.parse(date_string, DateTimeFormatter.ISO_DATE)
-            date_picker.updateDate(date.year, date.monthValue - 1, date.dayOfMonth)
-        } else
-            questionData = QuestionData(questionID, QuestionType.Type.DATE, questionText, null)
+            date_picker.updateDate(date.year, date.monthValue, date.dayOfMonth)
+        }
 
         // date entries don't work with onFocusChangeListener, so we have to hack into the next button
-        next_button_pre_action = {
+        nextButtonPreAction = {
             date_pre_action(date_picker)
         }
 
         // Set the text field to listen for and record user input
-        // date_picker.onFocusChangeListener = DatePickerResponseListener(questionData!!)
+        // date_picker.onFocusChangeListener = DatePickerResponseListener(questionData)
         (question.findViewById<View>(R.id.textFieldContainer) as LinearLayout).addView(date_picker)
         return question
     }
 
+
     fun date_pre_action(date_picker: DatePicker) {
+        // pad zeros for month and day of month if the values are less than 10.
         val month = if (date_picker.month < 10) "0${date_picker.month}" else date_picker.month.toString()
         val dayOfMonth = if (date_picker.dayOfMonth < 10) "0${date_picker.dayOfMonth}" else date_picker.dayOfMonth.toString()
+        // isoformat date string is pretty trivial
         this.questionData!!.date_string = "${date_picker.year}-${month}-${dayOfMonth}"
-        this.questionData!!.coerceAnswer()
+        // this.questionData!!.coerceAnswer() // called in setAnswer
         (activity as SurveyActivity).surveyLogic!!.setAnswer(this.questionData!!)
     }
 
-    // coerce flag, is false when inside datetime question because we only want to coerce the answer
-    // once? I don't think it actually matters,
-    fun time_pre_action(time_picker: TimePicker, coerce: Boolean) {
+
+    // coerce flag - is false when inside datetime question because we only want to coerce the
+    // answer once? I don't think it actually matters but I'm not testing it otherwise.
+    // (in fact I tried to make sure the date-time coerce method handled this case - Don't Care!)
+    fun time_pre_action(time_picker: TimePicker, coerce_and_set: Boolean) {
         // pad zeros if the values are less than 10
-        questionData!!.time_hour = time_picker.hour
-        questionData!!.time_minute = time_picker.minute
-        if (coerce)
+        this.questionData!!.time_hour = time_picker.hour
+        this.questionData!!.time_minute = time_picker.minute
+        if (coerce_and_set) {
             this.questionData!!.coerceAnswer()
-        (activity as SurveyActivity).surveyLogic!!.setAnswer(this.questionData!!)
+            (activity as SurveyActivity).surveyLogic!!.setAnswer(this.questionData!!)
+        }
     }
+
 
     /**Creates a question with an open-response, text-input field
      * @param questionText The text of the question
      * @param inputTextType The type of answer (number, text, etc.)
      * @return LinearLayout question and answer */
     private fun createFreeResponseQuestion(
-            inflater: LayoutInflater, questionID: String?,
-            questionText: String?, inputTextType: TextFieldType.Type,
+            inflater: LayoutInflater, questionID: String?, questionText: String?, inputTextType: TextFieldType.Type,
     ): LinearLayout {
         // TODO: Give open response questions autofocus and make the keyboard appear
-        val question = inflater.inflate(R.layout.survey_open_response_question, null) as LinearLayout
+        // TODO: when the user presses Enter, jump to the next input field
+        if (questionData == null) {
+            val options = "Text-field input type = $inputTextType" // options indicates free response type
+            questionData = QuestionData(questionID, QuestionType.Type.FREE_RESPONSE, questionText, options)
+        }
 
-        // Set the text of the question itself
-        val questionTextView = question.findViewById<View>(R.id.questionText) as MarkDownTextView
+        val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
 
-        if (questionText != null)
-            questionTextView.setText(questionText)
-
+        // set the input type of the text field based on the question type
         val editText: EditText = when (inputTextType) {
             TextFieldType.Type.NUMERIC -> inflater.inflate(R.layout.survey_free_number_input, null) as EditText
             TextFieldType.Type.SINGLE_LINE_TEXT -> inflater.inflate(R.layout.survey_free_text_input, null) as EditText
             TextFieldType.Type.MULTI_LINE_TEXT -> inflater.inflate(R.layout.survey_multiline_text_input, null) as EditText
         }
 
-        /* todo: when the user presses Enter, jump to the next input field */
-        populateQuestionDataIfNull()
-        if (questionData != null && questionData!!.answerString != null) {
-            editText.setText(questionData!!.answerString)
-        } else {
-            // Create text strings that represent the question and its answer choices
-            val options = "Text-field input type = $inputTextType"
-            questionData = QuestionData(questionID, QuestionType.Type.FREE_RESPONSE, questionText, options)
-        }
+        // extract the answer string from questionData
+        if (this.questionData!!.answerString != null)
+            editText.setText(this.questionData!!.answerString)
 
+        nextButtonPreAction = {
+            openResponsePreNextButton()
+        }
         // Set the text field to listen for and record user input
-        editText.onFocusChangeListener = OpenResponseListener(questionData!!)
+        editText.onFocusChangeListener = OpenResponseListener()
         (question.findViewById<View>(R.id.textFieldContainer) as LinearLayout).addView(editText)
         return question
     }
+
+    /*************************************** Slider UI ***************************************** */
 
     /** Adds a numeric scale above a Slider Question
      * @param question the Slider Question that needs a number scale
@@ -528,9 +545,9 @@ class QuestionFragment : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun makeSliderInvisibleUntilTouched(slider: SeekBarEditableThumb) {
         // Before the user has touched the slider, make the "thumb" transparent/ almost invisible
-        /* Note: this works well on Android 4; there's a weird bug on Android 2 in which the first
-         * slider question in the survey sometimes appears with a black thumb (once you touch it,
-         * it turns into a white thumb). */
+        // Note: this works well on Android 4; there's a weird bug on Android 2[sig] in which the
+        // first slider question in the survey sometimes appears with a black thumb (once you touch
+        // it, it turns into a white thumb).
         slider.markAsUntouched()
         slider.setOnTouchListener { v, event ->
             // When the user touches the slider, make the "thumb" opaque and fully visible
@@ -540,7 +557,7 @@ class QuestionFragment : Fragment() {
         }
     }
 
-    /**************************** ANSWER LISTENERS ********************************************* */
+    /************************************* ANSWER LISTENERS ************************************* */
 
     /** Listens for a touch/answer to a Slider Question, and records the answer  */
     private inner class SliderListener(var questionDescription: QuestionData) : OnSeekBarChangeListener {
@@ -548,73 +565,96 @@ class QuestionFragment : Fragment() {
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
         override fun onStopTrackingTouch(seekBar: SeekBar) {
-            var answer = ""
-            answer += if (seekBar is SeekBarEditableThumb) {
-                val slider = seekBar
-                slider.progress + slider.min
-            } else {
-                seekBar.progress
+            if (questionData !== questionDescription) {
+                throw RuntimeException("QuestionData mismatch slider")
             }
-            SurveyTimingsRecorder.recordAnswer(answer, questionDescription)
-            (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
+            // insane kotlin behavior - if you use 'as seekbareditablethumb' here then the 'seekbar'
+            // variable suddenly has the hasBeenTouched attribute, but not until then. I guess this
+            // means that the cast can fail, so any line after the cast has better typing
+            // information. That's super weird.
+
+            val real_seekbar = seekBar as SeekBarEditableThumb
+            // get the integer value of the answer, the min value is apparently needed based on
+            // exact type of seekbar?
+            // val answer: Int = if (seekBar is SeekBarEditableThumb) {
+            //     seekBar.progress + seekBar.min
+            // } else {
+            //     throw RuntimeException("Unknown seekbar type? wtaf")
+            //     seekBar.progress
+            // }
+            // set answer, pass answer to survey logic
+
+            questionData!!.answerInteger =
+                    if (real_seekbar.hasBeenTouched) real_seekbar.progress + real_seekbar.min else null
+            questionData!!.coerceAnswer()
+            SurveyTimingsRecorder.recordAnswer(questionData!!.answerString, questionData)
+            (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
         }
     }
 
-    /** Listens for a touch/answer to a Radio Button Question, and records the answer  */
-    private inner class RadioButtonListener(var questionDescription: QuestionData) : RadioGroup.OnCheckedChangeListener {
+    /** Listens for a touch/answer to a Radio Button Question, and records the answer. Must set
+     * integer value of index in order to restore question correctly */
+    private inner class RadioButtonListener : RadioGroup.OnCheckedChangeListener {
         override fun onCheckedChanged(group: RadioGroup, checkedId: Int) {
             val selectedButton = group.findViewById<View>(checkedId) as RadioButton
             if (selectedButton.isChecked) {
-                SurveyTimingsRecorder.recordAnswer(selectedButton.text.toString(), questionDescription)
-                (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
+                // this is the way surveytimings have always been recorded, they are the same afaik
+                SurveyTimingsRecorder.recordAnswer(selectedButton.text.toString(), questionData)
+                questionData!!.answerInteger = SurveyAnswersRecorder.indexOfSelectedRadioButton(the_questionLayout)
+                questionData!!.answerString = SurveyAnswersRecorder.answerFromRadioButtonQuestion(the_questionLayout)
+                (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
             } else {
-                /* It should not be possible to un-check a radio button, but if
-                 * that happens, record the answer as an empty string */
-                SurveyTimingsRecorder.recordAnswer("", questionDescription)
+                /* It should not be possible to un-check a radio button, but if that happens, record
+                 * the answer as an empty string. */
+                SurveyTimingsRecorder.recordAnswer("", questionData)
             }
         }
     }
 
     /** Listens for a touch/answer to a Checkbox Question, and records the answer  */
-    private inner class CheckboxListener(var questionDescription: QuestionData) : View.OnClickListener {
+    private inner class CheckboxListener : View.OnClickListener {
         override fun onClick(view: View) {
-            // If it's a CheckBox and its parent is a LinearLayout...
+            // If it's a CheckBox... and its parent is a LinearLayout? (we set it up how can this fail?)
             if (view is CheckBox && view.getParent() is LinearLayout) {
                 val checkboxesList = view.getParent() as LinearLayout
-                val answersList = SurveyAnswersRecorder.getSelectedCheckboxes(checkboxesList)
-                SurveyTimingsRecorder.recordAnswer(answersList, questionDescription)
-                // if (the_questionLayout != null) {
-                (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
-                // }
+                val answersList = SurveyAnswersRecorder.answerFromCheckboxQuestion(checkboxesList)
+                // survey timings use an empty list representation survey answers uses the
+                // NO_ANSWER_SELECTED constant. This decision was made at the beginning of time
+                // and can never change. fantastic.
+                SurveyTimingsRecorder.recordAnswer(answersList ?: "[]", questionData)
+                questionData!!.answerString = answersList
+                (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
             }
         }
     }
 
+    // the OpenResponseListener was triggering ~4ms-apart events for every touch action, and it
+    // could crash the app - I think it was a threading issue?? very unclear.
+    /** Get the answer from the answer field, record timings and send answer off. */
+    fun openResponsePreNextButton() {
+        val answer_string = SurveyAnswersRecorder.answerFromOpenResponseQuestion(the_questionLayout)
+        SurveyTimingsRecorder.recordAnswer(answer_string ?: "", questionData!!)
+        questionData!!.answerString = answer_string
+        (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
+    }
+
     /** Listens for an input/answer to an Open/Free Response Question, and records the answer  */
-    private inner class OpenResponseListener(var questionDescription: QuestionData) : OnFocusChangeListener {
-        // TODO: replace this with a listener on the Next button; that'd probably make more sense
+    private inner class OpenResponseListener : OnFocusChangeListener {
+        // TODO: replace this with a listener on the Next button - this gets called for every updated input event on the screen and is bad
         override fun onFocusChange(v: View, hasFocus: Boolean) {
             if (hasFocus) {
                 // The user just selected the input box
-                /* Improvement idea: record when the user first touched the input field; right now
-                 * it only records when the user selected away from the input field. */
+                // Improvement idea: record when the user first touched the input field; right now
+                // it only records when the user selected away from the input field. */
 
                 // Set the EditText so that if the user taps outside, the keyboard disappears
                 if (v is EditText) {
-                    val keyboard: TextFieldKeyboard
-                    keyboard = try {
+                    val keyboard: TextFieldKeyboard = try {
                         TextFieldKeyboard(context)
                     } catch (e: NoSuchMethodError) {
                         TextFieldKeyboard(activity)
                     }
                     keyboard.makeKeyboardBehave(v)
-                }
-            } else {
-                // The user just selected away from the input box
-                if (v is EditText) {
-                    val answer = v.text.toString()
-                    SurveyTimingsRecorder.recordAnswer(answer, questionDescription)
-                    (activity as SurveyActivity).surveyLogic!!.setAnswer(getAnswer(the_questionLayout!!, questionType!!))
                 }
             }
         }

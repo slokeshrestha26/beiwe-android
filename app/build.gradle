@@ -120,13 +120,12 @@ Version history:
     on appropriate formatting.
 67: 3.4.1  I broke accelerometer. I fixed accelerometer.
 68: 3.4.2  Check active survey notifications in order to stop weird notification scrolling behavior.
-
+69: required and date/time questions.
 next: probably new formatting for the hardware information for gps, accel, gyro
 */
 
 
 android {
-
 
     namespace 'org.beiwe.app'
     signingConfigs {
@@ -147,8 +146,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 31
-        versionCode 68       //TODO: update this Beiwe version code for new releases
-        versionName '3.4.2'  //TODO: update this Beiwe version number for new releases
+        versionCode 69       //TODO: update this Beiwe version code for new releases
+        versionName '3.5.0'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
 

@@ -71,5 +71,4 @@ public class SurveyTimingsRecorder {
 		input = input.replaceAll(",", ";");
 		return input;
 	}
-
 }

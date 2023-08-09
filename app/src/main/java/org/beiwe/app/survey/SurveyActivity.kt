@@ -59,9 +59,7 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
 
     override fun goToNextQuestion(questionData: QuestionData) {
         // in this context the dataFromCurrentQuestion is the data from the previous question.
-        // debugging...
-        questionData.coerceAnswer()
-        // questionData.pprint()
+        // questionData.pprint() // debugging...
         if (surveyLogic!!.currentQuestionRequired!! && !questionData.questionIsAnswered()) {
             Toast.makeText(this, "This question is required.", Toast.LENGTH_SHORT).show()
             return
@@ -82,11 +80,11 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // In order to do that we need to execute the fragment's getAnswer function.
-        // surveyLogic.setAnswer( questionFragment!!.getAnswer
-        // if (surveyLogic!!.currentQuestionData != null)
-        //     surveyLogic!!.currentQuestionData!!.pprint()
-        surveyLogic!!.goBackOneQuestion()
+        val previousQuestion = surveyLogic!!.previousQuestion()
+        // running the current version of the display logic on the previous question allows answers
+        // to be saved on a back button press, but can cause overwriting of visible activity...
+        // stuff. Point is need to work out correct backstack management (I think) for this to work.
+        // displaySurveyQuestionFragment(previousQuestion!!, surveyLogic!!.onFirstQuestion())
     }
 
     private fun displaySurveyQuestionFragment(jsonQuestion: JSONObject, isFirstQuestion: Boolean) {
@@ -147,10 +145,6 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
             e.printStackTrace()
         }
     }
-
-    // we need a reference on the activity to the current question fragment
-    val currentQuestionData: QuestionData?
-        get() = surveyLogic!!.currentQuestionData
 
     /**Called when the user presses "Submit" at the end of the survey,
      * saves the answers, and takes the user back to the main page.  */

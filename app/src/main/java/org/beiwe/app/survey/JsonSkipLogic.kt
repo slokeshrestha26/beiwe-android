@@ -17,13 +17,13 @@ import java.util.Locale
  * @param runDisplayLogic A boolean value for whether skip Logic should be run on this survey.
  * @throws JSONException thrown if there are any questions without question ids. */
 class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private val appContext: Context) {
-    private val QuestionAnswer: HashMap<String?, QuestionData>
-    private val QuestionSkipLogic: HashMap<String, JSONObject>
-    private val Questions: HashMap<String, JSONObject>
-    private val QuestionOrder: ArrayList<String>
-    private val QuestionRequired: HashMap<String, Boolean>
-    private var currentQuestion: Int
-    private val runDisplayLogic: Boolean
+    val QuestionAnswer: HashMap<String?, QuestionData>
+    val QuestionSkipLogic: HashMap<String, JSONObject>
+    val Questions: HashMap<String, JSONObject>
+    val QuestionOrder: ArrayList<String>
+    val QuestionRequired: HashMap<String, Boolean>
+    var currentQuestion: Int
+    val runDisplayLogic: Boolean
 
     init {
         val MAX_SIZE = jsonQuestions.length()
@@ -66,9 +66,8 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     fun pprint() {
         if (currentQuestionJson == null) {
             printe("can't print skiplogic current question, zeroth question.")
-        }
-        else {
-            printe("current question skip logic:")
+        } else {
+            printe("current question json logic:")
             printe(currentQuestionJson)
         }
     }
@@ -108,7 +107,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
         // if it is the first question it should invariably display.
         if (currentQuestion == 0) {
-//			Log.i("json logic", "skipping logic and displaying first question");
+			// Log.i("json logic", "skipping logic and displaying first question");
             if (QuestionOrder.size == 0)
                 return null
             else
@@ -150,7 +149,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         return getQuestion(true)
     }
 
-    fun goBackOneQuestion(): JSONObject? {
+    fun previousQuestion(): JSONObject? {
         return getQuestion(false)
     }
 
@@ -270,19 +269,18 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
     // coerce values to numerics for all non-checkbox questions (they have a json list)
 
-    fun setAnswer(questionData: QuestionData?) {
-        if (questionData == null)
-            return
-        questionData.coerceAnswer()
+    fun setAnswer(questionData: QuestionData) {
+        questionData.coerceAnswer() // ideally we don't need to run this safety function, but it's here just in case.
         QuestionAnswer[questionData.id] = questionData
     }
 
     /** @return a list of QuestionData objects for serialization to the answers file. */
-    val questionsForSerialization: List<QuestionData?>
+    val questionsForSerialization: List<QuestionData>
         get() {
-            val answers: MutableList<QuestionData?> = ArrayList(QuestionOrder.size)
+            val answers: MutableList<QuestionData> = ArrayList(QuestionOrder.size)
             for (questionId in QuestionOrder)
-                if (QuestionAnswer.containsKey(questionId)) answers.add(QuestionAnswer[questionId])
+                if (QuestionAnswer.containsKey(questionId) && QuestionAnswer[questionId] != null)
+                    answers.add(QuestionAnswer[questionId]!!)
             return answers
         }
 
