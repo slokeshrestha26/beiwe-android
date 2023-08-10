@@ -35,7 +35,7 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         initialViewMoment = System.currentTimeMillis()
         setContentView(R.layout.activity_survey)
         val triggerIntent = intent
-        surveyId = triggerIntent.getStringExtra("surveyId")
+        this.surveyId = triggerIntent.getStringExtra("surveyId")
     }
 
     override fun onDestroy() {

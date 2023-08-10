@@ -274,14 +274,48 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     }
 
     /** @return a list of QuestionData objects for serialization to the answers file. */
-    val questionsForSerialization: List<QuestionData>
-        get() {
-            val answers: MutableList<QuestionData> = ArrayList(questionOrder.size)
-            for (questionId in questionOrder)
-                if (questionAnswers.containsKey(questionId) && questionAnswers[questionId] != null)
-                    answers.add(questionAnswers[questionId]!!)
-            return answers
+    fun questionsForSerialization(): List<QuestionData> {
+        val answers: MutableList<QuestionData> = ArrayList(questionOrder.size)
+        // iterate over the question order, assemble QuestionAnswer objects. Skip INFO_TEXT_BOX
+        // questions wherever they show up.
+        for (questionId in questionOrder) {
+            // if the question logic state indicates that a question should not have displayed then
+            // we force the answer to NOT_PRESENTED.
+            if (!shouldQuestionDisplay(questionId)) {
+                val default_question_data = getCorrectlyPopulatedQuestionAnswer(questionId)
+                default_question_data.answerString = "NOT_PRESENTED"
+                if (default_question_data.type != QuestionType.Type.INFO_TEXT_BOX) // info text box...
+                    answers.add(default_question_data)
+                // It is possible for a user to go back and change answers with conditional logic,
+                // if so then they may have answers in questionAnswers. We want to skip those.
+                continue
+            }
+
+            var question_answer: QuestionData? = null
+            // if the question was answered, add it to the list of answers.
+            if (questionAnswers.containsKey(questionId))
+                question_answer = questionAnswers[questionId]
+            // if the question was not answered, get a default QuestionAnswer - will be coerced to
+            // NO_ANSWER_SELECTED. (handles both null object present and no object present.)
+            if (question_answer == null)
+                question_answer = getCorrectlyPopulatedQuestionAnswer(questionId)
+            // add as long as its not an info text box...
+            if (question_answer.type != QuestionType.Type.INFO_TEXT_BOX)
+                answers.add(question_answer)
+
         }
+        return answers
+    }
+
+    /** This is the single function call to correctly instantiate a correct, unanswered QuestionData
+     * object. Takes a question id, gets the json, passes it to QuestionType.Type logic, which is
+     * slightly weirdly over in QuestionJSONParser. */
+    fun getCorrectlyPopulatedQuestionAnswer(question_id: String): QuestionData {
+        val json_object = questionsById[question_id]
+        if (json_object != null)
+            return QuestionJSONParser.getQuestionDataFromJSONString(json_object)
+        throw NullPointerException("question_id $question_id not found in questionsById")
+    }
 
     // If would not display not, skip it without incrementing.
     // If question is actually unanswered construct a display string.

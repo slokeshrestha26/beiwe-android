@@ -113,30 +113,16 @@ class QuestionFragment : Fragment() {
     }
 
 
-    // extract the answer string from the question layout... this operation is not needed?
-    // private fun getAnswer(questionLayout: View, questionType: QuestionType.Type): QuestionData {
-    //     // get the string from the question layout, assign it to the questionData object
-    //     val answerString = SurveyAnswersRecorder.getAnswerString(questionLayout, questionType)
-    //     if (answerString != null)
-    //         questionData!!.answerString = answerString
-    //     // get the integer from the question layout, assign it to the questionData object
-    //     val answerIntegerValue = SurveyAnswersRecorder.answerIntegerValue(questionLayout, questionType)
-    //     if (answerIntegerValue != null)
-    //         questionData!!.answerInteger = answerIntegerValue
-    //
-    //     return this.questionData!!
-    // }
-
     // executes the correct instantiation logic for the question's ui element
     private fun createQuestion(inflater: LayoutInflater, args: Bundle): View {
         // all optionals
-        val questionID = args.getString("question_id")
+        val questionID = args.getString("question_id")!! // required
         val questionType = args.getString("question_type")
         val questionText = args.getString("question_text")
 
         if (questionType == "info_text_box") {
             this.questionType = QuestionType.Type.INFO_TEXT_BOX
-            return createInfoTextbox(inflater, questionText)
+            return createInfoTextbox(inflater, questionID, questionText)
         } else if (questionType == "slider") {
             this.questionType = QuestionType.Type.SLIDER
             val min = args.getInt("min")
@@ -169,21 +155,13 @@ class QuestionFragment : Fragment() {
         return inflater.inflate(R.layout.survey_info_textbox, null)
     }
 
-    /* We need to check whether questionData already has an object assigned to it, which occurs when
-     * the back button gets pressed and pops the backstack.  When the next button is pressed we pull
-     * any answer that has been saved by the activity.
-     * This operation may do nothing (re-set value to null) if there is no answer, that is fine. */
-    // private fun populateQuestionDataIfNull() {
-    //     if (questionData == null)
-    //         this.questionData = (activity as SurveyActivity).currentQuestionData
-    // }
 
     /** Creates an informational text view that does not have an answer type
      * @param infoText The informational text
      * @return TextView (to be displayed as question text) */
-    private fun createInfoTextbox(inflater: LayoutInflater, infoText: String?): TextView {
+    private fun createInfoTextbox(inflater: LayoutInflater, questionID: String, infoText: String?): TextView {
         // just blindly create a new questionData object, infotextboxes don't have answers.
-        this.questionData = QuestionData(null, QuestionType.Type.INFO_TEXT_BOX, null, null)
+        this.questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         var infoText = infoText // needs to be a var to be reassigned in the try-catch
         val infoTextbox = inflater.inflate(R.layout.survey_info_textbox, null) as MarkDownTextView
@@ -215,8 +193,12 @@ class QuestionFragment : Fragment() {
      * @param questionText The text of the question to be asked
      * @return LinearLayout A slider bar */
     private fun createSliderQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?, min: Int, max: Int,
+            inflater: LayoutInflater, questionID: String, questionText: String?, min: Int, max: Int,
     ): LinearLayout {
+        if (questionData == null) {
+            this.questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
+        }
+
         // if min is greater than max, swap them
         var min = min
         var max = max
@@ -225,12 +207,6 @@ class QuestionFragment : Fragment() {
             min = max
             max = temp_min
         }
-
-        if (questionData == null) {
-            val options = "min = $min; max = $max" // options state min and max.
-            this.questionData = QuestionData(questionID, QuestionType.Type.SLIDER, questionText, options)
-        }
-
         val question = generateQuestionText(inflater, R.layout.survey_slider_question, questionText)
         val slider = question.findViewById<View>(R.id.slider) as SeekBarEditableThumb
         // Set the slider's range and default/starting value
@@ -259,10 +235,10 @@ class QuestionFragment : Fragment() {
      * @param answers An array of strings that are options matched with radio buttons
      * @return RadioGroup A vertical set of radio buttons */
     private fun createRadioButtonQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?, answers: Array<String?>?,
+            inflater: LayoutInflater, questionID: String, questionText: String?, answers: Array<String?>?,
     ): LinearLayout {
         if (questionData == null)
-            questionData = QuestionData(questionID, QuestionType.Type.RADIO_BUTTON, questionText, Arrays.toString(answers))
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         val question = generateQuestionText(inflater, R.layout.survey_radio_button_question, questionText)
         var answers = answers  // need to be a var to be reassigned in the try-catch for bad optionss
@@ -301,10 +277,10 @@ class QuestionFragment : Fragment() {
      * @param options Each string in options[] will caption one checkbox
      * @return LinearLayout a question with a list of checkboxes */
     private fun createCheckboxQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?, options: Array<String?>?,
+            inflater: LayoutInflater, questionID: String, questionText: String?, options: Array<String?>?,
     ): LinearLayout {
         if (questionData == null)
-            questionData = QuestionData(questionID, QuestionType.Type.CHECKBOX, questionText, Arrays.toString(options))
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         val question = generateQuestionText(inflater, R.layout.survey_checkbox_question, questionText)
         val checkboxesList = question.findViewById<View>(R.id.checkboxesList) as LinearLayout
@@ -342,10 +318,10 @@ class QuestionFragment : Fragment() {
     }
 
     private fun createDateTimeQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?,
+            inflater: LayoutInflater, questionID: String, questionText: String?,
     ): LinearLayout {
         if (questionData == null)
-            questionData = QuestionData(questionID, QuestionType.Type.DATE_TIME, questionText, "")
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
         val time_picker = inflater.inflate(R.layout.survey_time_input, null) as TimePicker
@@ -383,10 +359,10 @@ class QuestionFragment : Fragment() {
     }
 
     private fun createTimeQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?,
+            inflater: LayoutInflater, questionID: String, questionText: String?,
     ): LinearLayout {
         if (questionData == null)
-            questionData = QuestionData(questionID, QuestionType.Type.TIME, questionText, "")
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         // Set the text of the question itself
         val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
@@ -410,10 +386,10 @@ class QuestionFragment : Fragment() {
 
 
     private fun createDateQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?,
+            inflater: LayoutInflater, questionID: String, questionText: String?,
     ): LinearLayout {
         if (questionData == null)
-            questionData = QuestionData(questionID, QuestionType.Type.DATE, questionText, "")
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
 
         val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)
         val date_picker = inflater.inflate(R.layout.survey_date_input, null) as DatePicker
@@ -468,13 +444,13 @@ class QuestionFragment : Fragment() {
      * @param inputTextType The type of answer (number, text, etc.)
      * @return LinearLayout question and answer */
     private fun createFreeResponseQuestion(
-            inflater: LayoutInflater, questionID: String?, questionText: String?, inputTextType: TextFieldType.Type,
+            inflater: LayoutInflater, questionID: String, questionText: String?, inputTextType: TextFieldType.Type,
     ): LinearLayout {
         // TODO: Give open response questions autofocus and make the keyboard appear
         // TODO: when the user presses Enter, jump to the next input field
         if (questionData == null) {
             val options = "Text-field input type = $inputTextType" // options indicates free response type
-            questionData = QuestionData(questionID, QuestionType.Type.FREE_RESPONSE, questionText, options)
+            questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
         }
 
         val question = generateQuestionText(inflater, R.layout.survey_open_response_question, questionText)

@@ -24,8 +24,7 @@ import java.util.ArrayList;
 
 public class SurveySubmitFragment extends Fragment {
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout surveySubmitLayout = (LinearLayout) inflater.inflate(R.layout.fragment_survey_submit, null);
         FrameLayout submitScreenContent = (FrameLayout) surveySubmitLayout.findViewById(R.id.submitScreenContent);
         ArrayList<String> unansweredQuestions = getArguments().getStringArrayList("unansweredQuestions");

@@ -31,7 +31,7 @@ class SurveyAnswersRecorder {
         } else {
             SurveyTimingsRecorder.sanitizeString(questionData.answerString)
         }
-        printe(line)
+        // printe(line)
         // printe("finished line generation")
         return line
     }
@@ -41,7 +41,7 @@ class SurveyAnswersRecorder {
     fun writeLinesToFile(surveyId: String?, surveyLogic: JsonSkipLogic): Boolean {
         try {
             TextFileManager.getSurveyAnswersFile().newFile(surveyId)
-            for (questionData: QuestionData in surveyLogic.questionsForSerialization) {
+            for (questionData: QuestionData in surveyLogic.questionsForSerialization()) {
                 val line = generateAnswerFileLine(questionData)
                 // printe("SurveyResponse answers", line)
                 TextFileManager.getSurveyAnswersFile().writeEncrypted(line)

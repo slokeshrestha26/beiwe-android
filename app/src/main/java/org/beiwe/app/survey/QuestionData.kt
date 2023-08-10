@@ -1,6 +1,8 @@
 package org.beiwe.app.survey
 
+import android.os.Bundle
 import org.beiwe.app.printe
+import org.json.JSONObject
 
 /** class for containing the answer to any type of question. Has data and logic to convert any type
  * of question to an appropriate answer string.  */
@@ -10,7 +12,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     var type: QuestionType.Type
     var text: String? = null
     var options: String? = null
-    public var answerString: String? = null
+    var answerString: String? = null
     var answerInteger: Int? = null
     var answerDouble: Double? = null
 
@@ -21,8 +23,8 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     fun pprint() {
         // print everything that has data in the object
         var x = "QuestionData - "
+        x += "type: $type, "
         x += if (this.id == null) "" else "id: $id, "
-        x += if (this.type == null) "" else "type: $type, "
         x += if (this.text == null) "" else "text: $text, "
         x += if (this.options == null) "" else "options: $options, "
         x += if (this.answerString == null) "" else "answerString: $answerString, "
