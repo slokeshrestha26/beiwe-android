@@ -17,40 +17,31 @@ class SurveyAnswersRecorder {
      * @param questionData metadata on the question
      * @return a String that can be written as a line to a file */
     fun generateAnswerFileLine(questionData: QuestionData): String {
-        // printe("starting line generation")
         var line = ""
         line += SurveyTimingsRecorder.sanitizeString(questionData.id)
-        // printe(line)
         line += TextFileManager.DELIMITER
-        // printe(line)
         line += SurveyTimingsRecorder.sanitizeString(questionData.type.stringName)
-        // printe(line)
         line += TextFileManager.DELIMITER
-        // printe(line)
         line += SurveyTimingsRecorder.sanitizeString(questionData.text)
-        // printe(line)
         line += TextFileManager.DELIMITER
-        // printe(line)
         line += SurveyTimingsRecorder.sanitizeString(questionData.options)
-        // printe(line)
         line += TextFileManager.DELIMITER
-        // printe(line)
-        line += if (questionData.answerString == null) {
+        line += if (questionData.answerString == null || questionData.answerString == "") {
             NO_ANSWER_SELECTED
         } else {
             SurveyTimingsRecorder.sanitizeString(questionData.answerString)
         }
-        // printe(line)
+        printe(line)
         // printe("finished line generation")
         return line
     }
 
     /** Create a new SurveyAnswers file, and write all of the answers to it
      * @return TRUE if wrote successfully; FALSE if caught an exception */
-    fun writeLinesToFile(surveyId: String?, answers: List<QuestionData>): Boolean {
+    fun writeLinesToFile(surveyId: String?, surveyLogic: JsonSkipLogic): Boolean {
         try {
             TextFileManager.getSurveyAnswersFile().newFile(surveyId)
-            for (questionData: QuestionData in answers) {
+            for (questionData: QuestionData in surveyLogic.questionsForSerialization) {
                 val line = generateAnswerFileLine(questionData)
                 // printe("SurveyResponse answers", line)
                 TextFileManager.getSurveyAnswersFile().writeEncrypted(line)

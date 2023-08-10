@@ -140,9 +140,9 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
 
             // construct the survey's skip logic.
             // (param 2: If randomization is enabled do not run the skip logic for the survey.)
-            surveyLogic = JsonSkipLogic(jsonQuestions!!, !randomize, applicationContext)
+            this.surveyLogic = JsonSkipLogic(jsonQuestions!!, !randomize, applicationContext)
         } catch (e: JSONException) {
-            e.printStackTrace()
+            e.printStackTrace()  // should we throw/report this?
         }
     }
 
@@ -152,7 +152,7 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         SurveyTimingsRecorder.recordSubmit(applicationContext)
 
         // Write the data to a SurveyAnswers file
-        val success = SurveyAnswersRecorder().writeLinesToFile(surveyId, surveyLogic!!.questionsForSerialization)
+        val success = SurveyAnswersRecorder().writeLinesToFile(surveyId, surveyLogic!!)
         val toastMsg: String = if (success) {
             PersistentData.getSurveySubmitSuccessToastText()
         } else {

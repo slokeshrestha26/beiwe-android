@@ -16,13 +16,13 @@ import java.util.Locale
  * @param runDisplayLogic A boolean value for whether skip Logic should be run on this survey.
  * @throws JSONException thrown if there are any questions without question ids. */
 class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private val appContext: Context) {
-    val QuestionAnswer: HashMap<String?, QuestionData>
-    val QuestionSkipLogic: HashMap<String, JSONObject>
-    val Questions: HashMap<String, JSONObject>
-    val QuestionOrder: ArrayList<String>
-    val QuestionRequired: HashMap<String, Boolean>
+    val questionAnswers: HashMap<String?, QuestionData>
+    val questionSkipLogic: HashMap<String, JSONObject>
+    val questionsById: HashMap<String, JSONObject>
+    val questionOrder: ArrayList<String>
+    val questionsRequired: HashMap<String, Boolean>
     var currentQuestion: Int
-    val runDisplayLogic: Boolean
+    val displayLogicEnabled: Boolean
 
     init {
         val MAX_SIZE = jsonQuestions.length()
@@ -32,33 +32,33 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         var displayLogic: JSONObject?
 
         // construct the various question id collections
-        QuestionAnswer = HashMap(MAX_SIZE)
-        QuestionSkipLogic = HashMap(MAX_SIZE)
-        Questions = HashMap(MAX_SIZE)
-        QuestionOrder = ArrayList(MAX_SIZE)
-        QuestionRequired = HashMap(MAX_SIZE)
+        questionAnswers = HashMap(MAX_SIZE)
+        questionSkipLogic = HashMap(MAX_SIZE)
+        questionsById = HashMap(MAX_SIZE)
+        questionOrder = ArrayList(MAX_SIZE)
+        questionsRequired = HashMap(MAX_SIZE)
 
         // go over the questions and store their data
         for (i in 0 until MAX_SIZE) { // uhg, you can't iterate over a JSONArray.
             question = jsonQuestions.optJSONObject(i)
             questionId = question.getString("question_id")
             requiredQuestion = question.optBoolean("required", false)
-            Questions[questionId] = question // store questions by id
-            QuestionRequired[questionId] = requiredQuestion // setup required questions
-            QuestionOrder.add(questionId) // setup question order
+            questionsById[questionId] = question // store questions by id
+            questionsRequired[questionId] = requiredQuestion // setup required questions
+            questionOrder.add(questionId) // setup question order
 
             // setup question logic
             if (question.has("display_if")) { // skip item if it has no display_if item
                 Log.v("debugging json content", " $question")
                 displayLogic = question.optJSONObject("display_if")
                 if (displayLogic != null) { // skip if display logic exists but is null
-                    QuestionSkipLogic[questionId] = displayLogic
+                    questionSkipLogic[questionId] = displayLogic
                 }
             }
         }
 
         // attribute init
-        this.runDisplayLogic = runDisplayLogic
+        this.displayLogicEnabled = runDisplayLogic
         currentQuestion = -1 // set the current question to -1, makes getNextQuestionID less annoying.
     }
 
@@ -73,8 +73,8 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
     val currentQuestionJson: JSONObject?
         get() {
-            if (currentQuestion < QuestionOrder.size && currentQuestion >= 0)
-                return Questions[QuestionOrder[currentQuestion]]
+            if (currentQuestion < questionOrder.size && currentQuestion >= 0)
+                return questionsById[questionOrder[currentQuestion]]
             return null
         }
 
@@ -82,16 +82,16 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     /** @return the QuestionData object for the current question, null otherwise. */
     val currentQuestionData: QuestionData?
         get() {
-            if (currentQuestion < QuestionOrder.size)
-                return QuestionAnswer[QuestionOrder[currentQuestion]]
+            if (currentQuestion < questionOrder.size)
+                return questionAnswers[questionOrder[currentQuestion]]
             return null
         }
 
     /** @return the question id string for the current question, null otherwise. */
     val currentQuestionRequired: Boolean?
         get() {
-            if (currentQuestion < QuestionOrder.size && currentQuestion >= 0)
-                return QuestionRequired[QuestionOrder[currentQuestion]]
+            if (currentQuestion < questionOrder.size && currentQuestion >= 0)
+                return questionsRequired[questionOrder[currentQuestion]]
             return null
         }
 
@@ -107,34 +107,34 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         // if it is the first question it should invariably display.
         if (currentQuestion == 0) {
             // Log.i("json logic", "skipping logic and displaying first question");
-            if (QuestionOrder.size == 0)
+            if (questionOrder.size == 0)
                 return null
             else
-                return Questions[QuestionOrder[0]]
+                return questionsById[questionOrder[0]]
         }
 
         // if we would overflow the list (>= size) we are done, return null.
         // Log.w("json logic", "overflowed...");
-        if (currentQuestion >= QuestionOrder.size)
+        if (currentQuestion >= questionOrder.size)
             return null
 
         // if display logic has been disabled we skip logic processing and return the next question
-        if (!runDisplayLogic) {
+        if (!displayLogicEnabled) {
             // Log.d("json logic", "runDisplayLogic set to true! doing all questions!");
-            return Questions[QuestionOrder[currentQuestion]]
+            return questionsById[questionOrder[currentQuestion]]
         }
 
-        val questionId = QuestionOrder[currentQuestion]
+        val questionId = questionOrder[currentQuestion]
         // Log.v("json logic", "starting question " + QuestionOrder.indexOf(questionId) + " (" + questionId + "))");
         // if questionId does not have skip logic we display it.
-        if (!QuestionSkipLogic.containsKey(questionId)) {
+        if (!questionSkipLogic.containsKey(questionId)) {
             // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.");
-            return Questions[questionId]
+            return questionsById[questionId]
         }
 
         if (shouldQuestionDisplay(questionId)) {
             // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.");
-            return Questions[questionId]
+            return questionsById[questionId]
         }
 
         // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
@@ -164,7 +164,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     private fun shouldQuestionDisplay(questionId: String): Boolean {
         try {
             // If the survey display logic object is null or empty, display
-            val question = QuestionSkipLogic[questionId]
+            val question = questionSkipLogic[questionId]
             return if (question == null || question.length() == 0)
                 true
             else
@@ -240,10 +240,10 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     private fun runNumericLogic(comparator: String, parameters: JSONArray): Boolean {
         // Log.d("json logic", "inside numeric logic: " + comparator + ", " + parameters.toString());
         val targetQuestionId = parameters.getString(0)
-        if (!QuestionAnswer.containsKey(targetQuestionId)) {
+        if (!questionAnswers.containsKey(targetQuestionId)) {
             return false
         } // false if DNE
-        val userAnswer = QuestionAnswer[targetQuestionId]!!.answerDouble
+        val userAnswer = questionAnswers[targetQuestionId]!!.answerDouble
         val surveyValue = parameters.getDouble(1)
 
 //		Log.d("logic...", "evaluating useranswer " + userAnswer + comparator + surveyValue);
@@ -270,16 +270,16 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
     fun setAnswer(questionData: QuestionData) {
         questionData.coerceAnswer() // ideally we don't need to run this safety function, but it's here just in case.
-        QuestionAnswer[questionData.id] = questionData
+        questionAnswers[questionData.id] = questionData
     }
 
     /** @return a list of QuestionData objects for serialization to the answers file. */
     val questionsForSerialization: List<QuestionData>
         get() {
-            val answers: MutableList<QuestionData> = ArrayList(QuestionOrder.size)
-            for (questionId in QuestionOrder)
-                if (QuestionAnswer.containsKey(questionId) && QuestionAnswer[questionId] != null)
-                    answers.add(QuestionAnswer[questionId]!!)
+            val answers: MutableList<QuestionData> = ArrayList(questionOrder.size)
+            for (questionId in questionOrder)
+                if (questionAnswers.containsKey(questionId) && questionAnswers[questionId] != null)
+                    answers.add(questionAnswers[questionId]!!)
             return answers
         }
 
@@ -305,17 +305,17 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
      * paging back, C) don't have answers. */
     val unansweredQuestions: ArrayList<String>
         get() {
-            val unanswered = ArrayList<String>(QuestionOrder.size)
+            val unanswered = ArrayList<String>(questionOrder.size)
             var questionDisplayNumber = 0
             var questionWouldDisplay: Boolean
 
             // Guarantee: the questions in QuestionAnswer will consist of all _displayed_ questions.
-            for (questionId in QuestionOrder) {
+            for (questionId in questionOrder) {
 
                 // QuestionData objects are put in the QuestionAnswers dictionary if they are ever
                 // displayed. (The user must also proceed to the next question, but that has no effect.)
                 // No QuestionAnswer object means question did not display, which means we can skip it.
-                if (QuestionAnswer.containsKey(questionId)) {
+                if (questionAnswers.containsKey(questionId)) {
                     // A user may have viewed questions along a Display Logic Path A, but failed to answer
                     // certain questions, then reversed and changed some answers. If so they may have created
                     // a logic path B that no longer displays a previously answered question.
@@ -325,7 +325,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                     // The only way to catch that case is to run shouldQuestionDisplay on every QuestionData
                     // object in QuestionAnswers.
                     // There is one exception: INFO_TEXT_BOX questions are always ignored.
-                    val questionData: QuestionData? = QuestionAnswer[questionId]
+                    val questionData: QuestionData? = questionAnswers[questionId]
 
                     // INFO_TEXT_BOX - skip it.
                     if (questionData!!.type == QuestionType.Type.INFO_TEXT_BOX)
@@ -346,7 +346,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                     if (questionWouldDisplay) {
                         questionDisplayNumber++
                         // need to get the question json and then get the question text
-                        val questionJson: JSONObject? = Questions[questionId]
+                        val questionJson: JSONObject? = questionsById[questionId]
                         val questionText = questionJson!!.optString("question_text") ?: ""
                         unanswered.add("Question " + questionDisplayNumber + ": " + questionText)
                     }
