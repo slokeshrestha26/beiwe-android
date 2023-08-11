@@ -43,11 +43,14 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         this.options = options
     }
 
-    fun coerceAnswer(){
+    // numeric index answers (radio buttons, sliders) and numeric open response have their values
+    // converted to doubles and stored in answerDouble - this is for the purpose of allowing
+    // comparisons to those numeric values in question logic.
+    fun coerceAnswer() {
         when (this.type) {
             QuestionType.Type.FREE_RESPONSE -> this.setAnswerFreeResponse()
             QuestionType.Type.SLIDER -> this.setAnswerSlider()
-            QuestionType.Type.RADIO_BUTTON -> answer_no_op()
+            QuestionType.Type.RADIO_BUTTON -> setAnswerRadioButton()
             QuestionType.Type.INFO_TEXT_BOX -> answer_no_op()
             QuestionType.Type.CHECKBOX -> this.answer_no_op()
             QuestionType.Type.DATE -> this.setAnswerDate()
@@ -61,11 +64,11 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         return this.answerString != null && this.answerString != ""
     }
 
-    // some answers are fully contained in their answerString.
+    // some answers are fully contained in their answerString, have no possible logic
     fun answer_no_op() {}
 
     /* Numeric free response questions will get converted to floats in addition to their string
-     * representation. */
+     * representation. This is used in survey logic.*/
     fun setAnswerFreeResponse() {
         if (this.answerString != null) {
             try {
@@ -74,23 +77,38 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
                 this.answerDouble = null
             }
         } else
-            // make sure to set double to null if string is null
+        // make sure to set double to null if string is null
             this.answerDouble = null
     }
 
     /** Sliders comes in as integers, convert to float, convert to string... why float?
      * make sure to clear out when null. anyway */
     fun setAnswerSlider() {
+        // setup doubles for numerical comparisons
         if (this.answerInteger != null)
             this.answerDouble = java.lang.Double.valueOf(this.answerInteger!!.toDouble())
         else
             this.answerDouble = null
 
-        // and then this next line depends on the double being set... why?
+        // and here we just set the answer string for... having an answer purposes.
         if (this.answerDouble != null)
             this.answerString = "" + this.answerInteger
         else
             this.answerString = null
+    }
+
+    /** Radio buttons are converted to doubles for use in logic. */
+    fun setAnswerRadioButton() {
+        // safe convert the int answer (WHICH IS THE INTEGER 0-INDEXED LOCATION OF THE SELECTED
+        // ANSWER) to double for use in comparison logic.
+        if (this.answerString != null) {
+            try {
+                this.answerDouble = this.answerInteger!!.toDouble()
+            } catch (e: NumberFormatException) {
+                this.answerDouble = null
+            }
+        } else // and clear out if null
+            this.answerDouble = null
     }
 
     /** Take the time numbers and convert to strings */

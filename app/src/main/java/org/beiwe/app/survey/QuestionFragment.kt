@@ -255,7 +255,7 @@ class QuestionFragment : Fragment() {
             answers = replacementAnswers
         }
 
-        // Loop through the answer strings, make each one a radio button option, set text
+        // Loop through the answer strings, make each one a radio button option, set text.
         for (i in answers.indices) {
             val radioButton = inflater.inflate(R.layout.survey_radio_button, null) as RadioButton
             if (answers.get(i) != null)
@@ -579,6 +579,7 @@ class QuestionFragment : Fragment() {
                 questionData!!.answerInteger = SurveyAnswersRecorder.indexOfSelectedRadioButton(the_questionLayout)
                 questionData!!.answerString = SurveyAnswersRecorder.answerFromRadioButtonQuestion(the_questionLayout)
                 (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
+                questionData!!.coerceAnswer()
             } else {
                 /* It should not be possible to un-check a radio button, but if that happens, record
                  * the answer as an empty string. */

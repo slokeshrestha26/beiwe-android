@@ -64,9 +64,9 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
     fun pprint() {
         if (currentQuestionJson == null) {
-            printe("can't print skiplogic current question, zeroth question.")
+            // printe("can't print skiplogic current question, zeroth question.")
         } else {
-            printe("current question json logic:")
+            // printe("current question json logic:")
             printe(currentQuestionJson)
         }
     }
@@ -106,41 +106,45 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
         // if it is the first question it should invariably display.
         if (currentQuestion == 0) {
-            // Log.i("json logic", "skipping logic and displaying first question");
-            if (questionOrder.size == 0)
+            if (questionOrder.size == 0) {
+                // printe("json logic", "skipping logic - there are no questions")
                 return null
-            else
+            } else {
+                val temp_questionId = questionOrder[currentQuestion]
+                // printe("json logic", "skipping logic for " + questionOrder.indexOf(temp_questionId) + " (" + temp_questionId + ") because we need to display first question")
                 return questionsById[questionOrder[0]]
+            }
         }
 
         // if we would overflow the list (>= size) we are done, return null.
-        // Log.w("json logic", "overflowed...");
-        if (currentQuestion >= questionOrder.size)
+        if (currentQuestion >= questionOrder.size) {
+            // printe("json logic", "overflowed, e.g. this should be the submit page?")
             return null
+        }
 
         // if display logic has been disabled we skip logic processing and return the next question
         if (!displayLogicEnabled) {
-            // Log.d("json logic", "runDisplayLogic set to true! doing all questions!");
+            // printe("json logic", "runDisplayLogic set to true, conditional display logic disabled")
             return questionsById[questionOrder[currentQuestion]]
         }
 
         val questionId = questionOrder[currentQuestion]
-        // Log.v("json logic", "starting question " + QuestionOrder.indexOf(questionId) + " (" + questionId + "))");
+        // printe("json logic", "starting question " + questionOrder.indexOf(questionId) + " (" + questionId + "))")
         // if questionId does not have skip logic we display it.
         if (!questionSkipLogic.containsKey(questionId)) {
-            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.");
+            // printe("json logic", "Question " + questionOrder.indexOf(questionId) + " (" + questionId + ") has no skip logic, done.")
             return questionsById[questionId]
-        }
+        } else
+            // printe("json logic", "Question " + questionOrder.indexOf(questionId) + " (" + questionId + ") has skip logic, evaluating...")
 
         if (shouldQuestionDisplay(questionId)) {
-            // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.");
+            // printe("json logic", "Question " + questionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as true, done.")
             return questionsById[questionId]
         }
 
-        // Log.d("json logic", "Question " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") did not evaluate as true, proceeding to next question...");
-        /* If it didn't meet any of the above conditions (and didn't display a question), call
-        this function recursively, and keep doing that until you reach a question that should
-        display. */
+        printe("json logic", "Question " + questionOrder.indexOf(questionId) + " (" + questionId + ") evaluated as should not display, proceeding to next question...")
+        /* If it didn't meet any of the above conditions (and didn't display a question), call this
+         * function recursively, keep doing that until you reach a question that should display. */
         return getQuestion(goForward)
     }
 
@@ -165,16 +169,21 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         try {
             // If the survey display logic object is null or empty, display
             val question = questionSkipLogic[questionId]
-            return if (question == null || question.length() == 0)
+            return if (question == null || question.length() == 0) {
+                // printe("should display", "question " + questionId + " has no logic, displaying question.")
                 true
-            else
-                parseLogicTree(questionId, question)
+            }
+            else {
+                val display_if_true = parseLogicTree(questionId, question)
+                // printe("should display", "question " + questionId + " evaluated as " + if (display_if_true) "display-true" else "display-false")
+                return display_if_true
+            }
         } catch (e: JSONException) {
             Log.w("json exception while doing a logic parse", "=============================================================================================================================================")
             e.printStackTrace()
             writeCrashlog(e, appContext)
+            return true
         }
-        return true
     }
 
     @Throws(JSONException::class)
@@ -189,7 +198,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         // We'll get the NOT out of the way first.
         if (comparator == "not") {
             // we need to pass in the Json _Object_ of the next layer in
-            // Log.d("json logic", "evaluating as NOT (invert)");
+            // printe("parseLogicTree", "evaluating as NOT (invert)")
             return !parseLogicTree(questionId, logic.getJSONObject(comparator))
         }
         if (COMPARATORS.contains(comparator)) {
@@ -201,18 +210,18 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
             // get array of logic operations
             val manyLogics = logic.getJSONArray(comparator)
             val results: MutableList<Boolean> = ArrayList(manyLogics.length())
-            // Log.v("json logic", "evaluating as boolean, " + manyLogics.length() + " things to process...");
+            // printe("parseLogicTree", "evaluating as boolean, " + manyLogics.length() + " things to process...")
 
             // iterate over array, get the booleans into a list
             for (i in 0 until manyLogics.length()) { // jsonArrays are not iterable...
                 results.add(parseLogicTree(questionId, manyLogics.getJSONObject(i)))
             } // results now contains the boolean evaluation of all nested logics.
 
-            // Log.v("json logic", "returning inside of " + QuestionOrder.indexOf(questionId) + " (" + questionId + ") after processing logic for boolean.");
+            // printe("parseLogicTree", "returning inside of " + questionOrder.indexOf(questionId) + " (" + questionId + ") after processing logic for boolean.")
 
             // And. if anything is false, return false. If those all pass, return true.
             if (comparator == "and") {
-                Log.d("logic meanderings", "$questionId AND bools: $results")
+                // printe("parseLogicTree", "$questionId AND bools: $results")
                 for (bool in results)
                     if (!bool)
                         return false
@@ -220,7 +229,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
             }
             // Or. if anything is true, return true. If those all pass, return false.
             if (comparator == "or") {
-                Log.d("logic meanderings", "$questionId OR bools: $results")
+                // printe("parseLogicTree", "$questionId OR bools: $results")
                 for (bool in results)
                     if (bool)
                         return true
@@ -230,7 +239,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         throw NullPointerException("received invalid comparator: $comparator")
     }
 
-    /** Processes the logical operation implemented of a comparator.
+    /** Processes the logical operation of a comparator.
      * If there has been no answer for the question a logic operation references this function returns false.
      * @param comparator a string that is in the COMPARATORS constant.
      * @param parameters json array 2 elements in length.  The first element is a target question ID to pull an answer from, the second is the survey's value to compare to.
@@ -238,16 +247,20 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
      * @throws JSONException */
     @Throws(JSONException::class)
     private fun runNumericLogic(comparator: String, parameters: JSONArray): Boolean {
-        // Log.d("json logic", "inside numeric logic: " + comparator + ", " + parameters.toString());
+        // printe("numeric logic", "compare: " + comparator + " to " + parameters.toString())
         val targetQuestionId = parameters.getString(0)
+
         if (!questionAnswers.containsKey(targetQuestionId)) {
+            // printe("numeric logic", "question " + targetQuestionId + " has no answer, must evaluate as false.")
             return false
-        } // false if DNE
+        }
+        // questionAnswers[targetQuestionId]!!.pprint()
+
+        // false if DNE
         val userAnswer = questionAnswers[targetQuestionId]!!.answerDouble
         val surveyValue = parameters.getDouble(1)
 
-//		Log.d("logic...", "evaluating useranswer " + userAnswer + comparator + surveyValue);
-
+		printe("numeric", "evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
         // If we encounter an unanswered question, that evaluates as false. (defined in the spec.)
         if (userAnswer == null)
             return false
