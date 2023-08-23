@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import org.beiwe.app.storage.PersistentData
+import org.json.JSONObject
 import java.util.*
 
 object PermissionHandler {
@@ -71,6 +72,9 @@ object PermissionHandler {
 	 *  WriteCallLog - Calls
 	 *
 	 *  We will check for microphone recording as a special condition on the audio recording screen. */
+
+    /* Simple permission checks */
+
     @JvmStatic
     fun checkAccessCoarseLocation(context: Context): Boolean {
         return context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED
@@ -130,9 +134,11 @@ object PermissionHandler {
         return context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PERMISSION_GRANTED
     }
 
+    /* Complex permission checks */
+
     @JvmStatic
     fun checkGpsPermissions(context: Context): Boolean {
-        return checkAccessFineLocation(context)
+        return checkAccessFineLocation(context) // we don't want coarse, fine means GPS.
     }
 
     fun checkCallsPermissions(context: Context): Boolean {
@@ -220,5 +226,38 @@ object PermissionHandler {
             }
         }
         return null
+    }
+
+    @JvmStatic
+    fun getPermissionsJson(context: Context): String {
+        val permissions = JSONObject()
+        // the normal permissions
+        permissions.put("access_coarse_location", checkAccessCoarseLocation(context))
+        permissions.put("access_fine_location", checkAccessFineLocation(context))
+        permissions.put("access_network_state", checkAccessNetworkState(context))
+        permissions.put("access_wifi_state", checkAccessWifiState(context))
+        permissions.put("bluetooth", checkAccessBluetooth(context))
+        permissions.put("bluetooth_admin", checkAccessBluetoothAdmin(context))
+        permissions.put("call_phone", checkAccessCallPhone(context))
+        permissions.put("read_call_log", checkAccessReadCallLog(context))
+        permissions.put("read_contacts", checkAccessReadContacts(context))
+        // read_phone_state was filled by copilot with "receive_boot_completed" - I'm not sure why.
+        permissions.put("read_phone_state", checkAccessReadPhoneState(context))
+        permissions.put("read_sms", checkAccessReadSms(context))
+        permissions.put("receive_mms", checkAccessReceiveMms(context))
+        permissions.put("receive_sms", checkAccessReceiveSms(context))
+        permissions.put("record_audio", checkAccessRecordAudio(context))
+
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        permissions.put("is_ignoring_battery_optimizations", pm.isIgnoringBatteryOptimizations(context.packageName))
+        permissions.put("is_power_save_mode", pm.isPowerSaveMode)
+        permissions.put("is_sustained_performance_mode_supported", pm.isSustainedPerformanceModeSupported)
+        permissions.put("is_device_idle_mode", pm.isDeviceIdleMode)
+        permissions.put("location_power_save_mode", pm.locationPowerSaveMode)
+        permissions.put("current_thermal_status", pm.currentThermalStatus)
+        permissions.put("is_interactive", pm.isInteractive)
+        permissions.put("battery_discharge_prediction", pm.batteryDischargePrediction)
+        permissions.put("is_battery_discharge_prediction_personalized", pm.isBatteryDischargePredictionPersonalized)
+        return permissions.toString()
     }
 }

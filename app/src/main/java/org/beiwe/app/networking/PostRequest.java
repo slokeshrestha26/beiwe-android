@@ -7,6 +7,7 @@ import android.util.Log;
 import org.beiwe.app.BuildConfig;
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.DeviceInfo;
+import org.beiwe.app.PermissionHandler;
 import org.beiwe.app.R;
 import org.beiwe.app.UtilsKt;
 import org.beiwe.app.storage.PersistentData;
@@ -459,7 +460,9 @@ public class PostRequest {
 			+ makeParameter("device_id", deviceId)
 			+ makeParameter("version_code", String.valueOf(BuildConfig.VERSION_CODE))
 			+ makeParameter("version_name", BuildConfig.VERSION_NAME)
-			+ makeParameter("os_version", android.os.Build.VERSION.RELEASE);
+			+ makeParameter("os_version", android.os.Build.VERSION.RELEASE)
+			+ makeParameter("device_status_report", PermissionHandler.getPermissionsJson(appContext))
+			+ makeParameter("timezone", DeviceInfo.timeZoneInfo());
 	}
 	
 	public static String addWebsitePrefix (String URL) {
