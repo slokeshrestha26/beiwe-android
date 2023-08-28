@@ -252,11 +252,11 @@ object PermissionHandler {
         permissions.put("permission_read_call_log", checkAccessReadCallLog(context))
         permissions.put("permission_read_contacts", checkAccessReadContacts(context))
         // read_phone_state was filled by copilot with "receive_boot_completed" - I'm not sure why.
-        permissions.put("permissionread_phone_state", checkAccessReadPhoneState(context))
-        permissions.put("permissionread_sms", checkAccessReadSms(context))
-        permissions.put("permissionreceive_mms", checkAccessReceiveMms(context))
-        permissions.put("permissionreceive_sms", checkAccessReceiveSms(context))
-        permissions.put("permissionrecord_audio", checkAccessRecordAudio(context))
+        permissions.put("permission_read_phone_state", checkAccessReadPhoneState(context))
+        permissions.put("permission_read_sms", checkAccessReadSms(context))
+        permissions.put("permission_receive_mms", checkAccessReceiveMms(context))
+        permissions.put("permission_receive_sms", checkAccessReceiveSms(context))
+        permissions.put("permission_record_audio", checkAccessRecordAudio(context))
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         permissions.put("power_is_ignoring_battery_optimizations", pm.isIgnoringBatteryOptimizations(context.packageName))
