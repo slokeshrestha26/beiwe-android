@@ -462,7 +462,8 @@ public class PostRequest {
 			+ makeParameter("version_name", BuildConfig.VERSION_NAME)
 			+ makeParameter("os_version", android.os.Build.VERSION.RELEASE)
 			+ makeParameter("device_status_report", PermissionHandler.getPermissionsJson(appContext))
-			+ makeParameter("timezone", DeviceInfo.timeZoneInfo());
+			+ makeParameter("timezone", DeviceInfo.timeZoneInfo())
+			+ makeParameter("free_space", DeviceInfo.freeSpace());
 	}
 	
 	public static String addWebsitePrefix (String URL) {

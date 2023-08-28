@@ -1,6 +1,7 @@
 package org.beiwe.app
 
 import android.annotation.SuppressLint
+import android.app.usage.StorageStatsManager
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.os.Build
@@ -96,7 +97,12 @@ object DeviceInfo {
 
     @JvmStatic
     fun timeZoneInfo(): String {
-        val tz = TimeZone.getDefault()
-        return tz.id  // this is a string like "America/New_York"
+        return  TimeZone.getDefault().id  // this is a string like "America/New_York"
+    }
+
+    @JvmStatic
+    fun freeSpace(): String {
+        // profiled on a Pixel 6, it takes less than a millisecond.
+        return android.os.StatFs("/data").availableBytes.toString()
     }
 }
