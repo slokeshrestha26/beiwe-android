@@ -121,7 +121,11 @@ Version history:
 67: 3.4.1  I broke accelerometer. I fixed accelerometer.
 68: 3.4.2  Check active survey notifications in order to stop weird notification scrolling behavior.
 69: required and date/time questions.
-next: probably new formatting for the hardware information for gps, accel, gyro
+70: 3.5.0  fully functioning required and date/time questions, adds device info and time zone reporting
+    for use by updated server software.
+
+TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
+   This probably requires a new data stream.
 */
 
 
@@ -146,7 +150,7 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 31
-        versionCode 69       //TODO: update this Beiwe version code for new releases
+        versionCode 70       //TODO: update this Beiwe version code for new releases
         versionName '3.5.0'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
