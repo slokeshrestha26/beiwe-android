@@ -23,22 +23,25 @@ class CrashHandler(private val errorHandlerContext: Context) : Thread.UncaughtEx
         exception.printStackTrace()
         Log.w("CrashHandler Raw", "end original stacktrace")
 
-        //Write that log file
+        // Write that log file
         Sentry.getContext().recordBreadcrumb(
                 BreadcrumbBuilder().setMessage("Attempting application restart").build()
         )
         writeCrashlog(exception, errorHandlerContext)
 
-        //keep this line for debugging crashes in the crash handler (yup.)
-        //printi("inside crashlog", "does this line happen")
+        // keep this line for debugging crashes in the crash handler (yup.)
+        // printi("inside crashlog", "does this line happen")
 
-        //setup to restart service
+        // setup to restart service
         val restartServiceIntent = Intent(errorHandlerContext, MainService::class.java)
         restartServiceIntent.setPackage(errorHandlerContext.packageName)
-        val restartServicePendingIntent = PendingIntent.getService(errorHandlerContext, 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT)
+
+        val restartServicePendingIntent = PendingIntent.getService(
+                errorHandlerContext, 1, restartServiceIntent, pending_intent_flag_fix(PendingIntent.FLAG_ONE_SHOT)
+        )
         val alarmService = errorHandlerContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmService[AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + millisecondsUntilRestart] = restartServicePendingIntent
-        //exit beiwe
+        // exit beiwe
         Process.killProcess(Process.myPid())
         System.exit(10)
     }
