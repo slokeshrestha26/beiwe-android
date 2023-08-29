@@ -15,8 +15,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots package
 
       - uses: ruby/setup-ruby@v1
         with:
