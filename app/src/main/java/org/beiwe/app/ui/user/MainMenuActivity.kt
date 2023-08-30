@@ -26,9 +26,10 @@ class MainMenuActivity : SessionActivity() {
             main_menu_call_clinician.text = PersistentData.getCallClinicianButtonText()
         else
             main_menu_call_clinician.visibility = View.GONE
+    }
 
+    fun setupSurveyList() {
         val permSurveyIds = ArrayList<String>()
-
         for (surveyId in PersistentData.getSurveyIds())
             try {
                 val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
@@ -48,6 +49,13 @@ class MainMenuActivity : SessionActivity() {
             }
         }
     }
+
+    // run an task every 5 seconds to refresh the available survey list
+    override fun onResume() {
+        super.onResume()
+        setupSurveyList()
+    }
+
 
     /*#########################################################################
 	############################## Buttons ####################################
