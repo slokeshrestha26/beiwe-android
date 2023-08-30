@@ -123,6 +123,8 @@ Version history:
 69: required and date/time questions.
 70: 3.5.0  fully functioning required and date/time questions, adds device info and time zone reporting
     for use by updated server software.
+71: 3.5.1  Android 13 (sdk 33) updates, bug fix to get background location services permission check,
+    minor bug fix on main menu page to make it reload more frequently, additions to device info.
 
 TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
    This probably requires a new data stream.
@@ -150,8 +152,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 33
-        versionCode 70       //TODO: update this Beiwe version code for new releases
-        versionName '3.5.0'  //TODO: update this Beiwe version number for new releases
+        versionCode 71       //TODO: update this Beiwe version code for new releases
+        versionName '3.5.1'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
 
