@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
 import org.json.JSONObject
@@ -35,7 +36,14 @@ object PermissionHandler {
         permissionMessages[Manifest.permission.ACCESS_COARSE_LOCATION] = R.string.permission_access_coarse_location
         permissionMessages[Manifest.permission.RECEIVE_MMS] = R.string.permission_receive_mms
         permissionMessages[Manifest.permission.RECEIVE_SMS] = R.string.permission_receive_sms
-        permissionMessages[Manifest.permission.ACCESS_BACKGROUND_LOCATION] = R.string.permission_access_background_location
+
+        // access background location and post notifications are only available on newer versions of
+        // android. Check must be identical to the one in their respective check function or the app will crash.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            permissionMessages[Manifest.permission.ACCESS_BACKGROUND_LOCATION] = R.string.permission_access_background_location
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            permissionMessages[Manifest.permission.POST_NOTIFICATIONS] = R.string.permission_notifications
+
         permissionMessages = Collections.unmodifiableMap(permissionMessages)
     }
 
@@ -86,6 +94,14 @@ object PermissionHandler {
         return context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED
     }
 
+    @JvmStatic
+    fun checkAccessBackgroundLocation(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            context.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PERMISSION_GRANTED
+        else
+            return true
+    }
+
     fun checkAccessNetworkState(context: Context): Boolean {
         return context.checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) == PERMISSION_GRANTED
     }
@@ -133,6 +149,13 @@ object PermissionHandler {
 
     fun checkAccessRecordAudio(context: Context): Boolean {
         return context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PERMISSION_GRANTED
+    }
+
+    fun checkAccessNotifications(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PERMISSION_GRANTED
+        else
+            true
     }
 
     /* Complex permission checks */
@@ -190,8 +213,13 @@ object PermissionHandler {
 
     @JvmStatic
     fun getNextPermission(context: Context, includeRecording: Boolean): String? {
+        // os version check handled inside checkAccessNotifications
+        if (!checkAccessNotifications(context)) return Manifest.permission.POST_NOTIFICATIONS
+
         if (PersistentData.getGpsEnabled()) {
             if (!checkAccessFineLocation(context)) return Manifest.permission.ACCESS_FINE_LOCATION
+            // os version check handled inside checkAccessBackgroundLocation
+            if (!checkAccessBackgroundLocation(context)) return Manifest.permission.ACCESS_BACKGROUND_LOCATION
         }
         if (PersistentData.getWifiEnabled()) {
             if (!checkAccessWifiState(context)) return Manifest.permission.ACCESS_WIFI_STATE
@@ -220,14 +248,25 @@ object PermissionHandler {
         //The phone call permission is invariant, it is required for all studies in order for the
         // call clinician functionality to work
         if (!checkAccessCallPhone(context)) return Manifest.permission.CALL_PHONE
-        if (Build.VERSION.SDK_INT >= 23) {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {
-                return POWER_EXCEPTION_PERMISSION
-            }
+
+        val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {
+            return POWER_EXCEPTION_PERMISSION
         }
+
         return null
     }
+
+    // https://stackoverflow.com/questions/65479363/android-adaptive-battery-setting-detection
+    fun isAdaptiveBatteryEnabled(ctx: Context): Boolean {
+        val intValue = Settings.Global.getInt(
+                ctx.contentResolver,
+                "adaptive_battery_management_enabled",
+                -1
+        )
+        return intValue == 1
+    }
+
 
     // This function is probably sitting in the wrong file, but its so broad, and we need to have a
     // it as a json object for serialization, that there isn't really anywhere good to stick it.
@@ -242,6 +281,7 @@ object PermissionHandler {
         permissions.put("time_locale", time_locale + " " + DeviceInfo.timeZoneInfo())
 
         // the normal permissions
+        permissions.put("permission_access_background_location", checkAccessBackgroundLocation(context))
         permissions.put("permission_access_coarse_location", checkAccessCoarseLocation(context))
         permissions.put("permission_access_fine_location", checkAccessFineLocation(context))
         permissions.put("permission_access_network_state", checkAccessNetworkState(context))
@@ -249,27 +289,31 @@ object PermissionHandler {
         permissions.put("permission_bluetooth", checkAccessBluetooth(context))
         permissions.put("permission_bluetooth_admin", checkAccessBluetoothAdmin(context))
         permissions.put("permission_call_phone", checkAccessCallPhone(context))
+        permissions.put("permission_post_notifications", checkAccessNotifications(context))
         permissions.put("permission_read_call_log", checkAccessReadCallLog(context))
         permissions.put("permission_read_contacts", checkAccessReadContacts(context))
-        // read_phone_state was filled by copilot with "receive_boot_completed" - I'm not sure why.
-        permissions.put("permission_read_phone_state", checkAccessReadPhoneState(context))
+        permissions.put("permission_read_phone_state (receive_boot_completed?)", checkAccessReadPhoneState(context))
         permissions.put("permission_read_sms", checkAccessReadSms(context))
+        permissions.put("permission_receive_boot_completed", checkAccessReadPhoneState(context))
         permissions.put("permission_receive_mms", checkAccessReceiveMms(context))
         permissions.put("permission_receive_sms", checkAccessReceiveSms(context))
         permissions.put("permission_record_audio", checkAccessRecordAudio(context))
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        permissions.put("power_battery_discharge_prediction", pm.batteryDischargePrediction)
+        permissions.put("power_current_thermal_status", pm.currentThermalStatus)
+        permissions.put("power_is_adaptive_battery_management_enabled", isAdaptiveBatteryEnabled(context))
+        permissions.put("power_is_battery_discharge_prediction_personalized", pm.isBatteryDischargePredictionPersonalized)
+        permissions.put("power_is_device_idle_mode", pm.isDeviceIdleMode)
         permissions.put("power_is_ignoring_battery_optimizations", pm.isIgnoringBatteryOptimizations(context.packageName))
+        permissions.put("power_is_interactive", pm.isInteractive)
         permissions.put("power_is_power_save_mode", pm.isPowerSaveMode)
         permissions.put("power_is_sustained_performance_mode_supported", pm.isSustainedPerformanceModeSupported)
-        permissions.put("power_is_device_idle_mode", pm.isDeviceIdleMode)
         permissions.put("power_location_power_save_mode", pm.locationPowerSaveMode)
-        permissions.put("power_current_thermal_status", pm.currentThermalStatus)
-        permissions.put("power_is_interactive", pm.isInteractive)
-        permissions.put("power_battery_discharge_prediction", pm.batteryDischargePrediction)
-        permissions.put("power_is_battery_discharge_prediction_personalized", pm.isBatteryDischargePredictionPersonalized)
 
+        // storage details
         permissions.put("storage_free_space", DeviceInfo.freeSpace())
         return permissions.toString()
+
     }
 }

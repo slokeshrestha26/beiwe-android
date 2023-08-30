@@ -33,6 +33,7 @@
     <string name="permission_receive_mms">"zum Empfang von MMS-Nachrichten "</string>
     <string name="permission_receive_sms">"zum Empfang von SMS-Nachrichten "</string>
     <string name="permission_access_background_location">Standort-Zugriff erlauben: „Immer zulassen\\“</string>
+    <string name="permission_notifications">Benachrichtigungen Zulassen</string>
 
     <!-- API URLs -->
 

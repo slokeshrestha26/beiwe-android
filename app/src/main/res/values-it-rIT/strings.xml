@@ -33,6 +33,7 @@
     <string name="permission_receive_mms">a ricevere messaggi MMS</string>
     <string name="permission_receive_sms">a ricevere messaggi SMS</string>
     <string name="permission_access_background_location">ad utilizzare l’opzione: \"Consenti sempre\"</string>
+    <string name="permission_notifications">Consenti notifiche</string>
 
     <!-- API URLs -->
 

@@ -98,7 +98,7 @@ public class TextFieldKeyboard {
     	imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     	
     	editText.clearFocus();
-    	View topParentView =getTopParentView(editText);
+    	View topParentView = getTopParentView(editText);
     	topParentView.requestFocus();
     }
     
