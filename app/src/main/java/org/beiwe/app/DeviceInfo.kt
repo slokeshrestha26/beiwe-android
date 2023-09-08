@@ -30,7 +30,7 @@ object DeviceInfo {
     @SuppressLint("HardwareIds")
     fun initialize(appContext: Context) {
         androidID = Settings.Secure.getString(appContext.contentResolver, Settings.Secure.ANDROID_ID) // android ID appears to be a 64 bit string
-
+        bluetoothMAC = EncryptionEngine.hashMAC("")
         /* If the BluetoothAdapter is null, or if the BluetoothAdapter.getAddress() returns null,
 		 * record an empty string for the Bluetooth MAC Address.
 		 * The Bluetooth MAC Address is always empty in Android 8.0 and above, because the app needs
@@ -40,21 +40,21 @@ object DeviceInfo {
 		 * The Bluetooth MAC Address is also sometimes empty on Android 7 and lower. */
 
         // This will not work on all devices: http://stackoverflow.com/questions/33377982/get-bluetooth-local-mac-address-in-marshmallow
-        if (Build.VERSION.SDK_INT >= 23) {
-            var bluetoothAddress = Settings.Secure.getString(appContext.contentResolver, "bluetooth_address")
-            if (bluetoothAddress == null) {
-                bluetoothAddress = ""
-            }
-
-            bluetoothMAC = EncryptionEngine.hashMAC(bluetoothAddress)
-        } else { // Android before version 6
-            val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            if (bluetoothAdapter == null || bluetoothAdapter.address == null) {
-                bluetoothMAC = ""
-            } else {
-                bluetoothMAC = bluetoothAdapter.address
-            }
-        }
+        // if (Build.VERSION.SDK_INT >= 23) {
+        //     // var bluetoothAddress = Settings.Secure.getString(appContext.contentResolver, "bluetooth_address")
+        //     // if (bluetoothAddress == null) {
+        //     //     bluetoothAddress = ""
+        //     // }
+        //
+        //     bluetoothMAC = EncryptionEngine.hashMAC("")
+        // } else { // Android before version 6
+        //     val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        //     if (bluetoothAdapter == null || bluetoothAdapter.address == null) {
+        //         bluetoothMAC = ""
+        //     } else {
+        //         bluetoothMAC = bluetoothAdapter.address
+        //     }
+        // }
     }
 
     @JvmStatic
