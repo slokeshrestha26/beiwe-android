@@ -10,6 +10,7 @@ import android.util.Log
 import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Locale
 
 class AccelerometerListener(appContext: Context) : SensorEventListener {
     companion object {
@@ -99,9 +100,12 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
         // needs to be error log or else we get no logcat output. wut.
         // printe("accelerometer milliseconds since prior: ${javaTimeCode-prior_timecode})")
         val values = arg0.values
-        val value0 = String.format("%.16f", values[0])
-        val value1 = String.format("%.16f", values[1])
-        val value2 = String.format("%.16f", values[2])
+
+        // force values to 16 decimal places in order to avoid scientific notation, and force english locale.
+        // String.format is locale-aware, non-us locales may use commas.
+        val value0 = String.format(Locale.US,"%.16f", values[0])
+        val value1 = String.format(Locale.US,"%.16f", values[1])
+        val value2 = String.format(Locale.US,"%.16f", values[2])
 
         // if the linecount is over 10,000 then we create a new file:
         if (lineCount > 10000) {

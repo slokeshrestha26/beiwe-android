@@ -14,6 +14,7 @@ import org.beiwe.app.printe
 import org.beiwe.app.printi
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Locale
 
 /* Notes/observation on Location Services:
  * We are passing in "0" as the minimum time for location updates to be pushed to us, this results in about
@@ -71,7 +72,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
         if (running)
             return
 
-        //Instantiate a new location manager (looks like the fine and coarse available variables get confused if we use an old one.)
+        // Instantiate a new location manager (looks like the fine and coarse available variables get confused if we use an old one.)
         locationManager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Uncomment to view all location providers, prints on gps session.
@@ -80,9 +81,9 @@ class GPSListener(private val appContext: Context) : LocationListener {
         // printe("locationmanager gnssCapabilities ${locationManager.gnssCapabilities}")
         // locationManager.allProviders.forEach { printe("provider: $it") }
 
-        //If the feature exists, request locations from it. (enable if their boolean flag is true.)
+        // If the feature exists, request locations from it. (enable if their boolean flag is true.)
         if (fineExists && finePermissible && coarsePermissible) {
-            //AndroidStudio insists that both of these require the same location permissions, which seems to be correct
+            // AndroidStudio insists that both of these require the same location permissions, which seems to be correct
             // since there is only one toggle in userland anyway, yes or no to location permissions.
             // parameters: provider, minTime, minDistance, listener);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
@@ -94,7 +95,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
                     LocationManager.NETWORK_PROVIDER, 0, 0f, this)
         }
 
-        //Verbose statements on the quality of GPS data streams.
+        // Verbose statements on the quality of GPS data streams.
         val fineAvailable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         val coarseAvailable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
@@ -142,7 +143,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
     /** pushes an update to us whenever there is a location update.  */
     override fun onLocationChanged(location: Location) {
         // val javaTimeCode = System.currentTimeMillis()
-        //order: time, latitude, longitude, altitude, horizontal_accuracy\n
+        // order: time, latitude, longitude, altitude, horizontal_accuracy\n
         // printe(System.currentTimeMillis())
         // printe(location.elapsedRealtimeNanos / 1_000_000)
 
@@ -152,12 +153,14 @@ class GPSListener(private val appContext: Context) : LocationListener {
         // Latitude and longitude offset should be 0 unless GPS fuzzing is enabled
         val latitude = location.latitude + PersistentData.getLatitudeOffset()
         val longitude = (location.longitude + PersistentData.getLongitudeOffset() + 180.0) % 360 - 180.0
-        val data = (javaTimeCode.toString() + TextFileManager.DELIMITER
-                + latitude + TextFileManager.DELIMITER
-                + longitude + TextFileManager.DELIMITER
-                + location.altitude + TextFileManager.DELIMITER
-                + location.accuracy)
-        //note, altitude is notoriously inaccurate, getAccuracy only applies to latitude/longitude
+        val data = (
+                javaTimeCode.toString() + TextFileManager.DELIMITER
+                    + String.format(Locale.US, "%.16f", latitude) + TextFileManager.DELIMITER
+                    + String.format(Locale.US, "%.16f", longitude) + TextFileManager.DELIMITER
+                    + String.format(Locale.US, "%.16f", location.altitude) + TextFileManager.DELIMITER
+                    + String.format(Locale.US, "%.16f", location.accuracy)
+                )
+        // note, altitude is notoriously inaccurate, getAccuracy only applies to latitude/longitude
         TextFileManager.getGPSFile().writeEncrypted(data)
     }
 
@@ -166,7 +169,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
 	 *  not encountered any corner cases where these are relevant. */
     //  arg0 for Provider Enabled/Disabled is a string saying "network" or "gps".
     override fun onProviderDisabled(arg0: String) {} // Log.d("A location provider was disabled.", arg0); }
-    override fun onProviderEnabled(arg0: String) {} //Log.d("A location provider was enabled.", arg0); }
+    override fun onProviderEnabled(arg0: String) {} // Log.d("A location provider was enabled.", arg0); }
 
     private fun makeDebugLogStatement(message: String) {
         TextFileManager.writeDebugLogStatement(message)

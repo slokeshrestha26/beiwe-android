@@ -10,6 +10,7 @@ import android.util.Log
 import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Locale
 
 class GyroscopeListener(private val appContext: Context) : SensorEventListener {
     companion object {
@@ -92,9 +93,9 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
         // print("gyro milliseconds since prior: ${javaTimeCode-prior_timecode})")
         // prior_timecode = javaTimeCode
         val values = arg0.values
-        val value0 = String.format("%.16f", values[0])
-        val value1 = String.format("%.16f", values[1])
-        val value2 = String.format("%.16f", values[2])
+        val value0 = String.format(Locale.US, "%.16f", values[0])
+        val value1 = String.format(Locale.US, "%.16f", values[1])
+        val value2 = String.format(Locale.US, "%.16f", values[2])
         // if the linecount is over 10,000 then we create a new file:
         if (lineCount > 10000) {
             TextFileManager.getGyroFile().newFile()
