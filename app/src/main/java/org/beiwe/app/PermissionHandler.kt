@@ -44,6 +44,10 @@ object PermissionHandler {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             permissionMessages[Manifest.permission.POST_NOTIFICATIONS] = R.string.permission_notifications
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionMessages[Manifest.permission.BLUETOOTH_CONNECT] = R.string.permission_bluetooth
+            permissionMessages[Manifest.permission.BLUETOOTH_SCAN] = R.string.permission_bluetooth_admin
+        }
         permissionMessages = Collections.unmodifiableMap(permissionMessages)
     }
 
@@ -79,8 +83,12 @@ object PermissionHandler {
 	 *  ReadContacts - Calls and SMS
 	 *  ReadPhoneState - Calls
 	 *  WriteCallLog - Calls
+	 *  Bluetooth Scan and Connect - Android 12+
+	 *  PostNotifications - Android 12+ (10+?)
+	 *  Background Location - Android 12+
 	 *
-	 *  We will check for microphone recording as a special condition on the audio recording screen. */
+	 * We check for microphone recording as a special condition on the audio recording screen,
+	 *   or when background audio is enabled */
 
     /* Simple permission checks */
 
@@ -116,6 +124,16 @@ object PermissionHandler {
 
     fun checkAccessBluetoothAdmin(context: Context): Boolean {
         return context.checkSelfPermission(Manifest.permission.BLUETOOTH_ADMIN) == PERMISSION_GRANTED
+    }
+
+    fun checkAccessBluetoothConnect(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        return context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PERMISSION_GRANTED
+    }
+
+    fun checkAccessBluetoothScan(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        return context.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PERMISSION_GRANTED
     }
 
     fun checkAccessCallPhone(context: Context): Boolean {
@@ -180,9 +198,15 @@ object PermissionHandler {
 
     @JvmStatic
     fun checkBluetoothPermissions(context: Context): Boolean {
+        // android versions below 12 use permission.BLUETOOTH and permission.BLUETOOTH_ADMIN,
+        // 12+ uses permission.BLUETOOTH_CONNECT and permission.BLUETOOTH_SCAN
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return checkAccessBluetoothConnect(context) && checkAccessBluetoothScan(context)
+        }
         return checkAccessBluetooth(context) && checkAccessBluetoothAdmin(context)
     }
 
+    @JvmStatic
     fun confirmGps(context: Context): Boolean {
         return PersistentData.getGpsEnabled() && checkGpsPermissions(context)
     }
@@ -197,6 +221,7 @@ object PermissionHandler {
         return PersistentData.getTextsEnabled() && checkTextsPermissions(context)
     }
 
+    @JvmStatic
     fun confirmWifi(context: Context): Boolean {
         return PersistentData.getWifiEnabled() && checkWifiPermissions(context) && checkAccessFineLocation(context) && checkAccessCoarseLocation(context)
     }
@@ -228,8 +253,15 @@ object PermissionHandler {
             if (!checkAccessFineLocation(context)) return Manifest.permission.ACCESS_FINE_LOCATION
         }
         if (PersistentData.getBluetoothEnabled()) {
-            if (!checkAccessBluetooth(context)) return Manifest.permission.BLUETOOTH
-            if (!checkAccessBluetoothAdmin(context)) return Manifest.permission.BLUETOOTH_ADMIN
+            // android versions below 12 use permission.BLUETOOTH and permission.BLUETOOTH_ADMIN,
+            // 12+ uses permission.BLUETOOTH_CONNECT and permission.BLUETOOTH_SCAN
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!checkAccessBluetoothConnect(context)) return Manifest.permission.BLUETOOTH_CONNECT
+                if (!checkAccessBluetoothScan(context)) return Manifest.permission.BLUETOOTH_SCAN
+            } else {
+                if (!checkAccessBluetooth(context)) return Manifest.permission.BLUETOOTH
+                if (!checkAccessBluetoothAdmin(context)) return Manifest.permission.BLUETOOTH_ADMIN
+            }
         }
         if (PersistentData.getCallsEnabled() && BuildConfig.READ_SMS_AND_PHONE_CALL_STATS) {
             if (!checkAccessReadPhoneState(context)) return Manifest.permission.READ_PHONE_STATE
@@ -288,6 +320,8 @@ object PermissionHandler {
         permissions.put("permission_access_wifi_state", checkAccessWifiState(context))
         permissions.put("permission_bluetooth", checkAccessBluetooth(context))
         permissions.put("permission_bluetooth_admin", checkAccessBluetoothAdmin(context))
+        permissions.put("permission_bluetooth_connect", checkAccessBluetoothConnect(context))
+        permissions.put("permission_bluetooth_scan", checkAccessBluetoothScan(context))
         permissions.put("permission_call_phone", checkAccessCallPhone(context))
         permissions.put("permission_post_notifications", checkAccessNotifications(context))
         permissions.put("permission_read_call_log", checkAccessReadCallLog(context))

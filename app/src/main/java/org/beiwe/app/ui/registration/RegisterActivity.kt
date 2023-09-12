@@ -211,7 +211,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         @JvmStatic
         private fun tryToRegisterWithTheServer(currentActivity: Activity, url: String, newPassword: String) {
             object : HTTPUIAsync(url, currentActivity) {
-                override fun doInBackground(vararg arg0: Void): Void? {
+                override fun doInBackground(vararg arg0: Void?): Void? {
                     initialize(currentActivity.applicationContext)
                     // Always use anonymized hashing when first registering the phone.
                     parameters = PostRequest.makeParameter("new_password", newPassword) +
@@ -234,8 +234,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                         } catch (e: InterruptedException) {
                             e.printStackTrace()
                         }
-                        parameters = PostRequest.makeParameter("bluetooth_id", DeviceInfo.getBluetoothMAC()) +
-                                PostRequest.makeParameter("new_password", newPassword) +
+                        parameters = PostRequest.makeParameter("new_password", newPassword) +
                                 PostRequest.makeParameter("phone_number", (activity as RegisterActivity).phoneNumber) +
                                 PostRequest.makeParameter("device_id", getAndroidID()) +
                                 PostRequest.makeParameter("device_os", "Android") +
@@ -250,7 +249,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                     return null
                 }
 
-                override fun onPostExecute(arg: Void) {
+                override fun onPostExecute(arg: Void?) {
                     super.onPostExecute(arg)
                     if (responseCode == 200) {
                         PersistentData.setPassword(newPassword)

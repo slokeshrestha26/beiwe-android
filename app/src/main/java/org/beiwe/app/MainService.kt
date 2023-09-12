@@ -25,6 +25,7 @@ import org.beiwe.app.PermissionHandler.checkWifiPermissions
 import org.beiwe.app.PermissionHandler.confirmBluetooth
 import org.beiwe.app.PermissionHandler.confirmCalls
 import org.beiwe.app.PermissionHandler.confirmTexts
+import org.beiwe.app.PermissionHandler.permissionMessages
 import org.beiwe.app.listeners.*
 import org.beiwe.app.networking.PostRequest
 import org.beiwe.app.networking.SurveyDownloader
@@ -55,7 +56,7 @@ const val FOREGROUND_SERVICE_NOTIFICATION_TIMER = 1000L * 60 * 60 * 6
 
 const val BLLUETOOTH_MESSAGE_1 = "bluetooth Failure, device should not have gotten to this line of code"
 const val BLLUETOOTH_MESSAGE_2 = "Device does not support bluetooth LE, bluetooth features disabled."
-const val FCM_ERROR_MESSAGE  = "Unable to get FCM token, will not be able to receive push notifications."
+const val FCM_ERROR_MESSAGE = "Unable to get FCM token, will not be able to receive push notifications."
 
 
 class MainService : Service() {
@@ -83,7 +84,7 @@ class MainService : Service() {
 
     /** onCreate is essentially the constructor for the service, initialize variables here.  */
     override fun onCreate() {
-        localHandle = this //yes yes, gross, I know. must instantiate before registerTimers()
+        localHandle = this // yes yes, gross, I know. must instantiate before registerTimers()
 
         try {
             val sentryDsn = BuildConfig.SENTRY_DSN
@@ -124,7 +125,7 @@ class MainService : Service() {
     }
 
     fun doSetup() {
-        //Accelerometer, gyro, power state, and wifi don't need permissions or they are checked in
+        // Accelerometer, gyro, power state, and wifi don't need permissions or they are checked in
         // the broadcastreceiver logic
         startPowerStateListener()
         gpsListener = GPSListener(applicationContext)
@@ -135,7 +136,7 @@ class MainService : Service() {
         if (PersistentData.getGyroscopeEnabled())
             gyroscopeListener = GyroscopeListener(applicationContext)
 
-        //Bluetooth, wifi, gps, calls, and texts need permissions
+        // Bluetooth, wifi, gps, calls, and texts need permissions
         if (confirmBluetooth(applicationContext))
             startBluetooth()
 
@@ -150,9 +151,9 @@ class MainService : Service() {
         else if (PersistentData.getCallsEnabled())
             sendBroadcast(Timer.checkForCallsEnabledIntent)
 
-        //Only do the following if the device is registered
+        // Only do the following if the device is registered
         if (PersistentData.getIsRegistered()) {
-            DeviceInfo.initialize(applicationContext) //if at registration this has already been initialized. (we don't care.)
+            DeviceInfo.initialize(applicationContext) // if at registration this has already been initialized. (we don't care.)
             startTimers()
         }
     }
@@ -343,20 +344,24 @@ class MainService : Service() {
              * most-recent-timer state. The Bluetooth-on action sets the corresponding Bluetooth-off
              * timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
             if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_on)) {
-                if (!PersistentData.getBluetoothEnabled())
-                        return
-                    if (checkBluetoothPermissions(applicationContext)) {
-                        if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
-                    } else {
-                        TextFileManager.writeDebugLogStatement("user has not provided permission for Bluetooth.")
-                    }
-                    timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
+                printe("Bluetooth on timer triggered")
+                if (!PersistentData.getBluetoothEnabled())  // return, don't set another alarm
                     return
+
+                if (checkBluetoothPermissions(applicationContext)) {
+                    if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
+                } else {
+                    TextFileManager.writeDebugLogStatement("user has not provided permission for Bluetooth.")
+                }
+                timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
+                return
             }
 
             if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_off)) {
-                if (checkBluetoothPermissions(applicationContext) && bluetoothListener != null)
+                printe("Bluetooth off timer triggered")
+                if (checkBluetoothPermissions(applicationContext) && bluetoothListener != null) {
                     bluetoothListener!!.disableBLEScan()
+                }
                 timer!!.setupExactSingleAbsoluteTimeAlarm(
                         PersistentData.getBluetoothTotalDuration(),
                         PersistentData.getBluetoothGlobalOffset(),
@@ -368,7 +373,7 @@ class MainService : Service() {
             // I don't know if we pull this one out
             // Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 
             if (broadcastAction == applicationContext.getString(R.string.signout_intent)) {
-                //FIXME: does this need to run on the main thread in do_signout_check?
+                // FIXME: does this need to run on the main thread in do_signout_check?
                 PersistentData.logout()
                 val loginPage = Intent(applicationContext, LoginActivity::class.java) // yup that is still java
                 loginPage.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -398,7 +403,7 @@ class MainService : Service() {
             // checks if the action is the id of a survey (expensive), if so pop up the notification
             // for that survey, schedule the next alarm.
             if (PersistentData.getSurveyIds().contains(broadcastAction)) {
-				// Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
+                // Log.i("MAIN SERVICE", "new notification: " + broadcastAction);
                 displaySurveyNotification(applicationContext, broadcastAction!!)
                 SurveyScheduler.scheduleSurvey(broadcastAction)
                 return
@@ -443,7 +448,7 @@ class MainService : Service() {
             TextFileManager.writeDebugLogStatement(
                     "Received Broadcast: " + Timer.intent_map[identifier_string]!!.toString())
 
-        // printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
+            // printv("'$identifier_string - trigger - ${System.currentTimeMillis() - t1}")
         } else {
             // printi("'$identifier_string' - not yet time to trigger")
             // printv("'$identifier_string - not trigger - ${System.currentTimeMillis() - t1}")
@@ -464,7 +469,7 @@ class MainService : Service() {
             identifier_string: String,
             intent_off_string: String,
             on_action: () -> Unit,
-            off_action: () -> Unit
+            off_action: () -> Unit,
     ) {
         // val t1 = System.currentTimeMillis()
         if (is_running && now <= should_turn_off_at) {
@@ -534,7 +539,7 @@ class MainService : Service() {
     }
 
     fun accelerometer_logic(now: Long) {
-        // accelerometer may not exist, or be disabled for the study
+        // accelerometer may not exist, or be disabled for the study, but it does not require permissions.
         if (!PersistentData.getAccelerometerEnabled() || !accelerometerListener!!.exists)
             return
 
@@ -557,7 +562,7 @@ class MainService : Service() {
     }
 
     fun gyro_logic(now: Long) {
-        // gyro may not exist, or be disabled for the study
+        // gyro may not exist, or be disabled for the study, but it does not require permissions.
         if (!PersistentData.getGyroscopeEnabled() || !gyroscopeListener!!.exists)
             return
 
@@ -580,8 +585,9 @@ class MainService : Service() {
     }
 
     fun gps_logic(now: Long) {
-        // GPS (location service) always _exists to a degree_, but may not be enabled on a study
-        if (!PersistentData.getGpsEnabled())
+        // GPS (location service) always _exists to a degree_, checked inside the gpsListener,
+        //  but may not be enabled on a study.  GPS requires permissions.
+        if (!PermissionHandler.confirmGps(applicationContext))
             return
 
         // assemble all the variables we need for on-off with duration
@@ -603,10 +609,8 @@ class MainService : Service() {
     }
 
     fun ambient_audio_logic(now: Long) {
-        //  there is a Lot of safety around enabling/disabling, and it looks like permissions might
-        //  not be implemented at all but it .. works??
-        //FIXME: permissions don't seem to be implemented for microphone access?
-        if (!PersistentData.getAmbientAudioEnabled())
+        // check permissions and enablement
+        if (!PermissionHandler.confirmAmbientAudioCollection(applicationContext))
             return
 
         val on_string = getString(R.string.turn_ambient_audio_on)
@@ -614,6 +618,7 @@ class MainService : Service() {
         val most_recent_on = PersistentData.getMostRecentAlarmTime(on_string)
         val should_turn_off_at = most_recent_on + PersistentData.getAmbientAudioOnDuration()
         val should_turn_on_again_at = should_turn_off_at + PersistentData.getAmbientAudioOffDuration()
+
         // ambiant audio needs the app context at runtime (we write very consistent code)
         val ambient_audio_on = {
             AmbientAudioListener.startRecording(applicationContext)
@@ -632,12 +637,9 @@ class MainService : Service() {
 
     fun do_wifi_logic_check(now: Long) {
         // wifi has permissions and may be disabled on the study
-        if (!PersistentData.getWifiEnabled())
+        if (!PermissionHandler.confirmWifi(applicationContext))
             return
-        if (!checkWifiPermissions(applicationContext)) {
-            TextFileManager.writeDebugLogStatement("user has not provided permission for Wifi.")
-            return
-        }
+
         val event_string = getString(R.string.run_wifi_log)
         val event_frequency = PersistentData.getWifiLogFrequency()
         val wifi_do_action = {  // wifi will need some attention to convert to kotlin...
@@ -709,7 +711,7 @@ class MainService : Service() {
                 // counter++
             }
 
-            //TODO: fix this naming mismatch.
+            // TODO: fix this naming mismatch.
             // Never call this:
             //   timer!!.cancelAlarm(Intent(surveyId))  // BAD!
             // setMostRecentSurveyAlarmTime is called in Timer.setupSurveyAlarm (when the alarm
@@ -745,7 +747,7 @@ class MainService : Service() {
 
     /** The BackgroundService is meant to be all the time, so we return START_STICKY  */
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        //Log.d("BackgroundService onStartCommand", "started with flag " + flags );
+        // Log.d("BackgroundService onStartCommand", "started with flag " + flags );
         TextFileManager.writeDebugLogStatement(
                 System.currentTimeMillis().toString() + " started with flag " + flags)
         val now = System.currentTimeMillis()
@@ -781,31 +783,31 @@ class MainService : Service() {
         return START_STICKY
         // in testing out this restarting behavior for the service it is entirely unclear if changing
         // this return will have any observable effect despite the documentation's claim that it does.
-        //return START_REDELIVER_INTENT;
+        // return START_REDELIVER_INTENT;
     }
 
     // the rest of these are ~identical
     override fun onTaskRemoved(rootIntent: Intent) {
-        //Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
+        // Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
         TextFileManager.writeDebugLogStatement("onTaskRemoved called with intent: $rootIntent")
         restartService()
     }
 
     override fun onUnbind(intent: Intent): Boolean {
-        //Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
+        // Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
         TextFileManager.writeDebugLogStatement("onUnbind called with intent: $intent")
         restartService()
         return super.onUnbind(intent)
     }
 
-    override fun onDestroy() { //Log.w("BackgroundService", "BackgroundService was destroyed.");
-        //note: this does not run when the service is killed in a task manager, OR when the stopService() function is called from debugActivity.
+    override fun onDestroy() { // Log.w("BackgroundService", "BackgroundService was destroyed.");
+        // note: this does not run when the service is killed in a task manager, OR when the stopService() function is called from debugActivity.
         TextFileManager.writeDebugLogStatement("BackgroundService was destroyed.")
         restartService()
         super.onDestroy()
     }
 
-    override fun onLowMemory() { //Log.w("BackroundService onLowMemory", "Low memory conditions encountered");
+    override fun onLowMemory() { // Log.w("BackroundService onLowMemory", "Low memory conditions encountered");
         TextFileManager.writeDebugLogStatement("onLowMemory called.")
         restartService()
     }
@@ -856,7 +858,7 @@ class MainService : Service() {
 
         private var foregroundServiceLastStarted = 0L
 
-        //FIXME: in order to make this non-static we probably need to port PostReqeuest to kotlin
+        // FIXME: in order to make this non-static we probably need to port PostReqeuest to kotlin
         /** create timers that will trigger events throughout the program, and
          * register the custom Intents with the controlMessageReceiver.  */
         @JvmStatic

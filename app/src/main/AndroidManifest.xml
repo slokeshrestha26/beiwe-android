@@ -47,11 +47,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
 
-    <!--<uses-permission android:name="android.permission.BLUETOOTH" />-->
-    <!--<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />-->
     <!-- Needed only if your app looks for Bluetooth devices. -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <!-- Needed only if your app makes the device discoverable to Bluetooth devices. -->
+    <!-- Needed only if your app communicates with already-paired Bluetooth devices. - it looks like this is more broad, some call we make requires it. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Needed only if your app makes the device discoverable to Bluetooth devices.  This might be incorrect... -->
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
 
