@@ -6,8 +6,7 @@ def keystorePropertiesFile = rootProject.file("private/keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
-/*
-Ensure the version number is well documented
+/* Ensure the version number is well documented
 
 Don't forget to update the version in the android manifest, only the version string is visible to the user.
 Version history:

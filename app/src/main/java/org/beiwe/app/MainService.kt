@@ -342,28 +342,28 @@ class MainService : Service() {
              * absolute-point-in-time as a trigger, and therefore we don't need to store
              * most-recent-timer state. The Bluetooth-on action sets the corresponding Bluetooth-off
              * timer, the Bluetooth-off action sets the next Bluetooth-on timer.*/
-            // if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_on)) {
-            //     if (!PersistentData.getBluetoothEnabled())
-            //             return
-            //         if (checkBluetoothPermissions(applicationContext)) {
-            //             if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
-            //         } else {
-            //             TextFileManager.writeDebugLogStatement("user has not provided permission for Bluetooth.")
-            //         }
-            //         timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
-            //         return
-            // }
-            //
-            // if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_off)) {
-            //     if (checkBluetoothPermissions(applicationContext) && bluetoothListener != null)
-            //         bluetoothListener!!.disableBLEScan()
-            //     timer!!.setupExactSingleAbsoluteTimeAlarm(
-            //             PersistentData.getBluetoothTotalDuration(),
-            //             PersistentData.getBluetoothGlobalOffset(),
-            //             Timer.bluetoothOnIntent
-            //     )
-            //     return
-            // }
+            if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_on)) {
+                if (!PersistentData.getBluetoothEnabled())
+                        return
+                    if (checkBluetoothPermissions(applicationContext)) {
+                        if (bluetoothListener != null) bluetoothListener!!.enableBLEScan()
+                    } else {
+                        TextFileManager.writeDebugLogStatement("user has not provided permission for Bluetooth.")
+                    }
+                    timer!!.setupExactSingleAlarm(PersistentData.getBluetoothOnDuration(), Timer.bluetoothOffIntent)
+                    return
+            }
+
+            if (broadcastAction == applicationContext.getString(R.string.turn_bluetooth_off)) {
+                if (checkBluetoothPermissions(applicationContext) && bluetoothListener != null)
+                    bluetoothListener!!.disableBLEScan()
+                timer!!.setupExactSingleAbsoluteTimeAlarm(
+                        PersistentData.getBluetoothTotalDuration(),
+                        PersistentData.getBluetoothGlobalOffset(),
+                        Timer.bluetoothOnIntent
+                )
+                return
+            }
 
             // I don't know if we pull this one out
             // Signs out the user. (does not set up a timer, that is handled in activity and sign-in logic) 

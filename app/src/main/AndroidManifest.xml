@@ -7,27 +7,30 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- new android 10  -->
+
     <!-- Accelerometer and Gyro -->
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
+
     <!-- Voice recording -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Network and upload -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Starting the main service at boot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <!-- Bluetooth proximity -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <!-- <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" /> -->
+
     <!-- get own phone number -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <!-- Permissions regarding phone calls -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
-	<!-- Permission used in android 6+ for being whitelisted for app standby -->
+
+    <!-- Permission used in android 6+ for being whitelisted for app standby -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <!-- as of the android 6 compatibility update, Beiwe no longer supports installation onto external media -->
+
     <!-- Power management and monitoring, not sure where this would be used... -->
     <uses-permission android:name="android.permission.BATTERY_STATS" />
 
@@ -36,6 +39,21 @@
 
     <!-- required on android 13 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- Bluetooth -->
+    <!-- Request legacy Bluetooth permissions on older devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+
+    <!--<uses-permission android:name="android.permission.BLUETOOTH" />-->
+    <!--<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />-->
+    <!-- Needed only if your app looks for Bluetooth devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <!-- Needed only if your app makes the device discoverable to Bluetooth devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+
 
     <application
         android:allowBackup="false"
