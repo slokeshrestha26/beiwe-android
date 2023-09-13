@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import kotlinx.android.synthetic.main.activity_main_menu.*
+import kotlinx.android.synthetic.main.activity_main_menu.main_menu_call_clinician
 import org.beiwe.app.R
 import org.beiwe.app.session.SessionActivity
 import org.beiwe.app.storage.PersistentData
@@ -12,7 +12,6 @@ import org.beiwe.app.survey.SurveyActivity
 import org.beiwe.app.ui.utils.SurveyNotifications
 import org.json.JSONException
 import org.json.JSONObject
-import java.util.*
 
 /**The main menu activity of the app. Currently displays 4 buttons - Audio Recording, Graph, Call Clinician, and Sign out.
  * @author Dor Samet
@@ -29,24 +28,55 @@ class MainMenuActivity : SessionActivity() {
     }
 
     fun setupSurveyList() {
-        val permSurveyIds = ArrayList<String>()
+        // get the active and always available surveys
+        val surveyIds = ArrayList<String>()
         for (surveyId in PersistentData.getSurveyIds())
             try {
                 val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
-                if (surveySettings.getBoolean("always_available"))
-                    permSurveyIds.add(surveyId)
+                val is_active = SurveyNotifications.isNotificationActive(applicationContext, surveyId)
+                if (surveySettings.getBoolean("always_available") || is_active)
+                    surveyIds.add(surveyId)
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
 
-        if (permSurveyIds.size != 0) {
-            for (i in permSurveyIds.indices) {
-                val button = findViewById<View>(resources.getIdentifier("permSurvey$i", "id", this.packageName)) as Button
-                if (PersistentData.getSurveyType(permSurveyIds[i]) == "audio_survey")
-                    button.setText(R.string.permaaudiosurvey)
-                button.setTag(R.string.permasurvey, permSurveyIds[i])
-                button.visibility = View.VISIBLE
-            }
+        var button_count = 0
+        for (i in surveyIds.indices) {
+            button_count = i
+            var surveyName = PersistentData.getSurveyName(surveyIds[i])
+            val surveyType = PersistentData.getSurveyType(surveyIds[i])
+            val button = findViewById<View>(resources.getIdentifier(
+                    "permSurvey$i", "id", this.packageName)) as Button
+
+            // set textAllCaps and surveyName if there is no survey name
+            if (surveyName == "") {
+                button.isAllCaps = true
+                surveyName = if (surveyType == "audio_survey")
+                    getString(R.string.permaaudiosurvey)
+                else
+                    getString(R.string.perm_survey)
+            } else
+                button.isAllCaps = false
+
+            // add emoji to survey name if it is an audio survey
+            if (surveyType == "audio_survey")
+                surveyName = "$surveyName 🎙"
+
+            // button.text = "$surveyName ($survey_tag)"
+            button.text = surveyName
+            button.setTag(R.string.permasurvey, surveyIds[i])
+            button.visibility = View.VISIBLE
+
+            // there are 16 buttons, so we only need to iterate 0 to 16
+            if (i >= 16)
+                break
+        }
+
+        // iterate over every unused button, disable button and GONE it to fix scroll bugs
+        for (i in button_count + 1..16) {
+            val button = findViewById<View>(resources.getIdentifier(
+                    "permSurvey$i", "id", this.packageName)) as Button
+            button.visibility = View.GONE
         }
     }
 

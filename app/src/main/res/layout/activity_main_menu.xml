@@ -37,7 +37,7 @@
     <View
         android:id="@+id/Placeholder2"
         android:layout_width="wrap_content"
-        android:layout_height="50dp" />
+        android:layout_height="25dp" />
 
         <Button
             android:id="@+id/main_menu_call_clinician"
@@ -47,6 +47,11 @@
             android:layout_gravity="center"
             android:text="@string/default_call_clinician_text" />
 
+        <View
+            android:id="@+id/Placeholder3"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
+
         <Button
             android:id="@+id/permSurvey0"
             android:visibility="invisible"
@@ -54,7 +59,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey1"
             android:visibility="invisible"
@@ -62,7 +67,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey2"
             android:visibility="invisible"
@@ -70,7 +75,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey3"
             android:visibility="invisible"
@@ -78,7 +83,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey4"
             android:visibility="invisible"
@@ -86,7 +91,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey5"
             android:visibility="invisible"
@@ -94,7 +99,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey6"
             android:visibility="invisible"
@@ -102,7 +107,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey7"
             android:visibility="invisible"
@@ -110,7 +115,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey8"
             android:visibility="invisible"
@@ -118,7 +123,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey9"
             android:visibility="invisible"
@@ -126,7 +131,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey10"
             android:visibility="invisible"
@@ -134,7 +139,7 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
+            android:text= "@string/perm_survey"/>
         <Button
             android:id="@+id/permSurvey11"
             android:visibility="invisible"
@@ -142,7 +147,46 @@
             android:layout_height="wrap_content"
             android:onClick="displaySurvey"
             android:layout_gravity="center"
-            android:text= "@string/perm_survey" />
-
+            android:text= "@string/perm_survey"/>
+        <Button
+            android:id="@+id/permSurvey12"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey"/>
+        <Button
+            android:id="@+id/permSurvey13"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey"/>
+        <Button
+            android:id="@+id/permSurvey14"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey"/>
+        <Button
+            android:id="@+id/permSurvey15"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey"/>
+        <Button
+            android:id="@+id/permSurvey16"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="displaySurvey"
+            android:layout_gravity="center"
+            android:text= "@string/perm_survey"/>
     </LinearLayout>
 </ScrollView>

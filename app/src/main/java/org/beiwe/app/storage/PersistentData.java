@@ -390,14 +390,18 @@ public class PersistentData {
 	public static String getSurveyContent(String surveyId){ return pref.getString(surveyId + "-content", null); }
 	public static String getSurveyType(String surveyId){ return pref.getString(surveyId + "-type", null); }
 	public static String getSurveySettings(String surveyId){ return pref.getString(surveyId + "-settings", null); }
+	public static String getSurveyName(String surveyId){ return pref.getString(surveyId + "-name", null); }
 	public static Boolean getSurveyNotificationState( String surveyId) { return pref.getBoolean(surveyId + "-notificationState", false ); }
 	public static long getMostRecentSurveyAlarmTime(String surveyId) { return pref.getLong( surveyId + "-prior_alarm", 9223372036854775807L); }
 	
-	public static void createSurveyData(String surveyId, String content, String timings, String type, String settings){
+	public static void createSurveyData(
+		String surveyId, String content, String timings, String type, String settings, String name
+	){
 		setSurveyContent(surveyId,  content);
 		setSurveyTimes(surveyId, timings);
 		setSurveyType(surveyId, type);
 		setSurveySettings(surveyId, settings);
+		setSurveyName(surveyId, name);
 	}
 	//individual setters
 	public static void setSurveyContent(String surveyId, String content){
@@ -411,6 +415,9 @@ public class PersistentData {
 	}
 	public static void setSurveySettings(String surveyId, String settings){
 		putCommit(surveyId + "-settings", settings);
+	}
+	public static void setSurveyName(String surveyId, String name){
+		putCommit(surveyId + "-name", name);
 	}
 	
 	//survey state storage
@@ -427,6 +434,7 @@ public class PersistentData {
 		editor.remove(surveyId + "-type");
 		editor.remove(surveyId + "-notificationState");
 		editor.remove(surveyId + "-settings");
+		editor.remove(surveyId + "-name");
 		editor.remove(surveyId + "-questionIds");
 		editor.commit();
 		removeSurveyId(surveyId);
