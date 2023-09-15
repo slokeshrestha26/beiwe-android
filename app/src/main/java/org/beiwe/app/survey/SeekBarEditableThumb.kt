@@ -9,18 +9,18 @@ import android.widget.SeekBar
  * Based on http://stackoverflow.com/a/19008611
  * @author Josh Zagorsky */
 
-class SeekBarEditableThumb : SeekBar {
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
+class SeekBarEditableThumb : androidx.appcompat.widget.AppCompatSeekBar {
+    // these constructors are somewhat pointless, we only use the second one, we only instantiate
+    // these in createSliderQuestion, and we manually set variables based on the question.
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle)
 
     private var compatThumb: Drawable? = null
 
-    /** Return a Boolean of whether or not the user has touched the SeekBar yet
-     * @return */
-    var hasBeenTouched: Boolean? = null
+    var hasBeenTouched: Boolean? = null // Boolean of whether or not the user has touched the SeekBar yet
         private set
-    private var min = 0
+
     override fun setThumb(thumb: Drawable) {
         super.setThumb(thumb)
         compatThumb = thumb
@@ -37,6 +37,10 @@ class SeekBarEditableThumb : SeekBar {
         compatThumb!!.mutate().alpha = 255
         hasBeenTouched = true
     }
+
+
+    // min is zoverriding th eSeekBar's built-in min, some restrictions on refactoring
+    private var min = 0
 
     /** The minimum doesn't have to be zero; the SeekBar can start at another number (even negative)
      * @param min */
