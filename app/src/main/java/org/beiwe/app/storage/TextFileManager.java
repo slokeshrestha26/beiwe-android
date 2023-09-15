@@ -5,6 +5,7 @@ import static org.beiwe.app.listeners.AmbientAudioListenerKt.ambientTempAudioFil
 import android.content.Context;
 import android.util.Log;
 
+import org.beiwe.app.BuildConfig;
 import org.beiwe.app.CrashHandler;
 import org.beiwe.app.listeners.AccelerometerListener;
 import org.beiwe.app.listeners.AmbientAudioListener;
@@ -351,7 +352,8 @@ public class TextFileManager {
 			} else {
 				Log.e("TextFileManager", "could not find file to write to, " + this.fileName);
 				e.printStackTrace();
-				CrashHandler.writeCrashlog(e, appContext);
+				if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+					CrashHandler.writeCrashlog(e, appContext);
 			}
 			this.fileName = null;  // Set filename null so that the system tries to create the file again later
 			return false;
@@ -361,13 +363,15 @@ public class TextFileManager {
 			} else {
 				Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
 				e.printStackTrace();
-				CrashHandler.writeCrashlog(e, appContext);
+				if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+					CrashHandler.writeCrashlog(e, appContext);
 			}
 			this.fileName = null;
 			return false;
 		} catch (InvalidKeyException e) {
 			Log.e("TextFileManager", "encrypted write operation without an AES key: " + this.name + ", " + this.fileName);
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 			this.fileName = null;
 			return false;
 		} catch (InvalidKeySpecException e) { //this occurs when an encrypted write operation occurs without an RSA key file, we eat this error because it only happens during registration/initial config.
@@ -421,15 +425,16 @@ public class TextFileManager {
 		} catch (FileNotFoundException e) {
 			Log.e("TextFileManager", "could not find file to write to, " + this.fileName);
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		} catch (IOException e) {
 			if (e.getMessage().toLowerCase().contains("enospc")) { // If the device is out of storage, alert the user
 				Log.e("ENOSPC", "Out of storage space");
 			}
 			Log.e("TextFileManager", "error in the write operation: " + e.getMessage());
 			e.printStackTrace();
-			// removed to prevent excessive sentry errors
-			// CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		}
 	}
 	
@@ -452,11 +457,14 @@ public class TextFileManager {
 			this.safeWritePlaintext(EncryptionEngine.encryptAES(data, this.AESKey));
 		} catch (InvalidKeyException e) {
 			Log.e("TextFileManager", "encrypted write operation without an AES key: " + this.name + ", " + this.fileName);
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 //			throw new NullPointerException("encrypted write operation without an AES key: " + this.fileName );
 		} catch (InvalidKeySpecException e) { //this occurs when an encrypted write operation occurs without an RSA key file, we eat this error because it only happens during registration/initial config.
 			Log.e("TextFileManager", "EncryptionEngine.AES_TOO_EARLY_ERROR: " + this.name + ", " + data);
 			e.printStackTrace();
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		}
 	}
 	
@@ -479,17 +487,20 @@ public class TextFileManager {
 			} catch (IOException e) {
 				Log.e("Upload", "read error in " + this.fileName);
 				e.printStackTrace();
-				CrashHandler.writeCrashlog(e, appContext);
+				if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+					CrashHandler.writeCrashlog(e, appContext);
 			}
 			bufferedInputStream.close();
 		} catch (FileNotFoundException e) {
 			Log.e("TextFileManager", "file " + this.fileName + " does not exist");
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		} catch (IOException e) {
 			Log.e("DataFileManager", "could not close " + this.fileName);
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		}
 		
 		return stringBuffer.toString();
@@ -533,7 +544,8 @@ public class TextFileManager {
 		} catch (Exception e) {
 			Log.e("TextFileManager", "cannot delete file " + fileName);
 			e.printStackTrace();
-			CrashHandler.writeCrashlog(e, appContext);
+			if (BuildConfig.APP_IS_DEV || BuildConfig.APP_IS_BETA || BuildConfig.DEBUG)
+				CrashHandler.writeCrashlog(e, appContext);
 		}
 	}
 	
