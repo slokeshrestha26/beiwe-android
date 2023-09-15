@@ -9,7 +9,6 @@ import org.beiwe.app.CrashHandler;
 import org.beiwe.app.DeviceInfo;
 import org.beiwe.app.PermissionHandler;
 import org.beiwe.app.R;
-import org.beiwe.app.UtilsKt;
 import org.beiwe.app.storage.PersistentData;
 import org.beiwe.app.storage.SetDeviceSettings;
 import org.beiwe.app.storage.TextFileManager;

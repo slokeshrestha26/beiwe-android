@@ -136,7 +136,12 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
         startPhoneCall(PersistentData.getPasswordResetNumber())
     }
 
-    private fun startPhoneCall(phoneNumber: String) {
+    private fun startPhoneCall(phoneNumber: String?) {
+        if (phoneNumber == null || phoneNumber == "") {
+            Log.e("sessionActivity", "no phone number")
+            return
+         }
+
         val callIntent = Intent(Intent.ACTION_CALL)
         callIntent.data = Uri.parse("tel:$phoneNumber")
         try {

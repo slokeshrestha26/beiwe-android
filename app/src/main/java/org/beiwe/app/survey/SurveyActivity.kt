@@ -23,7 +23,7 @@ import org.json.JSONObject
  * @author Josh Zagorsky, Eli Jones
  */
 class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitButtonClickedListener {
-    var surveyId: String? = null
+    lateinit var surveyId: String
     var surveyLogic: JsonSkipLogic? = null
     var hasLoadedBefore = false
     var initialViewMoment: Long = 0
@@ -35,7 +35,9 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         initialViewMoment = System.currentTimeMillis()
         setContentView(R.layout.activity_survey)
         val triggerIntent = intent
-        this.surveyId = triggerIntent.getStringExtra("surveyId")
+        // if you didn't hand it a survey id, it crashes. that is literally the most core thing in
+        // the app, so we're going to crash over it. Don't set it up to do that.
+        this.surveyId = triggerIntent.getStringExtra("surveyId")!!
     }
 
     override fun onDestroy() {
@@ -114,14 +116,15 @@ class SurveyActivity : SessionActivity(), OnGoToNextQuestionListener, OnSubmitBu
         fragmentTransaction.commit()
     }
 
-    private fun setUpQuestions(surveyId: String?) {
+    private fun setUpQuestions(surveyId: String) {
         // Get survey settings
         var randomizeWithMemory = false
         var randomize = false
         var numberQuestions = 0
 
         try {
-            val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
+            // default to an empty object
+            val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId)?: "{}")
             randomizeWithMemory = surveySettings.optBoolean(getString(R.string.randomizeWithMemory), false)
             randomize = surveySettings.optBoolean(getString(R.string.randomize), false)
             numberQuestions = surveySettings.optInt(getString(R.string.numberQuestions), 0)

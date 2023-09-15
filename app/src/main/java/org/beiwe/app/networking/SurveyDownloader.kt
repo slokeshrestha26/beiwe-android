@@ -62,19 +62,12 @@ object SurveyDownloader {
             Log.e("Survey Downloader", "JSON PARSING FAIL FAIL FAIL")
             return -1
         }
-        var surveyJSON: JSONObject
+        // var surveyJSON: JSONObject
         val oldSurveyIds = PersistentData.getSurveyIds()
         val newSurveyIds = ArrayList<String>()
-        var surveyId: String
-        var surveyName: String? = null
-        var surveyType: String?
-        var jsonQuestionsString: String?
-        var jsonTimingsString: String
-        var jsonSettingsString: String?
 
         for (surveyString in surveys) {
-
-            surveyJSON = try {
+            val surveyJSON = try {
                 JSONObject(surveyString)
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -83,7 +76,7 @@ object SurveyDownloader {
             }
 
             // Log.d("debugging survey update", "whole thing: " + surveyJSON.toString())
-            surveyId = try {
+            val surveyId = try {
                 surveyJSON.getString("_id")
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -91,7 +84,7 @@ object SurveyDownloader {
                 return -1
             }
             // Log.d("debugging survey update", "id: " + surveyId.toString())
-            surveyType = try {
+            val surveyType = try {
                 surveyJSON.getString("survey_type")
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -99,7 +92,7 @@ object SurveyDownloader {
                 return -1
             }
             // Log.d("debugging survey update", "type: " + surveyType.toString())
-            jsonQuestionsString = try {
+            val jsonQuestionsString = try {
                 surveyJSON.getString("content")
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -107,7 +100,7 @@ object SurveyDownloader {
                 return -1
             }
             // Log.d("debugging survey update", "questions: " + jsonQuestionsString)
-            jsonTimingsString = try {
+            val jsonTimingsString = try {
                 surveyJSON.getString("timings")
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -115,7 +108,7 @@ object SurveyDownloader {
                 return -1
             }
             // Log.d("debugging survey update", "timings: " + jsonTimingsString)
-            jsonSettingsString = try {
+            val jsonSettingsString = try {
                 surveyJSON.getString("settings")
             } catch (e: JSONException) {
                 writeCrashlog(e, appContext)
@@ -124,8 +117,8 @@ object SurveyDownloader {
             }
             // Log.d("debugging survey update", "settings: " + jsonSettingsString)
 
-            // name - force to empty string if somehow present as null.
-            surveyName = surveyJSON.optString("name", "") ?: ""
+            // name - force to empty string if somehow present as a null.
+            val surveyName = surveyJSON.optString("name", "") ?: ""
 
             if (oldSurveyIds.contains(surveyId)) {
                 // if surveyId already exists, check for changes, add to list of new survey ids.
@@ -155,6 +148,7 @@ object SurveyDownloader {
                 SurveyScheduler.checkImmediateTriggerSurvey(appContext, surveyId)
             }
         }
+
         for (oldSurveyId in oldSurveyIds) { // for each old survey id
             if (!newSurveyIds.contains(oldSurveyId)) {
                 // check if it is still a valid survey (it the list of new survey ids.)

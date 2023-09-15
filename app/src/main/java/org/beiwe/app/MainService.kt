@@ -21,23 +21,18 @@ import io.sentry.Sentry
 import io.sentry.android.AndroidSentryClientFactory
 import io.sentry.dsn.InvalidDsnException
 import org.beiwe.app.PermissionHandler.checkBluetoothPermissions
-import org.beiwe.app.PermissionHandler.checkWifiPermissions
 import org.beiwe.app.PermissionHandler.confirmBluetooth
 import org.beiwe.app.PermissionHandler.confirmCalls
 import org.beiwe.app.PermissionHandler.confirmTexts
-import org.beiwe.app.PermissionHandler.permissionMessages
 import org.beiwe.app.listeners.*
 import org.beiwe.app.networking.PostRequest
 import org.beiwe.app.networking.SurveyDownloader
-import org.beiwe.app.storage.PersistentData
-import org.beiwe.app.storage.SetDeviceSettings
-import org.beiwe.app.storage.TextFileManager
+import org.beiwe.app.storage.*
 import org.beiwe.app.survey.SurveyScheduler
 import org.beiwe.app.ui.user.LoginActivity
 import org.beiwe.app.ui.utils.SurveyNotifications.displaySurveyNotification
 import org.beiwe.app.ui.utils.SurveyNotifications.isNotificationActive
 import java.util.*
-
 
 // Notification Channel constants
 const val NOTIFICATION_CHANNEL_ID = "_service_channel"
@@ -100,6 +95,7 @@ class MainService : Service() {
         // Accessing a survey requires thhe user opening the app or an activet survey notification,
         // which means the background service is always running before that point, even in the
         // corner case of when the background starts an system-on.
+
         PersistentData.initialize(applicationContext)
         PersistentData.setNotTakingSurvey()
 

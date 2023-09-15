@@ -13,9 +13,7 @@ import org.beiwe.app.ui.utils.SurveyNotifications
 import org.json.JSONException
 import org.json.JSONObject
 
-/**The main menu activity of the app. Currently displays 4 buttons - Audio Recording, Graph, Call Clinician, and Sign out.
- * @author Dor Samet
- */
+
 class MainMenuActivity : SessionActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,16 +28,20 @@ class MainMenuActivity : SessionActivity() {
     fun setupSurveyList() {
         // get the active and always available surveys
         val surveyIds = ArrayList<String>()
-        for (surveyId in PersistentData.getSurveyIds())
+        for (surveyId: String in PersistentData.getSurveyIds())
             try {
-                val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId))
-                val is_active = SurveyNotifications.isNotificationActive(applicationContext, surveyId)
+                // default to an empty dictionary to handle nulls
+                val surveySettings = JSONObject(PersistentData.getSurveySettings(surveyId)?: "{}")
+                // persistent data notification state appears to be the source of truth
+                // for whether a survey should have be takeable.
+                val is_active = PersistentData.getSurveyNotificationState(surveyId)
                 if (surveySettings.getBoolean("always_available") || is_active)
                     surveyIds.add(surveyId)
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
 
+        // go through the surveys, geht any that should be active, set button text, enable button.
         var button_count = 0
         for (i in surveyIds.indices) {
             button_count = i

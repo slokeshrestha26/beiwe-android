@@ -1,5 +1,6 @@
 package org.beiwe.app.storage;
 
+
 import android.annotation.SuppressLint;
 import android.util.Base64;
 import android.util.Log;
@@ -19,6 +20,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -34,6 +36,44 @@ import javax.crypto.spec.SecretKeySpec;
  * Hashing uses the SHA256 hashing algorithm.
  * @author Eli Jones, Josh Zagorsky */
 public class EncryptionEngine {
+	
+	// these variables and the two static function below have some interaction with the kotlin
+	// conversion where the line
+	// 			PersistentData.putCommit(HASH_SALT_KEY, new String(newSalt));
+	// is converted to invalid Kotlin code. The reason is obscure So we moved it here instead.
+	static final String HASH_SALT_KEY = "hash_salt_key";
+	static final String HASH_ITERATIONS_KEY = "hash_iterations_key";
+	static final String USE_ANONYMIZED_HASHING_KEY = "use_anonymized_hashing";
+	
+	// shouldn't we be generating a new salt every time we hash something? FIXME: test thiss
+	// Get salt for pbkdf2 hashing
+	public static byte[] getHashSalt() {
+		String saltString = PersistentData.pref.getString(HASH_SALT_KEY, null);
+		// create salt if it does not exist
+		if(saltString == null) {
+			byte[] newSalt = SecureRandom.getSeed(64);
+			PersistentData.putCommit(HASH_SALT_KEY, new String(newSalt));
+			return newSalt;
+		}
+		else {
+			return saltString.getBytes();
+		}
+	}
+	
+	// Get iterations for pbkdf2 hashing
+	public static int getHashIterations() {
+		int iterations = PersistentData.pref.getInt(HASH_ITERATIONS_KEY, 0);
+		// create iterations if it does not exist
+		if(iterations == 0) {
+			// create random iteration count from 900 to 1100
+			int newIterations = 1100 - new Random().nextInt(200);
+			PersistentData.putCommit(HASH_ITERATIONS_KEY, newIterations);
+			return newIterations;
+		}
+		else {
+			return iterations;
+		}
+	}
 	
 	private static PublicKey RSAkey = null;
 	
@@ -74,8 +114,8 @@ public class EncryptionEngine {
 	 * @param input A String to hash.
 	 * @return a Base64 String of the hash result. */
 	public static String PBKDF2Hash (String input) {
-		byte[] salt = PersistentData.getHashSalt();
-		int iterations = PersistentData.getHashIterations();
+		byte[] salt = getHashSalt();
+		int iterations = getHashIterations();
 		PKCS5S2ParametersGenerator generator = new PKCS5S2ParametersGenerator(new SHA256Digest());
 		generator.init(PBEParametersGenerator.PKCS5PasswordToUTF8Bytes(input.toCharArray()), salt, iterations);
 
