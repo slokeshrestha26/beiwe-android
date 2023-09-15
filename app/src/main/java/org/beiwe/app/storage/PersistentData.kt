@@ -3,7 +3,6 @@ package org.beiwe.app.storage
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import kotlinx.coroutines.internal.SynchronizedObject
 import org.beiwe.app.BuildConfig
 import org.beiwe.app.JSONUtils
 import org.beiwe.app.R
@@ -80,16 +79,14 @@ const val CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY = "call_research_assistant_
 ################################### Initializing and Editing ######################################
 #################################################################################################*/
 
-/**The publicly accessible initializing function for the LoginManager, initializes the internal variables.  */
 object PersistentData {
-
     var isInitialized = false
     // some critical global scope variables...
     lateinit var pref: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
     lateinit var appContext: Context
 
-    @Synchronized @JvmStatic fun initialize(applicationContext: Context) {
+    @Synchronized fun initialize(applicationContext: Context) {
         if (isInitialized)
             return
         isInitialized = true
@@ -131,7 +128,6 @@ object PersistentData {
     /*#####################################################################################
     ##################################### User State ######################################
     #####################################################################################*/
-
     /** Quick check for login.  */
     @JvmStatic fun isLoggedIn(): Boolean {
         if (pref == null) Log.w("LoginManager", "FAILED AT ISLOGGEDIN")
@@ -140,9 +136,7 @@ object PersistentData {
     }
 
     /** Set the login session to expire a fixed amount of time in the future  */
-    @JvmStatic fun loginOrRefreshLogin() {
-        putCommit(LOGIN_EXPIRATION, System.currentTimeMillis() + getTimeBeforeAutoLogout())
-    }
+    @JvmStatic fun loginOrRefreshLogin() { putCommit(LOGIN_EXPIRATION, System.currentTimeMillis() + getTimeBeforeAutoLogout()) }
 
     /** Set the login session to "expired"  */
     @JvmStatic fun logout() {
@@ -151,267 +145,110 @@ object PersistentData {
     }
 
     // IS_REGISTERED
-    @JvmStatic fun getIsRegistered(): Boolean {
-        return pref.getBoolean(IS_REGISTERED, false)
-    }
-    @JvmStatic fun setIsRegistered(value: Boolean) {
-        putCommit(IS_REGISTERED, value)
-    }
-    @JvmStatic fun setLastRequestedPermission(value: String) {
-        putCommit(LastRequestedPermission, value)
-    }
-    @JvmStatic fun getLastRequestedPermission(): String {
-        return pref.getString(LastRequestedPermission, "")?: ""
-    }
-    @JvmStatic fun getTakingSurvey(): Boolean {
-        return pref.getBoolean(IS_TAKING_SURVEY, false)
-    }
-    @JvmStatic fun setTakingSurvey() {
-        putCommit(IS_TAKING_SURVEY, true)
-    }
-    @JvmStatic fun setNotTakingSurvey() {
-        putCommit(IS_TAKING_SURVEY, false)
-    }
+    @JvmStatic fun getIsRegistered(): Boolean { return pref.getBoolean(IS_REGISTERED, false) }
+    @JvmStatic fun setIsRegistered(value: Boolean) { putCommit(IS_REGISTERED, value) }
+    @JvmStatic fun setLastRequestedPermission(value: String) { putCommit(LastRequestedPermission, value) }
+    @JvmStatic fun getLastRequestedPermission(): String { return pref.getString(LastRequestedPermission, "")?: "" }
+    @JvmStatic fun getTakingSurvey(): Boolean { return pref.getBoolean(IS_TAKING_SURVEY, false) }
+    @JvmStatic fun setTakingSurvey() { putCommit(IS_TAKING_SURVEY, true) }
+    @JvmStatic fun setNotTakingSurvey() { putCommit(IS_TAKING_SURVEY, false) }
 
     /*######################################################################################
     ##################################### Passwords ########################################
     ######################################################################################*/
-
     /**Checks that an input matches valid password requirements. (this only checks length)
      * Throws up an alert notifying the user if the password is not valid.
      * @param password
      * @return true or false based on password requirements. */
-    @JvmStatic fun passwordMeetsRequirements(password: String): Boolean {
-        return password.length >= minPasswordLength()
-    }
-    @JvmStatic fun minPasswordLength(): Int {
-        return if (BuildConfig.APP_IS_BETA) 1 else 6
-    }
+    @JvmStatic fun passwordMeetsRequirements(password: String): Boolean { return password.length >= minPasswordLength() }
+    @JvmStatic fun minPasswordLength(): Int { return if (BuildConfig.APP_IS_BETA) 1 else 6 }
 
     /**Takes an input string and returns a boolean value stating whether the input matches the current password.  */
-    @JvmStatic fun checkPassword(input: String?): Boolean {
-        return getPassword() == EncryptionEngine.safeHash(input)
-    }
+    @JvmStatic fun checkPassword(input: String?): Boolean { return getPassword() == EncryptionEngine.safeHash(input) }
 
     /**Sets a password to a hash of the provided value.  */
-    @JvmStatic fun setPassword(password: String?) {
-        putCommit(KEY_PASSWORD, EncryptionEngine.safeHash(password))
-    }
+    @JvmStatic fun setPassword(password: String?) { putCommit(KEY_PASSWORD, EncryptionEngine.safeHash(password)) }
 
     /*#####################################################################################
     ################################# Firebase Cloud Messaging Instance ID ################
     #####################################################################################*/
-
-    @JvmStatic fun getFCMInstanceID(): String? {
-        return pref.getString(FCM_INSTANCE_ID, null)
-    }
-    @JvmStatic fun setFCMInstanceID(fcmInstanceID: String) {
-        putCommit(FCM_INSTANCE_ID, fcmInstanceID)
-    }
+    @JvmStatic fun getFCMInstanceID(): String? { return pref.getString(FCM_INSTANCE_ID, null) }
+    @JvmStatic fun setFCMInstanceID(fcmInstanceID: String) { putCommit(FCM_INSTANCE_ID, fcmInstanceID) }
 
     /*#####################################################################################
     ################################# Listener Settings ###################################
     #####################################################################################*/
-
-    @JvmStatic fun getAccelerometerEnabled(): Boolean {
-        return pref.getBoolean(ACCELEROMETER_ENABLED, false)
-    }
-    @JvmStatic fun setAccelerometerEnabled(enabled: Boolean): Boolean {
-        return putCommit(ACCELEROMETER_ENABLED, enabled)
-    }
-    @JvmStatic fun getAllowUploadOverCellularData(): Boolean {
-        return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false)
-    }
-    @JvmStatic fun setAllowUploadOverCellularData(enabled: Boolean) {
-        putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled)
-    }
-    @JvmStatic fun getAmbientAudioEnabled(): Boolean {
-        return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false)
-    }
-    @JvmStatic fun setAmbientAudioCollectionIsEnabled(enabled: Boolean): Boolean {
-        return putCommit(AMBIENT_AUDIO_ENABLED, enabled)
-    }
-    @JvmStatic fun getBluetoothEnabled(): Boolean {
-        return pref.getBoolean(BLUETOOTH_ENABLED, false)
-    }
-    @JvmStatic fun setBluetoothEnabled(enabled: Boolean): Boolean {
-        return putCommit(BLUETOOTH_ENABLED, enabled)
-    }
-    @JvmStatic fun getCallsEnabled(): Boolean {
-        return pref.getBoolean(CALLS_ENABLED, false)
-    }
-    @JvmStatic fun setCallsEnabled(enabled: Boolean): Boolean {
-        return putCommit(CALLS_ENABLED, enabled)
-    }
-    @JvmStatic fun getGpsEnabled(): Boolean {
-        return pref.getBoolean(GPS_ENABLED, false)
-    }
-    @JvmStatic fun setGpsEnabled(enabled: Boolean): Boolean {
-        return putCommit(GPS_ENABLED, enabled)
-    }
-    @JvmStatic fun getGyroscopeEnabled(): Boolean {
-        return pref.getBoolean(GYROSCOPE_ENABLED, false)
-    }
-    @JvmStatic fun setGyroscopeEnabled(enabled: Boolean): Boolean {
-        return putCommit(GYROSCOPE_ENABLED, enabled)
-    }
-    @JvmStatic fun getPowerStateEnabled(): Boolean {
-        return pref.getBoolean(POWER_STATE_ENABLED, false)
-    }
-    @JvmStatic fun setPowerStateEnabled(enabled: Boolean): Boolean {
-        return putCommit(POWER_STATE_ENABLED, enabled)
-    }
-    @JvmStatic fun getTextsEnabled(): Boolean {
-        return pref.getBoolean(TEXTS_ENABLED, false)
-    }
-    @JvmStatic fun setTextsEnabled(enabled: Boolean): Boolean {
-        return putCommit(TEXTS_ENABLED, enabled)
-    }
-    @JvmStatic fun getWifiEnabled(): Boolean {
-        return pref.getBoolean(WIFI_ENABLED, false)
-    }
-    @JvmStatic fun setWifiEnabled(enabled: Boolean) {
-        putCommit(WIFI_ENABLED, enabled)
-    }
+    @JvmStatic fun getAccelerometerEnabled(): Boolean { return pref.getBoolean(ACCELEROMETER_ENABLED, false) }
+    @JvmStatic fun setAccelerometerEnabled(enabled: Boolean): Boolean { return putCommit(ACCELEROMETER_ENABLED, enabled) }
+    @JvmStatic fun getAllowUploadOverCellularData(): Boolean { return pref.getBoolean(ALLOW_UPLOAD_OVER_CELLULAR_DATA, false) }
+    @JvmStatic fun setAllowUploadOverCellularData(enabled: Boolean) { putCommit(ALLOW_UPLOAD_OVER_CELLULAR_DATA, enabled) }
+    @JvmStatic fun getAmbientAudioEnabled(): Boolean { return pref.getBoolean(AMBIENT_AUDIO_ENABLED, false) }
+    @JvmStatic fun setAmbientAudioCollectionIsEnabled(enabled: Boolean): Boolean { return putCommit(AMBIENT_AUDIO_ENABLED, enabled) }
+    @JvmStatic fun getBluetoothEnabled(): Boolean { return pref.getBoolean(BLUETOOTH_ENABLED, false) }
+    @JvmStatic fun setBluetoothEnabled(enabled: Boolean): Boolean { return putCommit(BLUETOOTH_ENABLED, enabled) }
+    @JvmStatic fun getCallsEnabled(): Boolean { return pref.getBoolean(CALLS_ENABLED, false) }
+    @JvmStatic fun setCallsEnabled(enabled: Boolean): Boolean { return putCommit(CALLS_ENABLED, enabled) }
+    @JvmStatic fun getGpsEnabled(): Boolean { return pref.getBoolean(GPS_ENABLED, false) }
+    @JvmStatic fun setGpsEnabled(enabled: Boolean): Boolean { return putCommit(GPS_ENABLED, enabled) }
+    @JvmStatic fun getGyroscopeEnabled(): Boolean { return pref.getBoolean(GYROSCOPE_ENABLED, false) }
+    @JvmStatic fun setGyroscopeEnabled(enabled: Boolean): Boolean { return putCommit(GYROSCOPE_ENABLED, enabled) }
+    @JvmStatic fun getPowerStateEnabled(): Boolean { return pref.getBoolean(POWER_STATE_ENABLED, false) }
+    @JvmStatic fun setPowerStateEnabled(enabled: Boolean): Boolean { return putCommit(POWER_STATE_ENABLED, enabled) }
+    @JvmStatic fun getTextsEnabled(): Boolean { return pref.getBoolean(TEXTS_ENABLED, false) }
+    @JvmStatic fun setTextsEnabled(enabled: Boolean): Boolean { return putCommit(TEXTS_ENABLED, enabled) }
+    @JvmStatic fun getWifiEnabled(): Boolean { return pref.getBoolean(WIFI_ENABLED, false) }
+    @JvmStatic fun setWifiEnabled(enabled: Boolean) { putCommit(WIFI_ENABLED, enabled) }
 
     /*#####################################################################################
     ################################## Timer Settings #####################################
     #####################################################################################*/
     // Default values are only used if app doesn't download custom timings, which shouldn't ever happen.
-    @JvmStatic fun getAccelerometerOffDuration(): Long {
-        return 1000L * pref.getLong(ACCELEROMETER_OFF_SECONDS, 10)
-    }
-    @JvmStatic fun setAccelerometerOffDuration(seconds: Long) {
-        putCommit(ACCELEROMETER_OFF_SECONDS, seconds)
-    }
-    @JvmStatic fun getAccelerometerOnDuration(): Long {
-        return 1000L * pref.getLong(ACCELEROMETER_ON_SECONDS, (10 * 60).toLong())
-    }
-    @JvmStatic fun setAccelerometerOnDuration(seconds: Long) {
-        putCommit(ACCELEROMETER_ON_SECONDS, seconds)
-    }
-    @JvmStatic fun getAccelerometerFrequency(): Long {
-        return pref.getLong(ACCELEROMETER_FREQUENCY, 5)
-    }
-    @JvmStatic fun setAccelerometerFrequency(frequency: Long) {
-        putCommit(ACCELEROMETER_FREQUENCY, frequency)
-    }
-    @JvmStatic fun getAmbientAudioOffDuration(): Long {
-        return 1000L * pref.getLong(AMBIENT_AUDIO_OFF_SECONDS, (10 * 60).toLong())
-    }
-    @JvmStatic fun setAmbientAudioOffDuration(seconds: Long) {
-        putCommit(AMBIENT_AUDIO_OFF_SECONDS, seconds)
-    }
-    @JvmStatic fun getAmbientAudioOnDuration(): Long {
-        return 1000L * pref.getLong(AMBIENT_AUDIO_ON_SECONDS, (10 * 60).toLong())
-    }
-    @JvmStatic fun setAmbientAudioOnDuration(seconds: Long) {
-        putCommit(AMBIENT_AUDIO_ON_SECONDS, seconds)
-    }
-    @JvmStatic fun getAmbientAudioSampleRate(): Long {
-        return pref.getLong(AMBIENT_AUDIO_SAMPLE_RATE, 22050)
-    }
-    @JvmStatic fun setAmbientAudioSampleRate(rate: Long) {
-        putCommit(AMBIENT_AUDIO_SAMPLE_RATE, rate)
-    }
-    @JvmStatic fun getAmbientAudioBitrate(): Long {
-        return pref.getLong(AMBIENT_AUDIO_BITRATE, 24000)
-    }
-    @JvmStatic fun setAmbientAudioBitrate(rate: Long) {
-        putCommit(AMBIENT_AUDIO_BITRATE, rate)
-    }
-    @JvmStatic fun getBluetoothGlobalOffset(): Long {
-        return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, (0 * 60).toLong())
-    }
-    @JvmStatic fun setBluetoothGlobalOffset(seconds: Long) {
-        putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds)
-    }
-    @JvmStatic fun getBluetoothOnDuration(): Long {
-        return 1000L * pref.getLong(BLUETOOTH_ON_SECONDS, (1 * 60).toLong())
-    }
-    @JvmStatic fun setBluetoothOnDuration(seconds: Long) {
-        putCommit(BLUETOOTH_ON_SECONDS, seconds)
-    }
-    @JvmStatic fun getBluetoothTotalDuration(): Long {
-        return 1000L * pref.getLong(BLUETOOTH_TOTAL_SECONDS, (5 * 60).toLong())
-    }
-    @JvmStatic fun setBluetoothTotalDuration(seconds: Long) {
-        putCommit(BLUETOOTH_TOTAL_SECONDS, seconds)
-    }
-    @JvmStatic fun getCheckForNewSurveysFrequency(): Long {
-        return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, (24 * 60 * 60).toLong())
-    }
-    @JvmStatic fun setCheckForNewSurveysFrequency(seconds: Long) {
-        putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds)
-    }
-    @JvmStatic fun getCreateNewDataFilesFrequency(): Long {
-        return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, (15 * 60).toLong())
-    }
-    @JvmStatic fun setCreateNewDataFilesFrequency(seconds: Long) {
-        putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds)
-    }
-    @JvmStatic fun getGpsOffDuration(): Long {
-        return 1000L * pref.getLong(GPS_OFF_SECONDS, (5 * 60).toLong())
-    }
-    @JvmStatic fun setGpsOffDuration(seconds: Long) {
-        putCommit(GPS_OFF_SECONDS, seconds)
-    }
-    @JvmStatic fun getGpsOnDuration(): Long {
-        return 1000L * pref.getLong(GPS_ON_SECONDS, (5 * 60).toLong())
-    }
-    @JvmStatic fun setGpsOnDuration(seconds: Long) {
-        putCommit(GPS_ON_SECONDS, seconds)
-    }
-    @JvmStatic fun getGyroscopeOffDuration(): Long {
-        return 1000L * pref.getLong(GYROSCOPE_OFF_SECONDS, 10)
-    }
-    @JvmStatic fun setGyroscopeOffDuration(seconds: Long) {
-        putCommit(GYROSCOPE_OFF_SECONDS, seconds)
-    }
-    @JvmStatic fun getGyroscopeOnDuration(): Long {
-        return 1000L * pref.getLong(GYROSCOPE_ON_SECONDS, (10 * 60).toLong())
-    }
-    @JvmStatic fun setGyroscopeOnDuration(seconds: Long) {
-        putCommit(GYROSCOPE_ON_SECONDS, seconds)
-    }
-    @JvmStatic fun getGyroscopeFrequency(): Long {
-        return pref.getLong(GYROSCOPE_FREQUENCY, 5)
-    }
-    @JvmStatic fun setGyroscopeFrequency(frequency: Long) {
-        putCommit(GYROSCOPE_FREQUENCY, frequency)
-    }
-    @JvmStatic fun getTimeBeforeAutoLogout(): Long {
-        return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, (5 * 60).toLong())
-    }
-    @JvmStatic fun setTimeBeforeAutoLogout(seconds: Long) {
-        putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds)
-    }
-    @JvmStatic fun setUploadDataFilesFrequency(seconds: Long) {
-        putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds)
-    }
-    @JvmStatic fun getUploadDataFilesFrequency(): Long {
-        return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, 60)
-    }
-    @JvmStatic fun getVoiceRecordingMaxTimeLength(): Long {
-        return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, (4 * 60).toLong())
-    }
-    @JvmStatic fun setVoiceRecordingMaxTimeLength(seconds: Long) {
-        putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds)
-    }
-    @JvmStatic fun getWifiLogFrequency(): Long {
-        return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, (5 * 60).toLong())
-    }
-    @JvmStatic fun setWifiLogFrequency(seconds: Long) {
-        putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds)
-    }
+    @JvmStatic fun getAccelerometerOffDuration(): Long { return 1000L * pref.getLong(ACCELEROMETER_OFF_SECONDS, 10) }
+    @JvmStatic fun setAccelerometerOffDuration(seconds: Long) { putCommit(ACCELEROMETER_OFF_SECONDS, seconds) }
+    @JvmStatic fun getAccelerometerOnDuration(): Long { return 1000L * pref.getLong(ACCELEROMETER_ON_SECONDS, (10 * 60).toLong()) }
+    @JvmStatic fun setAccelerometerOnDuration(seconds: Long) { putCommit(ACCELEROMETER_ON_SECONDS, seconds) }
+    @JvmStatic fun getAccelerometerFrequency(): Long { return pref.getLong(ACCELEROMETER_FREQUENCY, 5) }
+    @JvmStatic fun setAccelerometerFrequency(frequency: Long) { putCommit(ACCELEROMETER_FREQUENCY, frequency) }
+    @JvmStatic fun getAmbientAudioOffDuration(): Long { return 1000L * pref.getLong(AMBIENT_AUDIO_OFF_SECONDS, (10 * 60).toLong()) }
+    @JvmStatic fun setAmbientAudioOffDuration(seconds: Long) { putCommit(AMBIENT_AUDIO_OFF_SECONDS, seconds) }
+    @JvmStatic fun getAmbientAudioOnDuration(): Long { return 1000L * pref.getLong(AMBIENT_AUDIO_ON_SECONDS, (10 * 60).toLong()) }
+    @JvmStatic fun setAmbientAudioOnDuration(seconds: Long) { putCommit(AMBIENT_AUDIO_ON_SECONDS, seconds) }
+    @JvmStatic fun getAmbientAudioSampleRate(): Long { return pref.getLong(AMBIENT_AUDIO_SAMPLE_RATE, 22050) }
+    @JvmStatic fun setAmbientAudioSampleRate(rate: Long) { putCommit(AMBIENT_AUDIO_SAMPLE_RATE, rate) }
+    @JvmStatic fun getAmbientAudioBitrate(): Long { return pref.getLong(AMBIENT_AUDIO_BITRATE, 24000) }
+    @JvmStatic fun setAmbientAudioBitrate(rate: Long) { putCommit(AMBIENT_AUDIO_BITRATE, rate) }
+    @JvmStatic fun getBluetoothGlobalOffset(): Long { return 1000L * pref.getLong(BLUETOOTH_GLOBAL_OFFSET_SECONDS, (0 * 60).toLong()) }
+    @JvmStatic fun setBluetoothGlobalOffset(seconds: Long) { putCommit(BLUETOOTH_GLOBAL_OFFSET_SECONDS, seconds) }
+    @JvmStatic fun getBluetoothOnDuration(): Long { return 1000L * pref.getLong(BLUETOOTH_ON_SECONDS, (1 * 60).toLong()) }
+    @JvmStatic fun setBluetoothOnDuration(seconds: Long) { putCommit(BLUETOOTH_ON_SECONDS, seconds) }
+    @JvmStatic fun getBluetoothTotalDuration(): Long { return 1000L * pref.getLong(BLUETOOTH_TOTAL_SECONDS, (5 * 60).toLong()) }
+    @JvmStatic fun setBluetoothTotalDuration(seconds: Long) { putCommit(BLUETOOTH_TOTAL_SECONDS, seconds) }
+    @JvmStatic fun getCheckForNewSurveysFrequency(): Long { return 1000L * pref.getLong(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, (24 * 60 * 60).toLong()) }
+    @JvmStatic fun setCheckForNewSurveysFrequency(seconds: Long) { putCommit(CHECK_FOR_NEW_SURVEYS_FREQUENCY_SECONDS, seconds) }
+    @JvmStatic fun getCreateNewDataFilesFrequency(): Long { return 1000L * pref.getLong(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, (15 * 60).toLong()) }
+    @JvmStatic fun setCreateNewDataFilesFrequency(seconds: Long) { putCommit(CREATE_NEW_DATA_FILES_FREQUENCY_SECONDS, seconds) }
+    @JvmStatic fun getGpsOffDuration(): Long { return 1000L * pref.getLong(GPS_OFF_SECONDS, (5 * 60).toLong()) }
+    @JvmStatic fun setGpsOffDuration(seconds: Long) { putCommit(GPS_OFF_SECONDS, seconds) }
+    @JvmStatic fun getGpsOnDuration(): Long { return 1000L * pref.getLong(GPS_ON_SECONDS, (5 * 60).toLong()) }
+    @JvmStatic fun setGpsOnDuration(seconds: Long) { putCommit(GPS_ON_SECONDS, seconds) }
+    @JvmStatic fun getGyroscopeOffDuration(): Long { return 1000L * pref.getLong(GYROSCOPE_OFF_SECONDS, 10) }
+    @JvmStatic fun setGyroscopeOffDuration(seconds: Long) { putCommit(GYROSCOPE_OFF_SECONDS, seconds) }
+    @JvmStatic fun getGyroscopeOnDuration(): Long { return 1000L * pref.getLong(GYROSCOPE_ON_SECONDS, (10 * 60).toLong()) }
+    @JvmStatic fun setGyroscopeOnDuration(seconds: Long) { putCommit(GYROSCOPE_ON_SECONDS, seconds) }
+    @JvmStatic fun getGyroscopeFrequency(): Long { return pref.getLong(GYROSCOPE_FREQUENCY, 5) }
+    @JvmStatic fun setGyroscopeFrequency(frequency: Long) { putCommit(GYROSCOPE_FREQUENCY, frequency) }
+    @JvmStatic fun getTimeBeforeAutoLogout(): Long { return 1000L * pref.getLong(SECONDS_BEFORE_AUTO_LOGOUT, (5 * 60).toLong()) }
+    @JvmStatic fun setTimeBeforeAutoLogout(seconds: Long) { putCommit(SECONDS_BEFORE_AUTO_LOGOUT, seconds) }
+    @JvmStatic fun setUploadDataFilesFrequency(seconds: Long) { putCommit(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, seconds) }
+    @JvmStatic fun getUploadDataFilesFrequency(): Long { return 1000L * pref.getLong(UPLOAD_DATA_FILES_FREQUENCY_SECONDS, 60) }
+    @JvmStatic fun getVoiceRecordingMaxTimeLength(): Long { return 1000L * pref.getLong(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, (4 * 60).toLong()) }
+    @JvmStatic fun setVoiceRecordingMaxTimeLength(seconds: Long) { putCommit(VOICE_RECORDING_MAX_TIME_LENGTH_SECONDS, seconds) }
+    @JvmStatic fun getWifiLogFrequency(): Long { return 1000L * pref.getLong(WIFI_LOG_FREQUENCY_SECONDS, (5 * 60).toLong()) }
+    @JvmStatic fun setWifiLogFrequency(seconds: Long) { putCommit(WIFI_LOG_FREQUENCY_SECONDS, seconds) }
 
     // accelerometer, gyroscope bluetooth, new surveys, create data files, gps, logout,upload, wifilog (not voice recording, that doesn't apply
-    @JvmStatic fun setMostRecentAlarmTime(identifier: String, time: Long) {
-        putCommit("$identifier-prior_alarm", time)
-    }
-    @JvmStatic fun getMostRecentAlarmTime(identifier: String): Long {
-        return pref.getLong("$identifier-prior_alarm", 0)
-    }
+    @JvmStatic fun setMostRecentAlarmTime(identifier: String, time: Long) { putCommit("$identifier-prior_alarm", time) }
+    @JvmStatic fun getMostRecentAlarmTime(identifier: String): Long { return pref.getLong("$identifier-prior_alarm", 0) }
     // we want default to be 0 so that checks "is this value less than the current expected value" (eg "did this timer event pass already")
 
     /*###########################################################################################
@@ -433,30 +270,15 @@ object PersistentData {
         val defaultText: String = appContext.getString(R.string.default_survey_submit_success_message)
         return pref.getString(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, defaultText)?: defaultText
     }
-    @JvmStatic fun setAboutPageText(text: String) {
-        putCommit(ABOUT_PAGE_TEXT_KEY, text)
-    }
-    @JvmStatic fun setCallClinicianButtonText(text: String) {
-        putCommit(CALL_CLINICIAN_BUTTON_TEXT_KEY, text)
-    }
-    @JvmStatic fun setConsentFormText(text: String) {
-        putCommit(CONSENT_FORM_TEXT_KEY, text)
-    }
-    @JvmStatic fun setSurveySubmitSuccessToastText(text: String) {
-        putCommit(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, text)
-    }
+    @JvmStatic fun setAboutPageText(text: String) { putCommit(ABOUT_PAGE_TEXT_KEY, text) }
+    @JvmStatic fun setCallClinicianButtonText(text: String) { putCommit(CALL_CLINICIAN_BUTTON_TEXT_KEY, text) }
+    @JvmStatic fun setConsentFormText(text: String) { putCommit(CONSENT_FORM_TEXT_KEY, text) }
+    @JvmStatic fun setSurveySubmitSuccessToastText(text: String) { putCommit(SURVEY_SUBMIT_SUCCESS_TOAST_TEXT_KEY, text) }
 
     /*###########################################################################################
     ################################### User Credentials ########################################
     ###########################################################################################*/
-
-    // /*###########################################################################################
-    // ################################### User Credentials ########################################
-    // ###########################################################################################*/
-
-    @JvmStatic fun getServerUrl(): String? {
-        return pref.getString(SERVER_URL_KEY, null)
-    }
+    @JvmStatic fun getServerUrl(): String? { return pref.getString(SERVER_URL_KEY, null) }
     @JvmStatic fun setServerUrl(serverUrl: String) {
         if (editor == null) Log.e("LoginManager.java", "editor is null in setServerUrl()")
         putCommit(SERVER_URL_KEY, prependHttpsToServerUrl(serverUrl))
@@ -477,82 +299,42 @@ object PersistentData {
         putCommit(KEY_ID, userID)
         setPassword(password)
     }
-    @JvmStatic fun getPassword(): String? {
-        return pref.getString(KEY_PASSWORD, null)
-    }
-    @JvmStatic fun getPatientID(): String? {
-        return pref.getString(KEY_ID, NULL_ID)
-    }
+
+    @JvmStatic fun getPassword(): String? { return pref.getString(KEY_PASSWORD, null) }
+    @JvmStatic fun getPatientID(): String? { return pref.getString(KEY_ID, NULL_ID) }
 
     /*###########################################################################################
     ###################################### ERROR INFO ###########################################
     ###########################################################################################*/
-
-    @JvmStatic fun setStudyID(studyID: String) {
-        putCommit(STUDY_ID, studyID)
-    }
-    @JvmStatic fun setStudyName(studyName: String) {
-        putCommit(STUDY_NAME, studyName)
-    }
-    @JvmStatic fun getStudyID(): String {
-        return pref.getString(STUDY_ID, NULL_ID)?: NULL_ID
-    }
-    @JvmStatic fun getStudyName(): String {
-        return pref.getString(STUDY_NAME, NULL_ID)?: NULL_ID
-    }
+    @JvmStatic fun setStudyID(studyID: String) { putCommit(STUDY_ID, studyID) }
+    @JvmStatic fun setStudyName(studyName: String) { putCommit(STUDY_NAME, studyName) }
+    @JvmStatic fun getStudyID(): String { return pref.getString(STUDY_ID, NULL_ID)?: NULL_ID }
+    @JvmStatic fun getStudyName(): String { return pref.getString(STUDY_NAME, NULL_ID)?: NULL_ID }
 
     /*###########################################################################################
     #################################### Contact Numbers ########################################
     ###########################################################################################*/
-
-    @JvmStatic fun getPrimaryCareNumber(): String {
-        return pref.getString(PCP_PHONE_KEY, "")?: ""
-    }
-    @JvmStatic fun setPrimaryCareNumber(phoneNumber: String) {
-        putCommit(PCP_PHONE_KEY, phoneNumber)
-    }
-    @JvmStatic fun getPasswordResetNumber(): String {
-        return pref.getString(PASSWORD_RESET_NUMBER_KEY, "")?: ""
-    }
-    @JvmStatic fun setPasswordResetNumber(phoneNumber: String) {
-        putCommit(PASSWORD_RESET_NUMBER_KEY, phoneNumber)
-    }
+    @JvmStatic fun getPrimaryCareNumber(): String { return pref.getString(PCP_PHONE_KEY, "")?: "" }
+    @JvmStatic fun setPrimaryCareNumber(phoneNumber: String) { putCommit(PCP_PHONE_KEY, phoneNumber) }
+    @JvmStatic fun getPasswordResetNumber(): String { return pref.getString(PASSWORD_RESET_NUMBER_KEY, "")?: "" }
+    @JvmStatic fun setPasswordResetNumber(phoneNumber: String) { putCommit(PASSWORD_RESET_NUMBER_KEY, phoneNumber) }
 
     /*###########################################################################################
     ###################################### Survey Info ##########################################
     ###########################################################################################*/
-
-    @JvmStatic fun getSurveyIds(): List<String> {
-        return JSONUtils.jsonArrayToStringList(getSurveyIdsJsonArray())
-    }
-    @JvmStatic fun getSurveyQuestionMemory(surveyId: String): MutableList<String?> {
-        return JSONUtils.jsonArrayToStringList(getSurveyQuestionMemoryJsonArray(surveyId))
-    }
-    @JvmStatic fun getSurveyTimes(surveyId: String): String? {
-        return pref.getString("$surveyId-times", null)
-    }
-    @JvmStatic fun getSurveyContent(surveyId: String): String? {
-        return pref.getString("$surveyId-content", null)
-    }
-    @JvmStatic fun getSurveyType(surveyId: String): String? {
-        return pref.getString("$surveyId-type", null)
-    }
-    @JvmStatic fun getSurveySettings(surveyId: String): String? {
-        return pref.getString("$surveyId-settings", null)
-    }
-    @JvmStatic fun getSurveyName(surveyId: String): String? {
-        return pref.getString("$surveyId-name", null)
-    }
+    @JvmStatic fun getSurveyIds(): List<String> { return JSONUtils.jsonArrayToStringList(getSurveyIdsJsonArray()) }
+    @JvmStatic fun getSurveyQuestionMemory(surveyId: String): MutableList<String?> { return JSONUtils.jsonArrayToStringList(getSurveyQuestionMemoryJsonArray(surveyId)) }
+    @JvmStatic fun getSurveyTimes(surveyId: String): String? { return pref.getString("$surveyId-times", null) }
+    @JvmStatic fun getSurveyContent(surveyId: String): String? { return pref.getString("$surveyId-content", null) }
+    @JvmStatic fun getSurveyType(surveyId: String): String? { return pref.getString("$surveyId-type", null) }
+    @JvmStatic fun getSurveySettings(surveyId: String): String? { return pref.getString("$surveyId-settings", null) }
+    @JvmStatic fun getSurveyName(surveyId: String): String? { return pref.getString("$surveyId-name", null) }
 
     // getSurveyNotificationState is the closest thing we have for a source of truth for whether the
     // survey has passed through logic where it should be activated. (button and notification))
     // obviously always-available surveys are... alway active, but they may or may not have a notification.
-    @JvmStatic fun getSurveyNotificationState(surveyId: String): Boolean {
-        return pref.getBoolean("$surveyId-notificationState", false)
-    }
-    @JvmStatic fun getMostRecentSurveyAlarmTime(surveyId: String): Long {
-        return pref.getLong("$surveyId-prior_alarm", 9223372036854775807L)
-    }
+    @JvmStatic fun getSurveyNotificationState(surveyId: String): Boolean { return pref.getBoolean("$surveyId-notificationState", false) }
+    @JvmStatic fun getMostRecentSurveyAlarmTime(surveyId: String): Long { return pref.getLong("$surveyId-prior_alarm", 9223372036854775807L) }
     @JvmStatic fun createSurveyData(
             surveyId: String, content: String, timings: String, type: String, settings: String, name: String,
     ) {
@@ -564,29 +346,15 @@ object PersistentData {
     }
 
     // individual setters
-    @JvmStatic fun setSurveyContent(surveyId: String, content: String) {
-        putCommit("$surveyId-content", content)
-    }
-    @JvmStatic fun setSurveyTimes(surveyId: String, times: String) {
-        putCommit("$surveyId-times", times)
-    }
-    @JvmStatic fun setSurveyType(surveyId: String, type: String) {
-        putCommit("$surveyId-type", type)
-    }
-    @JvmStatic fun setSurveySettings(surveyId: String, settings: String) {
-        putCommit("$surveyId-settings", settings)
-    }
-    @JvmStatic fun setSurveyName(surveyId: String, name: String) {
-        putCommit("$surveyId-name", name)
-    }
+    @JvmStatic fun setSurveyContent(surveyId: String, content: String) { putCommit("$surveyId-content", content) }
+    @JvmStatic fun setSurveyTimes(surveyId: String, times: String) { putCommit("$surveyId-times", times) }
+    @JvmStatic fun setSurveyType(surveyId: String, type: String) { putCommit("$surveyId-type", type) }
+    @JvmStatic fun setSurveySettings(surveyId: String, settings: String) { putCommit("$surveyId-settings", settings) }
+    @JvmStatic fun setSurveyName(surveyId: String, name: String) { putCommit("$surveyId-name", name) }
 
     // survey state storage
-    @JvmStatic fun setSurveyNotificationState(surveyId: String, bool: Boolean) {
-        putCommit("$surveyId-notificationState", bool)
-    }
-    @JvmStatic fun setMostRecentSurveyAlarmTime(surveyId: String, time: Long) {
-        putCommit("$surveyId-prior_alarm", time)
-    }
+    @JvmStatic fun setSurveyNotificationState(surveyId: String, bool: Boolean) { putCommit("$surveyId-notificationState", bool) }
+    @JvmStatic fun setMostRecentSurveyAlarmTime(surveyId: String, time: Long) { putCommit("$surveyId-prior_alarm", time) }
     @JvmStatic fun deleteSurvey(surveyId: String) {
         editor.remove("$surveyId-content")
         editor.remove("$surveyId-times")
@@ -652,14 +420,11 @@ object PersistentData {
             throw NullPointerException("duplicate question id added: $questionId")
         }
     }
-    @JvmStatic fun clearSurveyQuestionMemory(surveyId: String) {
-        putCommit("$surveyId-questionIds", JSONArray().toString())
-    }
+    @JvmStatic fun clearSurveyQuestionMemory(surveyId: String) { putCommit("$surveyId-questionIds", JSONArray().toString()) }
 
     /*###########################################################################################
     ###################################### FUZZY GPS ############################################
     ###########################################################################################*/
-
     @JvmStatic fun getLatitudeOffset(): Double {
         val latitudeOffset = pref.getFloat(LATITUDE_OFFSET_KEY, 0.0f)
         // create latitude offset if it does not exist
@@ -685,15 +450,9 @@ object PersistentData {
             newLongitudeOffset
         } else longitudeOffset
     }
-    @JvmStatic fun setUseGpsFuzzing(useFuzzyGps: Boolean): Boolean {
-        return putCommit(USE_GPS_FUZZING_KEY, useFuzzyGps)
-    }
-    @JvmStatic fun getUseGpsFuzzing(): Boolean {
-        return pref.getBoolean(USE_GPS_FUZZING_KEY, false)
-    }
-    @JvmStatic fun setUseAnonymizedHashing(useAnonymizedHashing: Boolean): Boolean {
-        return putCommit(EncryptionEngine.USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing)
-    }
+    @JvmStatic fun setUseGpsFuzzing(useFuzzyGps: Boolean): Boolean { return putCommit(USE_GPS_FUZZING_KEY, useFuzzyGps) }
+    @JvmStatic fun getUseGpsFuzzing(): Boolean { return pref.getBoolean(USE_GPS_FUZZING_KEY, false) }
+    @JvmStatic fun setUseAnonymizedHashing(useAnonymizedHashing: Boolean): Boolean { return putCommit(EncryptionEngine.USE_ANONYMIZED_HASHING_KEY, useAnonymizedHashing) }
     @JvmStatic fun getUseAnonymizedHashing(): Boolean {
         // If not present, default to safe hashing
         return pref.getBoolean(EncryptionEngine.USE_ANONYMIZED_HASHING_KEY, true)
@@ -702,18 +461,8 @@ object PersistentData {
     /*###########################################################################################
     ###################################### Call Buttons #########################################
     ###########################################################################################*/
-
-    @JvmStatic fun getCallClinicianButtonEnabled(): Boolean {
-        return pref.getBoolean(CALL_CLINICIAN_BUTTON_ENABLED_KEY, false)
-    }
-    @JvmStatic fun setCallClinicianButtonEnabled(enabled: Boolean) {
-        putCommit(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled)
-    }
-    @JvmStatic fun getCallResearchAssistantButtonEnabled(): Boolean {
-        return pref.getBoolean(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, false)
-    }
-    @JvmStatic fun setCallResearchAssistantButtonEnabled(enabled: Boolean) {
-        putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled)
-    }
-
+    @JvmStatic fun getCallClinicianButtonEnabled(): Boolean { return pref.getBoolean(CALL_CLINICIAN_BUTTON_ENABLED_KEY, false) }
+    @JvmStatic fun setCallClinicianButtonEnabled(enabled: Boolean) { putCommit(CALL_CLINICIAN_BUTTON_ENABLED_KEY, enabled) }
+    @JvmStatic fun getCallResearchAssistantButtonEnabled(): Boolean { return pref.getBoolean(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, false) }
+    @JvmStatic fun setCallResearchAssistantButtonEnabled(enabled: Boolean) { putCommit(CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY, enabled) }
 }
