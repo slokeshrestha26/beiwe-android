@@ -198,8 +198,7 @@ class QuestionFragment : Fragment() {
         if (questionData == null) {
             this.questionData = (activity as SurveyActivity).surveyLogic!!.getCorrectlyPopulatedQuestionAnswer(questionID)
         }
-
-        // if min is greater than max, swap them
+        // if min is greater than max we need to swap them, so we have to redeclare them.
         var min = min
         var max = max
         if (min > max) {
@@ -207,19 +206,20 @@ class QuestionFragment : Fragment() {
             min = max
             max = temp_min
         }
+
+        // get the question and the slider, set the slider's range and default/starting value
         val question = generateQuestionText(inflater, R.layout.survey_slider_question, questionText)
         val slider = question.findViewById<View>(R.id.slider) as SeekBarEditableThumb
-        // Set the slider's range and default/starting value
-        slider.max = max - min
+        slider.max = max
         slider.min = min
 
-        // set the slider value based on the question data
+        // set the slider value based on the question data, otherwise make it "untouched"
         if (this.questionData!!.answerInteger != null) {
             slider.progress = this.questionData!!.answerInteger!!
             slider.markAsTouched()
         } else {
             // Make the slider invisible until it's touched (so there's effectively no default value)
-            slider.progress = 0 // value irrelevant, user must Stop touching element to run answer logic
+            slider.progress = min // value irrelevant, user must Stop touching element to run answer logic
             makeSliderInvisibleUntilTouched(slider)
         }
 
@@ -486,25 +486,36 @@ class QuestionFragment : Fragment() {
         var numbersLabel = question.findViewById(R.id.numbersPlaceholder) as View
         val index = question.indexOfChild(numbersLabel)
         question.removeView(numbersLabel)
+        // this is the survey_slider_numbers_label file
         numbersLabel = inflater.inflate(R.layout.survey_slider_numbers_label, question, false)
+        // this is the "linearLayoutNumbers" file
         val label = numbersLabel.findViewById<View>(R.id.linearLayoutNumbers) as LinearLayout
 
-        /* Decide whether to put 2, 3, 4, or 5 number labels. Pick the highest number of labels
-         * that can be achieved with each label above an integer value, and even spacing between
-         * all labels. */
+        // up to 11 labels - 11 works by giving your 0-10 options _correctly_, e.g.
+        // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10 ~~ that's 11 labels.
+        // otherwise you get weird splits, like this for 1-100:
+        // 1, 12, 23, 34, 45, 56, 67, 78, 89, 100
+        // we can always fit the full list if it is <= 11
         val range = max - min
-        val numberOfLabels = if (range % 4 == 0) 5 else if (range % 3 == 0) 4 else if (range % 2 == 0) 3 else 2
+        val numberOfLabels = if (range < 11) range + 1 else 11
 
-        // Create labels and spacers
+        // Create labels and spacers - the survey_slider_single_number_label file
         val numberResourceID = R.layout.survey_slider_single_number_label
+
+        // low value must be zero due to the placeholder required for no-value, I think.
+        // if numberOfLabels must be -1 because we manually add the highest
         for (i in 0 until numberOfLabels - 1) {
+            // create the label container(?)
             val number = inflater.inflate(numberResourceID, label, false) as TextView
             label.addView(number)
-            number.text = "" + (min + i * range / (numberOfLabels - 1))
+            // calculate the label - i starts at zero so it sets minimum correctly
+            val label_number = (min + (i * range) / (numberOfLabels - 1))
+            number.text = label_number.toString()
+            /// and add the space
             val spacer = inflater.inflate(R.layout.horizontal_spacer, label, false) as View
             label.addView(spacer)
         }
-        // Create one last label (the rightmost one) without a spacer to its right
+        // Create the last, highest, rightmost label without a spacer to its right
         val number = inflater.inflate(numberResourceID, label, false) as TextView
         label.addView(number)
         number.text = max.toString()
@@ -527,9 +538,9 @@ class QuestionFragment : Fragment() {
         slider.markAsUntouched()
         slider.setOnTouchListener { v, event ->
             // When the user touches the slider, make the "thumb" opaque and fully visible
-            val slider = v as SeekBarEditableThumb
-            slider.markAsTouched()
-            false
+            val the_slider = v as SeekBarEditableThumb
+            the_slider.markAsTouched()
+            false // ummmm I don't know what this value is used for...
         }
     }
 
@@ -541,27 +552,15 @@ class QuestionFragment : Fragment() {
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
         override fun onStopTrackingTouch(seekBar: SeekBar) {
-            if (questionData !== questionDescription) {
+            if (questionData !== questionDescription)
                 throw RuntimeException("QuestionData mismatch slider")
-            }
-            // insane kotlin behavior - if you use 'as seekbareditablethumb' here then the 'seekbar'
-            // variable suddenly has the hasBeenTouched attribute, but not until then. I guess this
-            // means that the cast can fail, so any line after the cast has better typing
-            // information. That's super weird.
 
             val real_seekbar = seekBar as SeekBarEditableThumb
-            // get the integer value of the answer, the min value is apparently needed based on
-            // exact type of seekbar?
-            // val answer: Int = if (seekBar is SeekBarEditableThumb) {
-            //     seekBar.progress + seekBar.min
-            // } else {
-            //     throw RuntimeException("Unknown seekbar type? wtaf")
-            //     seekBar.progress
-            // }
-            // set answer, pass answer to survey logic
-
-            questionData!!.answerInteger =
-                    if (real_seekbar.hasBeenTouched) real_seekbar.progress + real_seekbar.min else null
+            if (real_seekbar.hasBeenTouched!!)
+                questionData!!.answerInteger = real_seekbar.progress
+            else
+                questionData!!.answerInteger = null
+            // standard answer rigamarole
             questionData!!.coerceAnswer()
             SurveyTimingsRecorder.recordAnswer(questionData!!.answerString, questionData)
             (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)

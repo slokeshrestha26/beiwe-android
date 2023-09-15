@@ -37,20 +37,4 @@ class SeekBarEditableThumb : androidx.appcompat.widget.AppCompatSeekBar {
         compatThumb!!.mutate().alpha = 255
         hasBeenTouched = true
     }
-
-
-    // min is zoverriding th eSeekBar's built-in min, some restrictions on refactoring
-    private var min = 0
-
-    /** The minimum doesn't have to be zero; the SeekBar can start at another number (even negative)
-     * @param min */
-    override fun setMin(min: Int) {
-        this.min = min
-    }
-
-    /** The minimum doesn't have to be zero; the SeekBar can start at another number (even negative)
-     * @param min */
-    override fun getMin(): Int {
-        return min
-    }
 }

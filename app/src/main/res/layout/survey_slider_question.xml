@@ -25,12 +25,15 @@
         android:id="@+id/slider"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:max="4"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp"
+        android:max="9999"
+        android:paddingStart="50dp"
+        android:paddingEnd="50dp"
+		android:layout_marginStart="5dp"
+		android:layout_marginEnd="5dp"
         android:paddingTop="10dp"
         android:paddingBottom="50dp"
-        android:progress="2" >
+        android:progress="-1000" >
+		<!-- -1000 and 9999 are dummy values, they get reset -->
     </org.beiwe.app.survey.SeekBarEditableThumb>
 
 </LinearLayout>
