@@ -224,7 +224,7 @@ class QuestionFragment : Fragment() {
             // if value set to min or lower it goes to the left extreme, unfilled, max to the right
             // extreme, filled. User must _stop_ touching element to run answer logic.
             slider.progress = min
-            makeSliderInvisibleUntilTouched(slider)
+            slider.markAsUntouched()
         }
 
         // Add a label above the slider with numbers that mark points on a scale
@@ -528,34 +528,19 @@ class QuestionFragment : Fragment() {
         question.addView(numbersLabel, index)
     }
 
-    // This triggers a lot. Still don't know how to make the initial tap shift the thumb.
-    /** Make the "thumb" (the round circle/progress knob) of a Slider almost invisible until the user
-     * touches it.  This way the user is forced to answer every slider question; otherwise, we would
-     * not be able to tell the difference between a user ignoring a slider and a user choosing to
-     * leave a slider at the default value.  This makes it like there is no default value.
-     * @param slider */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun makeSliderInvisibleUntilTouched(slider: SeekBarEditableThumb) {
-        // Before the user has touched the slider, make the "thumb" transparent/ almost invisible
-        // Note: this works well on Android 4; there's a weird bug on Android 2[sig] in which the
-        // first slider question in the survey sometimes appears with a black thumb (once you touch
-        // it, it turns into a white thumb).
-        slider.markAsUntouched()
-        slider.setOnTouchListener { v: View, event: MotionEvent ->
-            // When the user touches the slider, make the "thumb" opaque and fully visible
-            val the_slider = v as SeekBarEditableThumb
-            the_slider.markAsTouched()
-            false // if this returns true the progress never changes.
-        }
-    }
-
     /************************************* ANSWER LISTENERS ************************************* */
 
     /** Listens for a touch/answer to a Slider Question, and records the answer  */
     private inner class SliderListener(var questionDescription: QuestionData) : OnSeekBarChangeListener {
-        // This does not trigger until the finger _slides_. Annoying. Can't hook to shift thumb
-        // on initial tap, have to wait for onProgressChanged.
-        override fun onStartTrackingTouch(seekBar: SeekBar) {}
+        // This does not trigger until the finger _slides_. Annoying. If you hook with an on-touch
+        // listener to mark the slider as touched, it will trigger on every touch, which is bad,
+        // and also it makes the progress visible until the first slide, which is also bad. Even
+        // if this is... slightly odd because it is just-barely possible to touch the screen
+        // and have nothing happen until you lift your finger, that appears to be the way android
+        // intends this to work, and the way it works in other apps I'm pretty sure
+        override fun onStartTrackingTouch(seekBar: SeekBar) {
+            (seekBar as SeekBarEditableThumb).markAsTouched()  // make the thumb visible
+        }
 
         // update the text above the slider as the user moves the slider.
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
