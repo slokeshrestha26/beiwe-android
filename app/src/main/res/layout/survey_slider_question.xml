@@ -16,11 +16,24 @@
 	    android:text="@string/question_error_text" >
 	</org.beiwe.app.survey.MarkDownTextView>
 
+	<androidx.appcompat.widget.AppCompatTextView
+		android:id="@+id/sliderSelectionText"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		style="@style/MainTextStyle"
+		android:gravity="center"
+		android:paddingBottom="20dp"
+		android:textSize="40sp"
+		android:text="">
+	</androidx.appcompat.widget.AppCompatTextView>
+
 	<View
 	    android:id="@+id/numbersPlaceholder"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content" />
 
+	<!-- There is a ticMark attribute for v24+, but it renders Below the bar, and doesn't do basics
+	 like automatic ui scaling so its terrible when there are lots of options to choose from. -->
     <org.beiwe.app.survey.SeekBarEditableThumb
         android:id="@+id/slider"
         android:layout_width="match_parent"

@@ -6,6 +6,7 @@ import android.app.Fragment
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
@@ -23,7 +24,6 @@ import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.TextView
 import android.widget.TimePicker
 import org.beiwe.app.R
-import org.beiwe.app.printe
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Arrays
@@ -213,13 +213,17 @@ class QuestionFragment : Fragment() {
         slider.max = max
         slider.min = min
 
-        // set the slider value based on the question data, otherwise make it "untouched"
+        // set the slider value based on the question data, otherwise make it "untouched".
+        // if we have a number set the text displlayed above the slider to that number, otherwise empty.
         if (this.questionData!!.answerInteger != null) {
             slider.progress = this.questionData!!.answerInteger!!
+            question.findViewById<TextView>(R.id.sliderSelectionText).text = slider.progress.toString()
             slider.markAsTouched()
         } else {
             // Make the slider invisible until it's touched (so there's effectively no default value)
-            slider.progress = min // value irrelevant, user must Stop touching element to run answer logic
+            // if value set to min or lower it goes to the left extreme, unfilled, max to the right
+            // extreme, filled. User must _stop_ touching element to run answer logic.
+            slider.progress = min
             makeSliderInvisibleUntilTouched(slider)
         }
 
@@ -524,6 +528,7 @@ class QuestionFragment : Fragment() {
         question.addView(numbersLabel, index)
     }
 
+    // This triggers a lot. Still don't know how to make the initial tap shift the thumb.
     /** Make the "thumb" (the round circle/progress knob) of a Slider almost invisible until the user
      * touches it.  This way the user is forced to answer every slider question; otherwise, we would
      * not be able to tell the difference between a user ignoring a slider and a user choosing to
@@ -536,11 +541,11 @@ class QuestionFragment : Fragment() {
         // first slider question in the survey sometimes appears with a black thumb (once you touch
         // it, it turns into a white thumb).
         slider.markAsUntouched()
-        slider.setOnTouchListener { v, event ->
+        slider.setOnTouchListener { v: View, event: MotionEvent ->
             // When the user touches the slider, make the "thumb" opaque and fully visible
             val the_slider = v as SeekBarEditableThumb
             the_slider.markAsTouched()
-            false // ummmm I don't know what this value is used for...
+            false // if this returns true the progress never changes.
         }
     }
 
@@ -548,8 +553,14 @@ class QuestionFragment : Fragment() {
 
     /** Listens for a touch/answer to a Slider Question, and records the answer  */
     private inner class SliderListener(var questionDescription: QuestionData) : OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {}
+        // This does not trigger until the finger _slides_. Annoying. Can't hook to shift thumb
+        // on initial tap, have to wait for onProgressChanged.
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
+        // update the text above the slider as the user moves the slider.
+        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+            (seekBar.parent as LinearLayout).findViewById<TextView>(R.id.sliderSelectionText).text = progress.toString()
+        }
 
         override fun onStopTrackingTouch(seekBar: SeekBar) {
             if (questionData !== questionDescription)
