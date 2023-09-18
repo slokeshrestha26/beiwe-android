@@ -204,7 +204,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
         if (COMPARATORS.contains(comparator)) {
             // in this case logic.getString(comparator) contains a json list/array with the first
             // element being the referencing question ID, and the second being a value to compare to.
-            return runNumericLogic(comparator, logic.getJSONArray(comparator))
+            return runLogic(comparator, logic.getJSONArray(comparator))
         }
         if (BOOLEAN_OPERATORS.contains(comparator)) {
             // get array of logic operations
@@ -242,25 +242,110 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     /** Processes the logical operation of a comparator.
      * If there has been no answer for the question a logic operation references this function returns false.
      * @param comparator a string that is in the COMPARATORS constant.
-     * @param parameters json array 2 elements in length.  The first element is a target question ID to pull an answer from, the second is the survey's value to compare to.
+     * @param parameters json array 2 elements in length.  The first element is a target question ID
+     * to pull an answer from, the second is the survey's value to compare to.
      * @return Boolean result of the operation, or false if the referenced question has no answer.
      * @throws JSONException */
     @Throws(JSONException::class)
-    private fun runNumericLogic(comparator: String, parameters: JSONArray): Boolean {
-        // printe("numeric logic", "compare: " + comparator + " to " + parameters.toString())
+    private fun runLogic(comparator: String, parameters: JSONArray): Boolean {
+        printe("numeric logic", "compare: " + comparator + " to " + parameters.toString())
         val targetQuestionId = parameters.getString(0)
 
         if (!questionAnswers.containsKey(targetQuestionId)) {
             // printe("numeric logic", "question " + targetQuestionId + " has no answer, must evaluate as false.")
             return false
         }
-        // questionAnswers[targetQuestionId]!!.pprint()
 
+        questionAnswers[targetQuestionId]!!.pprint()
         // false if DNE
-        val userAnswer = questionAnswers[targetQuestionId]!!.answerDouble
-        val surveyValue = parameters.getDouble(1)
 
-		printe("numeric", "evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
+        // need to redirect references to checkbox questions because their logic works differently.
+        if (questionAnswers[targetQuestionId]!!.type == QuestionType.Type.CHECKBOX) {
+            val userAnswer: String? = questionAnswers[targetQuestionId]!!.answerString
+            val surveyValue: Int = parameters.getInt(1) // its an int because it references an index
+            return checkboxLogic(comparator, userAnswer, surveyValue)
+        } else {
+            val userAnswer: Double? = questionAnswers[targetQuestionId]!!.answerDouble
+            // its a float because numeric text answers are coerced to floats
+            val surveyValue: Double = parameters.getDouble(1)
+            return numericLogic(comparator, userAnswer, surveyValue)
+        }
+    }
+
+    /** runs the bulk comparator logic for index oriented checkbox questions, which may have many answers selected */
+    fun checkboxLogic(comparator: String, userAnswer: String?, surveyValue: Int) : Boolean {
+        // printe("checkbox - evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
+
+        // If we encounter an unanswered question, that evaluates as false. (defined in the spec.)
+        if (userAnswer == null || userAnswer.isEmpty() || userAnswer == "[]")
+            return false
+
+        // user answer will be a json list of numbers, referring to the index of answers that were selected.
+        // we need to convert the userAnswers to list of integers, and then run the logic of that the numeric operator
+        // until there is at least one match - e.g. an "any" match
+
+        val answerJsonList = try {
+             JSONArray(userAnswer)
+        } catch (e: JSONException) {
+            // unforrtunately for now this needs to explode, because we need to know if it can happen.
+            e.printStackTrace()
+            throw NullPointerException("checkbox - user answer was '" + userAnswer + "' and it was not a json list")
+        }
+        // printe("the json array of answers selected was " + answerJsonList.toString())
+
+        // integer list for the real values
+        val answerList = ArrayList<Int>(answerJsonList.length())
+        // check that every value is an integer by trying to access it as an integer and catching the exception
+        for (i in 0 until answerJsonList.length()) {
+            try {
+                answerList.add(answerJsonList.getInt(i))
+            } catch (e: JSONException) {
+                // and this also needs to explode
+                e.printStackTrace()
+                throw NullPointerException(
+                        "checkbox - user answer was '" + userAnswer + "' and it was not a json list of integers")
+            }
+        }
+        // printe("the integer array of answers selected was " + answerList.toString())
+
+        // interpret == as "in" and != as "not in"
+        if (comparator == "==")
+            return answerList.contains(surveyValue)
+        if (comparator == "!=")  // not actually a real comparator in the spec, whatever
+            return !answerList.contains(surveyValue)
+
+        // The less and greater than checks, if there are any matches
+        if (comparator == "<") {
+            for (answer in answerList)
+                if (answer < surveyValue)
+                    return true
+            return false
+        }
+        if (comparator == ">") {
+            for (answer in answerList)
+                if (answer > surveyValue)
+                    return true
+            return false
+        }
+        if (comparator == "<=") {
+            for (answer in answerList)
+                if (answer <= surveyValue)
+                    return true
+            return false
+        }
+        if (comparator == ">="){
+            for (answer in answerList)
+                if (answer >= surveyValue)
+                    return true
+            return false
+        }
+        // don't crash the app if its an invalid comparator, just return false.
+        return false
+    }
+
+    /** runs the bulk comparator logic for numeric questions, includes radio selections because they can only have one answer. */
+    fun numericLogic(comparator: String, userAnswer: Double?, surveyValue: Double) : Boolean {
+		printe("numeric - evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
         // If we encounter an unanswered question, that evaluates as false. (defined in the spec.)
         if (userAnswer == null)
             return false
@@ -276,7 +361,8 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
             return isEqual(userAnswer, surveyValue)
         if (comparator == "!=")
             return !isEqual(userAnswer, surveyValue)
-        throw NullPointerException("numeric logic fail")
+        // don't crash the app if its an invalid comparator, just return false.
+        return false
     }
 
     // coerce values to numerics for all non-checkbox questions (they have a json list)
