@@ -128,7 +128,8 @@ Version history:
 73: 3.5.2a - disables bluetooth because it caused the app to crash? this bug does not occur on
     the downloaded play store version of the app.
 74: 3.5.3 - Remove bluetooth mac, fixes bluetooth permissions (and converts it to kotlin).
-75: 3.5.3 - fixes numerous issues with Slider question ui/ux, adds textual display of value.
+75: 3.5.4 - fixes numerous issues with Slider question ui/ux, adds textual display of value.
+    Adds question queue somewhat like iOS, displays survey names, displays survey names in notifications.
 TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
    This probably requires a new data stream.
 */

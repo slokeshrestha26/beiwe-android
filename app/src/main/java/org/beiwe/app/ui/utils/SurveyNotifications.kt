@@ -74,6 +74,9 @@ object SurveyNotifications {
         val notificationBuilder = Notification.Builder(appContext, CHANNEL_ID)
         notificationBuilder.setContentTitle(appContext.getString(R.string.survey_notification_app_name))
         notificationBuilder.setShowWhen(true) // As of API 24 this no longer defaults to true and must be set explicitly
+        var survey_name = PersistentData.getSurveyName(surveyId)?: ""
+        if (survey_name != "")
+            survey_name = " \"$survey_name\""
 
         // build the activity intent based on the type of survey
         val activityIntent: Intent
@@ -81,7 +84,7 @@ object SurveyNotifications {
             activityIntent = Intent(appContext, SurveyActivity::class.java)
             activityIntent.action = appContext.getString(R.string.start_tracking_survey)
             notificationBuilder.setTicker(appContext.resources.getString(R.string.new_android_survey_notification_ticker))
-            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_android_survey_notification_details))
+            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_android_survey_notification_details) + survey_name)
             notificationBuilder.setSmallIcon(R.drawable.survey_icon)
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.survey_icon))
             notificationBuilder.setGroup(surveyId)
@@ -89,7 +92,7 @@ object SurveyNotifications {
             activityIntent = Intent(appContext, getAudioSurveyClass(surveyId))
             activityIntent.action = appContext.getString(R.string.start_audio_survey)
             notificationBuilder.setTicker(appContext.resources.getString(R.string.new_audio_survey_notification_ticker))
-            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_audio_survey_notification_details))
+            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_audio_survey_notification_details) + survey_name)
             notificationBuilder.setSmallIcon(R.drawable.voice_recording_icon)
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.voice_recording_icon))
             notificationBuilder.setGroup(surveyId)
@@ -145,12 +148,15 @@ object SurveyNotifications {
         //activityIntent contains information on the action triggered by tapping the notification.
         val notificationBuilder = NotificationCompat.Builder(appContext)
         notificationBuilder.setContentTitle(appContext.getString(R.string.survey_notification_app_name))
+        var survey_name = PersistentData.getSurveyName(surveyId)?: ""
+        if (survey_name != "")
+            survey_name = " \"$survey_name\""
         val activityIntent: Intent
         if (PersistentData.getSurveyType(surveyId) == "tracking_survey") {
             activityIntent = Intent(appContext, SurveyActivity::class.java)
             activityIntent.action = appContext.getString(R.string.start_tracking_survey)
             notificationBuilder.setTicker(appContext.resources.getString(R.string.new_android_survey_notification_ticker))
-            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_android_survey_notification_details))
+            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_android_survey_notification_details) + survey_name)
             notificationBuilder.setSmallIcon(R.drawable.survey_icon)
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.survey_icon))
             notificationBuilder.setGroup(surveyId)
@@ -158,7 +164,7 @@ object SurveyNotifications {
             activityIntent = Intent(appContext, getAudioSurveyClass(surveyId))
             activityIntent.action = appContext.getString(R.string.start_audio_survey)
             notificationBuilder.setTicker(appContext.resources.getString(R.string.new_audio_survey_notification_ticker))
-            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_audio_survey_notification_details))
+            notificationBuilder.setContentText(appContext.resources.getString(R.string.new_audio_survey_notification_details) + survey_name)
             notificationBuilder.setSmallIcon(R.drawable.voice_recording_icon)
             notificationBuilder.setLargeIcon(BitmapFactory.decodeResource(appContext.resources, R.drawable.voice_recording_icon))
             notificationBuilder.setGroup(surveyId)
