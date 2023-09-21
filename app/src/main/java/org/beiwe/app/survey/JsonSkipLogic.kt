@@ -3,6 +3,7 @@ package org.beiwe.app.survey
 import android.content.Context
 import android.util.Log
 import org.beiwe.app.CrashHandler.Companion.writeCrashlog
+import org.beiwe.app.JSONUtils
 import org.beiwe.app.printe
 import org.json.JSONArray
 import org.json.JSONException
@@ -256,16 +257,20 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
             return false
         }
 
-        questionAnswers[targetQuestionId]!!.pprint()
-        // false if DNE
+        val target_question_QuestionData = questionAnswers[targetQuestionId]!!
+
+        // val target_question = questionsById[targetQuestionId]!!
+        // very helpful when debugging
+        target_question_QuestionData.pprint()
 
         // need to redirect references to checkbox questions because their logic works differently.
-        if (questionAnswers[targetQuestionId]!!.type == QuestionType.Type.CHECKBOX) {
-            val userAnswer: String? = questionAnswers[targetQuestionId]!!.answerString
-            val surveyValue: Int = parameters.getInt(1) // its an int because it references an index
-            return checkboxLogic(comparator, userAnswer, surveyValue)
+        if (target_question_QuestionData.type == QuestionType.Type.CHECKBOX) {
+            val userAnswer: String? = target_question_QuestionData.answerString
+            val surveyValue: Int = parameters.getInt(1)
+
+            return checkboxLogic(comparator, userAnswer, surveyValue, target_question_QuestionData)
         } else {
-            val userAnswer: Double? = questionAnswers[targetQuestionId]!!.answerDouble
+            val userAnswer: Double? = target_question_QuestionData.answerDouble
             // its a float because numeric text answers are coerced to floats
             val surveyValue: Double = parameters.getDouble(1)
             return numericLogic(comparator, userAnswer, surveyValue)
@@ -273,68 +278,65 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     }
 
     /** runs the bulk comparator logic for index oriented checkbox questions, which may have many answers selected */
-    fun checkboxLogic(comparator: String, userAnswer: String?, surveyValue: Int) : Boolean {
-        // printe("checkbox - evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
+    fun checkboxLogic(comparator: String, userAnswer: String?, surveyValue: Int, target_QuestionData: QuestionData) : Boolean {
+        printe("checkbox - evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
 
-        // If we encounter an unanswered question, that evaluates as false. (defined in the spec.)
-        if (userAnswer == null || userAnswer.isEmpty() || userAnswer == "[]")
+        // If we encounter an unanswered question, or a question with no answers, return false
+        if (userAnswer == null || userAnswer.isEmpty() || userAnswer == "[]"
+                || target_QuestionData.answerOptions == null
+                || target_QuestionData.answerOptions!!.isEmpty()
+                || target_QuestionData.answerOptions == "[]")
             return false
 
-        // user answer will be a json list of numbers, referring to the index of answers that were selected.
-        // we need to convert the userAnswers to list of integers, and then run the logic of that the numeric operator
-        // until there is at least one match - e.g. an "any" match
-
-        val answerJsonList = try {
-             JSONArray(userAnswer)
+        // The user's answer will be a json list of _strings_. We need to go through the answers to get
+        // the index of the answer chosen in order make the index comparisons.
+        val userAnswers = try {
+            JSONUtils.jsonArrayToStringList(JSONArray(userAnswer))
         } catch (e: JSONException) {
-            // unforrtunately for now this needs to explode, because we need to know if it can happen.
-            e.printStackTrace()
-            throw NullPointerException("checkbox - user answer was '" + userAnswer + "' and it was not a json list")
+            throw NullPointerException("checkbox - user answers were '" + userAnswer + "' and it was not a json list")
         }
-        // printe("the json array of answers selected was " + answerJsonList.toString())
+        val answerOptions = try {
+            JSONUtils.jsonArrayToStringList(JSONArray(target_QuestionData.answerOptions))
+        } catch (e: JSONException) {
+            throw NullPointerException("checkbox - answer options was '" + target_QuestionData.answerOptions + "' and it was not a json list")
+        }
 
-        // integer list for the real values
-        val answerList = ArrayList<Int>(answerJsonList.length())
+        // integer list for the final index values
+        val userAnswersIndexList = ArrayList<Int>(userAnswers.size)
         // check that every value is an integer by trying to access it as an integer and catching the exception
-        for (i in 0 until answerJsonList.length()) {
-            try {
-                answerList.add(answerJsonList.getInt(i))
-            } catch (e: JSONException) {
-                // and this also needs to explode
-                e.printStackTrace()
-                throw NullPointerException(
-                        "checkbox - user answer was '" + userAnswer + "' and it was not a json list of integers")
-            }
+        for (anAnswer in userAnswers) {
+            userAnswersIndexList.add(answerOptions.indexOf(anAnswer))
         }
-        // printe("the integer array of answers selected was " + answerList.toString())
+
+        // printe("the integer array of answers selected was " + userAnswersIndexList.toString())
 
         // interpret == as "in" and != as "not in"
         if (comparator == "==")
-            return answerList.contains(surveyValue)
+            return userAnswersIndexList.contains(surveyValue)
         if (comparator == "!=")  // not actually a real comparator in the spec, whatever
-            return !answerList.contains(surveyValue)
+            return !userAnswersIndexList.contains(surveyValue)
 
         // The less and greater than checks, if there are any matches
         if (comparator == "<") {
-            for (answer in answerList)
+            for (answer in userAnswersIndexList)
                 if (answer < surveyValue)
                     return true
             return false
         }
         if (comparator == ">") {
-            for (answer in answerList)
+            for (answer in userAnswersIndexList)
                 if (answer > surveyValue)
                     return true
             return false
         }
         if (comparator == "<=") {
-            for (answer in answerList)
+            for (answer in userAnswersIndexList)
                 if (answer <= surveyValue)
                     return true
             return false
         }
         if (comparator == ">="){
-            for (answer in answerList)
+            for (answer in userAnswersIndexList)
                 if (answer >= surveyValue)
                     return true
             return false

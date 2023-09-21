@@ -32,7 +32,7 @@ public class SurveyTimingsRecorder {
 		message += sanitizeString(questionData.getId()) + TextFileManager.DELIMITER;
 		message += sanitizeString(questionData.getType().getStringName()) + TextFileManager.DELIMITER;
 		message += sanitizeString(questionData.getText()) + TextFileManager.DELIMITER;
-		message += sanitizeString(questionData.getOptions()) + TextFileManager.DELIMITER;
+		message += sanitizeString(questionData.getAnswerOptions()) + TextFileManager.DELIMITER;
 		message += sanitizeString(answer);
 
 		Log.i("SurveyResponse timings", message);

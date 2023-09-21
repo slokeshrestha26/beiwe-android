@@ -8,7 +8,6 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import org.beiwe.app.R
-import org.beiwe.app.printe
 import org.beiwe.app.storage.TextFileManager
 
 class SurveyAnswersRecorder {
@@ -24,7 +23,7 @@ class SurveyAnswersRecorder {
         line += TextFileManager.DELIMITER
         line += SurveyTimingsRecorder.sanitizeString(questionData.text)
         line += TextFileManager.DELIMITER
-        line += SurveyTimingsRecorder.sanitizeString(questionData.options)
+        line += SurveyTimingsRecorder.sanitizeString(questionData.answerOptions)
         line += TextFileManager.DELIMITER
         line += if (questionData.answerString == null || questionData.answerString == "") {
             NO_ANSWER_SELECTED

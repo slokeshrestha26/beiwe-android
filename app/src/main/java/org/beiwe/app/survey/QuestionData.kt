@@ -1,8 +1,6 @@
 package org.beiwe.app.survey
 
-import android.os.Bundle
 import org.beiwe.app.printe
-import org.json.JSONObject
 
 /** class for containing the answer to any type of question. Has data and logic to convert any type
  * of question to an appropriate answer string.  */
@@ -11,7 +9,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     var id: String? = null
     var type: QuestionType.Type
     var text: String? = null
-    var options: String? = null
+    var answerOptions: String? = null
     var answerString: String? = null
     var answerInteger: Int? = null
     var answerDouble: Double? = null
@@ -26,7 +24,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         x += "type: $type, "
         x += if (this.id == null) "" else "id: $id, "
         x += if (this.text == null) "" else "text: $text, "
-        x += if (this.options == null) "" else "options: $options, "
+        x += if (this.answerOptions == null) "" else "options: $answerOptions, "
         x += if (this.answerString == null) "" else "answerString: $answerString, "
         x += if (this.answerInteger == null) "" else "answerInteger: $answerInteger, "
         x += if (this.answerDouble == null) "" else "answerDouble: $answerDouble, "
@@ -40,7 +38,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         this.id = id
         this.type = type
         this.text = text
-        this.options = options
+        this.answerOptions = options
     }
 
     // numeric index answers (radio buttons, sliders) and numeric open response have their values
