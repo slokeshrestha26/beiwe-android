@@ -129,9 +129,10 @@ object SetDeviceSettings {
                 // safe, so we will wait 5 seconds (extreme overkill).  The only Real situation
                 // where we don't want to explode the the app is if the user is taking a survey.
                 // (could also use login state)
+                // I have tested this and it works. We could show a toast.
                 if (writeDeviceSettings(deviceSettingsJSON)){
                     while (PersistentData.getTakingSurvey()) {
-                        printw("waiting for survey to finish")
+                        // printw("waiting for survey to finish")
                         Thread.sleep(5000)
                     }
                     printe("restarting service?")

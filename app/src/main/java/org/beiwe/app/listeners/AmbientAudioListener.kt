@@ -107,7 +107,7 @@ object AmbientAudioListener {
         TextFileManager.writeDebugLogStatement("AmbientAudioListener.encryptAmbientAudioFile()")
         // If the audio recorder exists, stop recording and start encrypting the file
         if (instantiated && mRecorder != null) {
-            mRecorder!!.stop()
+            mRecorder!!.stop()  //FIXME this line can crash with an illegal state exception
             mRecorder!!.reset()
             mRecorder!!.release()
             EncryptAmbientAudioFileTask().execute()  // executes on a thread and then starts a new recording

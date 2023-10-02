@@ -8,15 +8,18 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
     // todo: make more of these non optional.
     var id: String? = null
     var type: QuestionType.Type
-    var text: String? = null
-    var answerOptions: String? = null
-    var answerString: String? = null
-    var answerInteger: Int? = null
-    var answerDouble: Double? = null
+    var text: String? = null  // the question prompt
+    var answerOptions: String? = null  // answers for anything enumerated (radio buttons, checkboxes)
+    var answerString: String? = null  // answers for anything that is a string (everything?)
+    var answerInteger: Int? = null  // answers for anything that is an integer (sliders?)
+    var answerDouble: Double? = null  // used inside logic (numerical free responses can have floating point values.)
 
+    // date and time components for date and time questions
     var time_hour: Int? = null
     var time_minute: Int? = null
     var date_string: String? = null
+
+    var indicesList: List<Int>? = null  // used in checkbox answer logic (we could make radio buttons use this too)
 
     fun pprint() {
         // print everything that has data in the object
@@ -31,6 +34,7 @@ class QuestionData(id: String?, type: QuestionType.Type, text: String?, options:
         x += if (this.time_hour == null) "" else "time_hour: $time_hour, "
         x += if (this.time_minute == null) "" else "time_minute: $time_minute, "
         x += if (this.date_string == null) "" else "date_string: $date_string, "
+        x += if (this.indicesList == null) "" else "indicesList: $indicesList, "
         printe(x)
     }
 

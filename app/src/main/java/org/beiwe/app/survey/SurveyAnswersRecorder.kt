@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import androidx.appcompat.widget.AppCompatCheckBox
 import org.beiwe.app.R
 import org.beiwe.app.storage.TextFileManager
 
@@ -140,8 +141,7 @@ class SurveyAnswersRecorder {
 
         fun indexOfSelectedRadioButton(questionLayout: View): Int? {
             val radioGroup = questionLayout.findViewById<View>(R.id.radioGroup) as RadioGroup
-            val numberOfChoices = radioGroup.childCount
-            for (i in 0 until numberOfChoices) {
+            for (i in 0 until radioGroup.childCount) {
                 if ((radioGroup.getChildAt(i) as RadioButton).isChecked)
                     return i
             }
@@ -160,7 +160,8 @@ class SurveyAnswersRecorder {
          * @param checkboxesList a LinearLayout, presumably containing only checkboxes
          * @return a String formatted like a String[] printed to a single String */
         fun selectedCheckboxes(checkboxesList: LinearLayout): String {
-            // Make a list of the checked answers that reads like a printed array of strings
+            // This is the ORIGINAL format - a list of the checked answers that reads like a printed array of strings
+            // when this data is serialied to a file the commas get replaced with semicolons. (we want to change this)
             var answersList = "["
 
             // Iterate over the whole list of CheckBoxes in this LinearLayout
@@ -182,6 +183,18 @@ class SurveyAnswersRecorder {
             // close list and return
             answersList += "]"
             return answersList
+        }
+
+        // checkboxes may have many answers, assemble a list of the indices of the selected answers.
+        fun indicesOfSelectedCheckboxButtons(questionLayout: View): MutableList<Int> {
+            val questions_layout = questionLayout.findViewById<View>(R.id.checkboxesList) as LinearLayout
+            // val numberOfChoices = radioGroup.childCount
+            val selected_indices = mutableListOf<Int>()
+            for (i in 0 until questions_layout.childCount) {
+                if ((questions_layout.getChildAt(i) as AppCompatCheckBox).isChecked)
+                    selected_indices.add(i)
+            }
+            return selected_indices
         }
 
         // // externally accessed function

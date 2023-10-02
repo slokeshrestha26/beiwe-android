@@ -3,7 +3,6 @@ package org.beiwe.app.survey
 import android.content.Context
 import android.util.Log
 import org.beiwe.app.CrashHandler.Companion.writeCrashlog
-import org.beiwe.app.JSONUtils
 import org.beiwe.app.printe
 import org.json.JSONArray
 import org.json.JSONException
@@ -265,10 +264,9 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
         // need to redirect references to checkbox questions because their logic works differently.
         if (target_question_QuestionData.type == QuestionType.Type.CHECKBOX) {
-            val userAnswer: String? = target_question_QuestionData.answerString
-            val surveyValue: Int = parameters.getInt(1)
-
-            return checkboxLogic(comparator, userAnswer, surveyValue, target_question_QuestionData)
+            val userAnswers: String? = target_question_QuestionData.answerString
+            val surveyTargetValue: Int = parameters.getInt(1)
+            return checkboxLogic(comparator, target_question_QuestionData.indicesList, surveyTargetValue)
         } else {
             val userAnswer: Double? = target_question_QuestionData.answerDouble
             // its a float because numeric text answers are coerced to floats
@@ -278,66 +276,41 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
     }
 
     /** runs the bulk comparator logic for index oriented checkbox questions, which may have many answers selected */
-    fun checkboxLogic(comparator: String, userAnswer: String?, surveyValue: Int, target_QuestionData: QuestionData) : Boolean {
-        printe("checkbox - evaluating answer " + userAnswer + " " + comparator + " " + surveyValue)
-
-        // If we encounter an unanswered question, or a question with no answers, return false
-        if (userAnswer == null || userAnswer.isEmpty() || userAnswer == "[]"
-                || target_QuestionData.answerOptions == null
-                || target_QuestionData.answerOptions!!.isEmpty()
-                || target_QuestionData.answerOptions == "[]")
+    fun checkboxLogic(comparator: String, userAnswersIndicesList: List<Int>?, surveyTargetValue: Int) : Boolean {
+        printe("target_QuestionData.answerOptions: '", userAnswersIndicesList.toString() + "'")
+        if (userAnswersIndicesList == null || userAnswersIndicesList.isEmpty()) {
+            // print("No answer!")
             return false
-
-        // The user's answer will be a json list of _strings_. We need to go through the answers to get
-        // the index of the answer chosen in order make the index comparisons.
-        val userAnswers = try {
-            JSONUtils.jsonArrayToStringList(JSONArray(userAnswer))
-        } catch (e: JSONException) {
-            throw NullPointerException("checkbox - user answers were '" + userAnswer + "' and it was not a json list")
         }
-        val answerOptions = try {
-            JSONUtils.jsonArrayToStringList(JSONArray(target_QuestionData.answerOptions))
-        } catch (e: JSONException) {
-            throw NullPointerException("checkbox - answer options was '" + target_QuestionData.answerOptions + "' and it was not a json list")
-        }
-
-        // integer list for the final index values
-        val userAnswersIndexList = ArrayList<Int>(userAnswers.size)
-        // check that every value is an integer by trying to access it as an integer and catching the exception
-        for (anAnswer in userAnswers) {
-            userAnswersIndexList.add(answerOptions.indexOf(anAnswer))
-        }
-
-        // printe("the integer array of answers selected was " + userAnswersIndexList.toString())
 
         // interpret == as "in" and != as "not in"
         if (comparator == "==")
-            return userAnswersIndexList.contains(surveyValue)
+            return userAnswersIndicesList.contains(surveyTargetValue)
         if (comparator == "!=")  // not actually a real comparator in the spec, whatever
-            return !userAnswersIndexList.contains(surveyValue)
+            return !userAnswersIndicesList.contains(surveyTargetValue)
 
         // The less and greater than checks, if there are any matches
         if (comparator == "<") {
-            for (answer in userAnswersIndexList)
-                if (answer < surveyValue)
+            for (answer in userAnswersIndicesList)
+                if (answer < surveyTargetValue)
                     return true
             return false
         }
         if (comparator == ">") {
-            for (answer in userAnswersIndexList)
-                if (answer > surveyValue)
+            for (answer in userAnswersIndicesList)
+                if (answer > surveyTargetValue)
                     return true
             return false
         }
         if (comparator == "<=") {
-            for (answer in userAnswersIndexList)
-                if (answer <= surveyValue)
+            for (answer in userAnswersIndicesList)
+                if (answer <= surveyTargetValue)
                     return true
             return false
         }
         if (comparator == ">="){
-            for (answer in userAnswersIndexList)
-                if (answer >= surveyValue)
+            for (answer in userAnswersIndicesList)
+                if (answer >= surveyTargetValue)
                     return true
             return false
         }
@@ -446,7 +419,7 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
 
             // Guarantee: the questions in QuestionAnswer will consist of all _displayed_ questions.
             for (questionId in questionOrder) {
-
+                // printe("evaluating for purposes of unanswered questions: " + questionId)
                 // QuestionData objects are put in the QuestionAnswers dictionary if they are ever
                 // displayed. (The user must also proceed to the next question, but that has no effect.)
                 // No QuestionAnswer object means question did not display, which means we can skip it.
@@ -461,27 +434,33 @@ class JsonSkipLogic(jsonQuestions: JSONArray, runDisplayLogic: Boolean, private 
                     // object in QuestionAnswers.
                     // There is one exception: INFO_TEXT_BOX questions are always ignored.
                     val questionData: QuestionData? = questionAnswers[questionId]
-
                     // INFO_TEXT_BOX - skip it.
-                    if (questionData!!.type == QuestionType.Type.INFO_TEXT_BOX)
+                    if (questionData!!.type == QuestionType.Type.INFO_TEXT_BOX) {
                         continue
+                    }
 
                     // check if should display, store value
                     questionWouldDisplay = shouldQuestionDisplay(questionId)
-                    if (questionWouldDisplay) // If would display, increment question number.
+                    if (questionWouldDisplay) { // If would display, increment question number.
                         questionDisplayNumber++
-                    else // If would not display not, skip it without incrementing.
+                    } else { // If would not display not, skip it without incrementing.
                         continue
+                    }
 
                     // If question is actually unanswered construct a display string.
-                    if (!questionData.questionIsAnswered())
+                    if (!questionData.questionIsAnswered()) {
                         unanswered.add("Question " + questionDisplayNumber + ": " + questionData.text)
+                    }
                 } else {
+                    // we need to check the json... great
                     questionWouldDisplay = shouldQuestionDisplay(questionId)
                     if (questionWouldDisplay) {
                         questionDisplayNumber++
                         // need to get the question json and then get the question text
                         val questionJson: JSONObject? = questionsById[questionId]
+                        if (questionJson!!.optString("question_type") == "info_text_box") {
+                            continue
+                        }
                         val questionText = questionJson!!.optString("question_text") ?: ""
                         unanswered.add("Question " + questionDisplayNumber + ": " + questionText)
                     }

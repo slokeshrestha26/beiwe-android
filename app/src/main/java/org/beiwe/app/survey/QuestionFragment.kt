@@ -595,6 +595,8 @@ class QuestionFragment : Fragment() {
                 // and can never change. fantastic.
                 SurveyTimingsRecorder.recordAnswer(answersList ?: "[]", questionData)
                 questionData!!.answerString = answersList
+                // we need answer indices for checkbox logic.
+                questionData!!.indicesList = SurveyAnswersRecorder.indicesOfSelectedCheckboxButtons(checkboxesList)
                 (activity as SurveyActivity).surveyLogic!!.setAnswer(questionData!!)
             }
         }

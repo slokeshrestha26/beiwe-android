@@ -74,13 +74,16 @@ public class SurveySubmitFragment extends Fragment {
         } else {
             unansweredQuestionsMessage.setText("You did not answer " + unansweredQuestions.size() + " questions:");
         }
+        
+        // unansweredQuestionsMessage.setTextAlignment(View.TEXT_ALIGNMENT_CENTER); // doesn't do anything
+        
         // Show a list of the unanswered questions
         ListView unansweredQuestionsListView = (ListView) unansweredQuestionsLayout.findViewById(R.id.unansweredQuestionsListView);
-        ArrayAdapter adapter;
+        ArrayAdapter<String> adapter;
         try {
-            adapter = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_1, unansweredQuestions);
+            adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, unansweredQuestions);
         } catch (NoSuchMethodError e) {
-            adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, unansweredQuestions);
+            adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, unansweredQuestions);
         }
         unansweredQuestionsListView.setAdapter(adapter);
         
