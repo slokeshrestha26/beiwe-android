@@ -130,6 +130,10 @@ Version history:
 74: 3.5.3 - Remove bluetooth mac, fixes bluetooth permissions (and converts it to kotlin).
 75: 3.5.4 - fixes numerous issues with Slider question ui/ux, adds textual display of value.
     Adds question queue somewhat like iOS, displays survey names, displays survey names in notifications.
+
+76: 3.5.5 - adds reference logic for checkbox questions.
+77: 3.5.6 - fixes old android registration bug, and old android version audio recording bug.
+
 TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
    This probably requires a new data stream.
 */
@@ -156,8 +160,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 33
-        versionCode 75       //TODO: update this Beiwe version code for new releases
-        versionName '3.5.4'  //TODO: update this Beiwe version number for new releases
+        versionCode 77       //TODO: update this Beiwe version code for new releases
+        versionName '3.5.6'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
 
