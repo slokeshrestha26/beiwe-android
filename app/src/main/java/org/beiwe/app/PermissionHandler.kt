@@ -6,8 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
@@ -16,6 +16,7 @@ object PermissionHandler {
 
     @JvmField
     var POWER_EXCEPTION_PERMISSION = "POWER_EXCEPTION_PERMISSION"
+
     @JvmField
     var permissionMessages: MutableMap<String, Int> = HashMap()
 
@@ -277,7 +278,7 @@ object PermissionHandler {
             if (!checkAccessRecordAudio(context)) return Manifest.permission.RECORD_AUDIO
         }
 
-        //The phone call permission is invariant, it is required for all studies in order for the
+        // The phone call permission is invariant, it is required for all studies in order for the
         // call clinician functionality to work
         if (!checkAccessCallPhone(context)) return Manifest.permission.CALL_PHONE
 
@@ -299,16 +300,24 @@ object PermissionHandler {
         return intValue == 1
     }
 
+    @JvmStatic
+    fun getDeviceStatusReport(context: Context): String {
+        return _getDeviceStatusReport(context)
+    }
 
     // This function is probably sitting in the wrong file, but its so broad, and we need to have a
     // it as a json object for serialization, that there isn't really anywhere good to stick it.
+
     @JvmStatic
-    fun getDeviceStatusReport(context: Context): String {
+    @Throws(JSONException::class)    // its almost impossible to use the IDE when EVERY LINE has a warning
+    fun _getDeviceStatusReport(context: Context): String {
         val permissions = JSONObject()
 
         // get the time, convert to calendar object, get local time, insert timezone.
         val time_int = System.currentTimeMillis()
         val time_locale = Date(System.currentTimeMillis()).toLocaleString()
+
+        // these are well known to work
         permissions.put("time_int", time_int)
         permissions.put("time_locale", time_locale + " " + DeviceInfo.timeZoneInfo())
 
@@ -333,21 +342,57 @@ object PermissionHandler {
         permissions.put("permission_receive_sms", checkAccessReceiveSms(context))
         permissions.put("permission_record_audio", checkAccessRecordAudio(context))
 
+        // properties of the powermanager do not always exist on older android versions (8 at least)
+        // so we need to wrap all of these
+
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        permissions.put("power_battery_discharge_prediction", pm.batteryDischargePrediction)
-        permissions.put("power_current_thermal_status", pm.currentThermalStatus)
+
+        // get the names of all the methods and attributes on the power manager - whole process with
+        // a list is basically same speed as a set, up to 30ms on slow devices is fine.
+        val names = List<String>(pm.javaClass.methods.size) { pm.javaClass.methods[it].name }
+
+        // All properties here are known to exist on a Pixel 6 running Android 13
+        // The marked items were missing on a Nexus 7 2013 tablet running Android 8.
+        permissions.put( // missing Android 8
+                "power_battery_discharge_prediction",
+                if (names.contains("getBatteryDischargePrediction")) pm.batteryDischargePrediction else "missing")
+        permissions.put( // missing Android 8
+                "power_current_thermal_status",
+                if (names.contains("getCurrentThermalStatus")) pm.currentThermalStatus else "missing"
+        )
+        permissions.put( // missing Android 8
+                "power_is_battery_discharge_prediction_personalized",
+                if (names.contains("isBatteryDischargePredictionPersonalized")) pm.isBatteryDischargePredictionPersonalized else "missing"
+        )
+        permissions.put(
+                "power_is_device_idle_mode",
+                if (names.contains("isDeviceIdleMode")) pm.isDeviceIdleMode else "missing"
+        )
+        permissions.put(
+                "power_is_interactive",
+                if (names.contains("isInteractive")) pm.isInteractive else "missing"
+        )
+        permissions.put(
+                "power_is_power_save_mode",
+                if (names.contains("isPowerSaveMode")) pm.isPowerSaveMode else "missing")
+        permissions.put(
+                "power_is_sustained_performance_mode_supported",
+                if (names.contains("isSustainedPerformanceModeSupported")) pm.isSustainedPerformanceModeSupported else "missing"
+        )
+        permissions.put( // missing android 8
+                "power_location_power_save_mode",
+                if (names.contains("getLocationPowerSaveMode")) pm.locationPowerSaveMode else "missing"
+        )
+        permissions.put(
+                "power_is_ignoring_battery_optimizations",
+                if (names.contains("isIgnoringBatteryOptimizations")) pm.isIgnoringBatteryOptimizations(context.packageName) else "missing"
+        )
+
+        // not a power manager property
         permissions.put("power_is_adaptive_battery_management_enabled", isAdaptiveBatteryEnabled(context))
-        permissions.put("power_is_battery_discharge_prediction_personalized", pm.isBatteryDischargePredictionPersonalized)
-        permissions.put("power_is_device_idle_mode", pm.isDeviceIdleMode)
-        permissions.put("power_is_ignoring_battery_optimizations", pm.isIgnoringBatteryOptimizations(context.packageName))
-        permissions.put("power_is_interactive", pm.isInteractive)
-        permissions.put("power_is_power_save_mode", pm.isPowerSaveMode)
-        permissions.put("power_is_sustained_performance_mode_supported", pm.isSustainedPerformanceModeSupported)
-        permissions.put("power_location_power_save_mode", pm.locationPowerSaveMode)
 
         // storage details
         permissions.put("storage_free_space", DeviceInfo.freeSpace())
         return permissions.toString()
-
     }
 }

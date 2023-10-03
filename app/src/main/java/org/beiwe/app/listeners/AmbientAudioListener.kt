@@ -77,10 +77,22 @@ object AmbientAudioListener {
                 // TODO: does this occur only when certain security details (device lock) are active,
                 //  or is it truly manufacturer-based.
                 // this causes a lot of spam when the screen is off and the microphone is being turned on.
-                printe("AmbientAudioListener", AUDIO_FAIL_COUNT + deviceSetupCount)
+                printe("AmbientAudioListener1", AUDIO_FAIL_COUNT + deviceSetupCount)
                 e.printStackTrace()
                 if (deviceSetupCount == 1) {
                     TextFileManager.writeDebugLogStatement("AmbientAudioListener device setup failed")
+                    TextFileManager.writeDebugLogStatement(e.message)
+                }
+                mRecorder = null
+                return
+            } catch (e: NoSuchMethodError) {
+                // this error occurrs on old versions of android, 2013 nexus 7 running android 8.
+                // because MediaRecorder doesn't appear to exist:
+                // No direct method <init>(Landroid/content/Context;)V in class Landroid/media/MediaRecorder; or its super classes (declaration of 'android.media.MediaRecorder' appears in /system/framework/framework.jar)
+                printe("AmbientAudioListener2", AUDIO_FAIL_COUNT + deviceSetupCount)
+                e.printStackTrace()
+                if (deviceSetupCount == 1) {
+                    TextFileManager.writeDebugLogStatement("AmbientAudioListener device setup failed due to incompatible android version")
                     TextFileManager.writeDebugLogStatement(e.message)
                 }
                 mRecorder = null
