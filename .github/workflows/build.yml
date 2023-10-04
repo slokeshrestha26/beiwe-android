@@ -39,16 +39,16 @@ jobs:
           echo "keyPassword=$KEY_PASSWORD" >> private/keystore.properties
           echo "releaseDSN=$SENTRY_DSN" >> private/keystore.properties
 
-      - name: Create Google Play Service Account credentials file
-        env:
-          GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED }}
-        run: |
-          echo "$GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED" > private/google_service_acct_key.json.b64
-          base64 -d -i private/google_service_acct_key.json.b64 > private/google_service_acct_key.json
+      # - name: Create Google Play Service Account credentials file
+      #   env:
+      #     GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED }}
+      #   run: |
+      #     echo "$GOOGLE_PLAY_SERVICE_ACCT_KEY_BASE64_ENCODED" > private/google_service_acct_key.json.b64
+      #     base64 -d -i private/google_service_acct_key.json.b64 > private/google_service_acct_key.json
 
-      - name: Generate signed app bundle and push to Google Play Alpha track
-        run: |
-          bundle exec fastlane buildAAB
+      # - name: Generate signed app bundle and push to Google Play Alpha track
+      #   run: |
+      #     bundle exec fastlane buildAAB
 
       - name: Build signed APKs and push to Amazon S3
         env:
