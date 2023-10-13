@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,7 +16,6 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import org.beiwe.app.BuildConfig
-import org.beiwe.app.DeviceInfo
 import org.beiwe.app.DeviceInfo.androidVersion
 import org.beiwe.app.DeviceInfo.beiweVersion
 import org.beiwe.app.DeviceInfo.brand
@@ -26,18 +26,26 @@ import org.beiwe.app.DeviceInfo.manufacturer
 import org.beiwe.app.DeviceInfo.model
 import org.beiwe.app.DeviceInfo.product
 import org.beiwe.app.PermissionHandler
-import org.beiwe.app.PermissionHandler.checkAccessReadSms
+import org.beiwe.app.PermissionHandler.checkAccessReadPhoneNumbers
 import org.beiwe.app.R
 import org.beiwe.app.RunningBackgroundServiceActivity
 import org.beiwe.app.networking.HTTPUIAsync
 import org.beiwe.app.networking.PostRequest
+import org.beiwe.app.printe
 import org.beiwe.app.storage.EncryptionEngine
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.survey.TextFieldKeyboard
 import org.beiwe.app.ui.utils.AlertsManager
 
-/**Activity used to log a user in to the application for the first time. This activity should only be called on ONCE,
- * as once the user is logged in, data is saved on the phone.
+const val PHONE_REQUIRED = BuildConfig.READ_SMS_AND_PHONE_CALL_STATS
+val READ_PHONE_NUMBERS_PERMISSION = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    Manifest.permission.READ_PHONE_NUMBERS
+} else {
+    Manifest.permission.READ_PHONE_STATE
+}
+
+/**Activity used to log a user in to the application for the first time. This activity should only
+ * be called on ONCE, as once the user is logged in, data is saved on the phone.
  * @author Dor Samet, Eli Jones, Josh Zagorsky */
 
 @SuppressLint("ShowToast")
@@ -50,7 +58,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
     var handler: Handler? = null
     var self: RegisterActivity? = null  // what on earth is this doing
 
-    /** Users will go into this activity first to register information on the phone and on the server.  */
+    /** Users will go into this activity first to register information on the phone and on the server. */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
@@ -75,10 +83,10 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         textFieldKeyboard.makeKeyboardBehave(newPasswordInput)
         textFieldKeyboard.makeKeyboardBehave(confirmNewPasswordInput)
         newPasswordInput!!.hint = String.format(
-                getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()
+            getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()
         )
         confirmNewPasswordInput!!.hint = String.format(
-                getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()
+            getString(R.string.registration_replacement_password_hint), PersistentData.minPasswordLength()
         )
     }
 
@@ -92,54 +100,63 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         val confirmNewPassword = confirmNewPasswordInput!!.text.toString()
         if (serverUrl.length == 0 && BuildConfig.CUSTOMIZABLE_SERVER_URL) {
             // If the study URL is empty, alert the user
-            AlertsManager.showAlert(getString(R.string.url_too_short), getString(R.string.couldnt_register), this)
+            AlertsManager.showAlert(getString(
+                R.string.url_too_short), getString(R.string.couldnt_register), this)
         } else if (userID.length == 0) {
             // If the user id length is too short, alert the user
-            AlertsManager.showAlert(getString(R.string.invalid_user_id), getString(R.string.couldnt_register), this)
+            AlertsManager.showAlert(getString(
+                R.string.invalid_user_id), getString(R.string.couldnt_register), this)
         } else if (tempPassword.length < 1) {
             // If the temporary registration password isn't filled in
-            AlertsManager.showAlert(getString(R.string.empty_temp_password), getString(R.string.couldnt_register), this)
+            AlertsManager.showAlert(getString(
+                R.string.empty_temp_password), getString(R.string.couldnt_register), this)
         } else if (!PersistentData.passwordMeetsRequirements(newPassword)) {
             // If the new password has too few characters
-            val alertMessage = String.format(getString(R.string.password_too_short), PersistentData.minPasswordLength())
+            val alertMessage = String.format(getString(
+                R.string.password_too_short), PersistentData.minPasswordLength())
             AlertsManager.showAlert(alertMessage, getString(R.string.couldnt_register), this)
         } else if (newPassword != confirmNewPassword) {
             // If the new password doesn't match the confirm new password
-            AlertsManager.showAlert(getString(R.string.password_mismatch), getString(R.string.couldnt_register), this)
+            AlertsManager.showAlert(getString(
+                R.string.password_mismatch), getString(R.string.couldnt_register), this)
         } else {
-            if (BuildConfig.CUSTOMIZABLE_SERVER_URL) {
+            if (BuildConfig.CUSTOMIZABLE_SERVER_URL)
                 PersistentData.setServerUrl(serverUrl)
-            }
             PersistentData.setLoginCredentials(userID, tempPassword)
 
-            // Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() + "\" with password \"" + LoginManager.getPassword() + "\"" );
-            tryToRegisterWithTheServer(this, PostRequest.addWebsitePrefix(applicationContext.getString(R.string.register_url)), newPassword)
+            // Log.d("RegisterActivity", "trying \"" + LoginManager.getPatientID() +
+            //       "\" with password \"" + LoginManager.getPassword() + "\"" );
+            tryToRegisterWithTheServer(
+                this,
+                PostRequest.addWebsitePrefix(applicationContext.getString(R.string.register_url)),
+                newPassword
+            )
         }
     }
 
-    /**This is the fuction that requires SMS permissions.  We need to supply a (unique) identifier for phone numbers to the registration arguments.
-     * @return */
+    /**This is the fuction that requires phone permissions.  We need to supply a (unique) identifier
+     * for phone numbers to the registration arguments.*/
     private val phoneNumber: String
         get() {
-            val phoneManager = this.getSystemService(TELEPHONY_SERVICE) as TelephonyManager
-            val phoneNumber: String?
-            phoneNumber = try {
-                // If READ_SMS_AND_PHONE_CALL_STATS is true, we should not be able to get here without having
-                // asked for the SMS permission.  If it's false, we don't have permission to do this.
-                phoneManager.line1Number
+            val phoneNumber = try {
+                // If the participant accepts the phone permission checks, then this command will succeed
+                (this.getSystemService(TELEPHONY_SERVICE) as TelephonyManager).line1Number
             } catch (e: SecurityException) {
+                printe("RegisterActivity", "SecurityException in phoneNumber getter")
                 ""
             }
-            if (phoneNumber == null) {
-                return EncryptionEngine.hashPhoneNumber("")
-            } else
-                return EncryptionEngine.hashPhoneNumber(phoneNumber)
+            // apparently we have a null case to handle, kotlin disagrees, please keep this if statement anyway
+            return if (phoneNumber == null)
+                EncryptionEngine.hashPhoneNumber("")
+            else
+                EncryptionEngine.hashPhoneNumber(phoneNumber)
         }
 
+    // duplicate of the function from RunningBackgroundServiceActivity (this isn't a subclass)
     private fun goToSettings() {
         // Log.i("reg", "goToSettings");
         val myAppSettings = Intent(
-                Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")
         )
         myAppSettings.addCategory(Intent.CATEGORY_DEFAULT)
         myAppSettings.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -160,11 +177,10 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
             return
         }
 
-        // We need access to the phone number, there might be a cleaner way than asking for this
+        // We ~need access to the phone number, there might be a cleaner way than asking for this
         // permission but we don't know it.
-        if (BuildConfig.READ_SMS_AND_PHONE_CALL_STATS &&
-                !checkAccessReadSms(applicationContext) && !thisResumeCausedByFalseActivityReturn) {
-            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)) {
+        if (PHONE_REQUIRED && !checkAccessReadPhoneNumbers(applicationContext) && !thisResumeCausedByFalseActivityReturn) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_NUMBERS)) {
                 if (!prePromptActive && !postPromptActive)
                     showPostPermissionAlert(this)
             } else if (!prePromptActive && !postPromptActive)
@@ -178,7 +194,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        // Log.i("reg", "onActivityResult. requestCode: " + requestCode + ", resultCode: " + resultCode );
+        // printi"onActivityResult. requestCode: " + requestCode + ", resultCode: " + resultCode )
         aboutToResetFalseActivityReturn = true
     }
 
@@ -189,7 +205,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
             return
 
         for (i in grantResults.indices) {
-            if (permissions[i] == Manifest.permission.READ_SMS) {
+            if (permissions[i] == Manifest.permission.READ_PHONE_NUMBERS) {
                 // Log.i("permiss", "permission return: " + permissions[i]);
                 if (grantResults[i] == PermissionHandler.PERMISSION_GRANTED)
                     break
@@ -197,7 +213,6 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                 // previously and the user denied the request.")
                 if (shouldShowRequestPermissionRationale(permissions[i]))
                     showPostPermissionAlert(this)
-
             }
         }
     }
@@ -227,9 +242,11 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                     responseCode = PostRequest.httpRegister(parameters, url)
 
                     // If we are not using anonymized hashing, resubmit the phone identifying information
-                    if (responseCode == 200 && !PersistentData.getUseAnonymizedHashing()) { // This short circuits so if the initial register fails, it won't try here
+                    // (This short circuits so if the initial register fails, it won't try here)
+                    if (responseCode == 200 && !PersistentData.getUseAnonymizedHashing()) {
                         try {
-                            // Sleep for one second so the backend does not receive information with overlapping timestamps.... haaax...
+                            // Sleep for one second to fix bug htat happens when backend does not
+                            // receive information with overlapping timestamps.... haaax...
                             Thread.sleep(1000)
                         } catch (e: InterruptedException) {
                             e.printStackTrace()
@@ -243,7 +260,8 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                                 PostRequest.makeParameter("brand", brand) +
                                 PostRequest.makeParameter("manufacturer", manufacturer) +
                                 PostRequest.makeParameter("model", model) +
-                                PostRequest.makeParameter("product", product) + PostRequest.makeParameter("beiwe_version", beiweVersion)
+                                PostRequest.makeParameter("product", product) +
+                                PostRequest.makeParameter("beiwe_version", beiweVersion)
                         PostRequest.httpRegisterAgain(parameters, url)
                     }
                     return null
@@ -265,8 +283,8 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         }
 
         /*####################################################################
-	###################### Permission Prompting ##########################
-	####################################################################*/
+	    ###################### Permission Prompting ##########################
+	    ####################################################################*/
         private var prePromptActive = false
         private var postPromptActive = false
         private var thisResumeCausedByFalseActivityReturn = false
@@ -284,7 +302,7 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
             builder.setTitle(activity.getString(R.string.permissions_alert_title))
             builder.setMessage(R.string.permission_registration_read_sms_alert)
             builder.setOnDismissListener {
-                activity.requestPermissions(arrayOf(Manifest.permission.READ_SMS), PERMISSION_CALLBACK)
+                activity.requestPermissions(arrayOf(READ_PHONE_NUMBERS_PERMISSION), PERMISSION_CALLBACK)
                 prePromptActive = false
             }
             builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text)) { arg0, arg1 -> } // Okay button

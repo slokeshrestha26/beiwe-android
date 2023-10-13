@@ -55,13 +55,13 @@ object PermissionHandler {
     @JvmStatic
     fun getNormalPermissionMessage(permission: String, appContext: Context): String {
         return String.format(appContext.getString(R.string.permission_normal_request_template),
-                appContext.getString(permissionMessages[permission]!!))
+            appContext.getString(permissionMessages[permission]!!))
     }
 
     @JvmStatic
     fun getBumpingPermissionMessage(permission: String, appContext: Context): String {
         return String.format(appContext.getString(R.string.permission_bumping_request_template),
-                appContext.getString(permissionMessages[permission]!!))
+            appContext.getString(permissionMessages[permission]!!))
     }
 
     /* The following are enabled by default.
@@ -151,6 +151,14 @@ object PermissionHandler {
 
     fun checkAccessReadPhoneState(context: Context): Boolean {
         return context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PERMISSION_GRANTED
+    }
+
+    fun checkAccessReadPhoneNumbers(context: Context): Boolean {
+        // read phone numbers got separated into its own thing in 0 (11)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            context.checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) == PERMISSION_GRANTED
+        else
+            return checkAccessReadPhoneState(context)
     }
 
     @JvmStatic
@@ -264,6 +272,12 @@ object PermissionHandler {
                 if (!checkAccessBluetoothAdmin(context)) return Manifest.permission.BLUETOOTH_ADMIN
             }
         }
+
+        // read phone numbers was introduced in O, only check it if on O or higher, otherwise its read_phone_state
+        if (PersistentData.getCallsEnabled() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!checkAccessReadPhoneNumbers(context)) return Manifest.permission.READ_PHONE_NUMBERS
+        }
+
         if (PersistentData.getCallsEnabled() && BuildConfig.READ_SMS_AND_PHONE_CALL_STATS) {
             if (!checkAccessReadPhoneState(context)) return Manifest.permission.READ_PHONE_STATE
             if (!checkAccessReadCallLog(context)) return Manifest.permission.READ_CALL_LOG
@@ -293,9 +307,9 @@ object PermissionHandler {
     // https://stackoverflow.com/questions/65479363/android-adaptive-battery-setting-detection
     fun isAdaptiveBatteryEnabled(ctx: Context): Boolean {
         val intValue = Settings.Global.getInt(
-                ctx.contentResolver,
-                "adaptive_battery_management_enabled",
-                -1
+            ctx.contentResolver,
+            "adaptive_battery_management_enabled",
+            -1
         )
         return intValue == 1
     }
@@ -336,6 +350,7 @@ object PermissionHandler {
         permissions.put("permission_read_call_log", checkAccessReadCallLog(context))
         permissions.put("permission_read_contacts", checkAccessReadContacts(context))
         permissions.put("permission_read_phone_state (receive_boot_completed?)", checkAccessReadPhoneState(context))
+        permissions.put("permission_read_phone_numbers", checkAccessReadPhoneNumbers(context))
         permissions.put("permission_read_sms", checkAccessReadSms(context))
         permissions.put("permission_receive_boot_completed", checkAccessReadPhoneState(context))
         permissions.put("permission_receive_mms", checkAccessReceiveMms(context))
@@ -354,38 +369,38 @@ object PermissionHandler {
         // All properties here are known to exist on a Pixel 6 running Android 13
         // The marked items were missing on a Nexus 7 2013 tablet running Android 8.
         permissions.put( // missing Android 8
-                "power_battery_discharge_prediction",
-                if (names.contains("getBatteryDischargePrediction")) pm.batteryDischargePrediction else "missing")
+            "power_battery_discharge_prediction",
+            if (names.contains("getBatteryDischargePrediction")) pm.batteryDischargePrediction else "missing")
         permissions.put( // missing Android 8
-                "power_current_thermal_status",
-                if (names.contains("getCurrentThermalStatus")) pm.currentThermalStatus else "missing"
+            "power_current_thermal_status",
+            if (names.contains("getCurrentThermalStatus")) pm.currentThermalStatus else "missing"
         )
         permissions.put( // missing Android 8
-                "power_is_battery_discharge_prediction_personalized",
-                if (names.contains("isBatteryDischargePredictionPersonalized")) pm.isBatteryDischargePredictionPersonalized else "missing"
+            "power_is_battery_discharge_prediction_personalized",
+            if (names.contains("isBatteryDischargePredictionPersonalized")) pm.isBatteryDischargePredictionPersonalized else "missing"
         )
         permissions.put(
-                "power_is_device_idle_mode",
-                if (names.contains("isDeviceIdleMode")) pm.isDeviceIdleMode else "missing"
+            "power_is_device_idle_mode",
+            if (names.contains("isDeviceIdleMode")) pm.isDeviceIdleMode else "missing"
         )
         permissions.put(
-                "power_is_interactive",
-                if (names.contains("isInteractive")) pm.isInteractive else "missing"
+            "power_is_interactive",
+            if (names.contains("isInteractive")) pm.isInteractive else "missing"
         )
         permissions.put(
-                "power_is_power_save_mode",
-                if (names.contains("isPowerSaveMode")) pm.isPowerSaveMode else "missing")
+            "power_is_power_save_mode",
+            if (names.contains("isPowerSaveMode")) pm.isPowerSaveMode else "missing")
         permissions.put(
-                "power_is_sustained_performance_mode_supported",
-                if (names.contains("isSustainedPerformanceModeSupported")) pm.isSustainedPerformanceModeSupported else "missing"
+            "power_is_sustained_performance_mode_supported",
+            if (names.contains("isSustainedPerformanceModeSupported")) pm.isSustainedPerformanceModeSupported else "missing"
         )
         permissions.put( // missing android 8
-                "power_location_power_save_mode",
-                if (names.contains("getLocationPowerSaveMode")) pm.locationPowerSaveMode else "missing"
+            "power_location_power_save_mode",
+            if (names.contains("getLocationPowerSaveMode")) pm.locationPowerSaveMode else "missing"
         )
         permissions.put(
-                "power_is_ignoring_battery_optimizations",
-                if (names.contains("isIgnoringBatteryOptimizations")) pm.isIgnoringBatteryOptimizations(context.packageName) else "missing"
+            "power_is_ignoring_battery_optimizations",
+            if (names.contains("isIgnoringBatteryOptimizations")) pm.isIgnoringBatteryOptimizations(context.packageName) else "missing"
         )
 
         // not a power manager property

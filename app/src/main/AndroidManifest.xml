@@ -24,6 +24,7 @@
 
     <!-- get own phone number -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
 
     <!-- Permissions regarding phone calls -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
