@@ -136,6 +136,8 @@ Version history:
     because something either changed in the deep magic of android permissions code, or the
     directions have always been wrong and nobody noticed. hooray.
 79: 3.5.8 - Adds a bunch of app state tracking info.
+80: 3.5.9 - Potential bug fix for null intents that may have been causing random, frequent crashes.
+    Power state listener ported to kotlin (with a similar fix to a similar potential bug).
 
 
 TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
@@ -164,8 +166,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 33
-        versionCode 79       //TODO: update this Beiwe version code for new releases
-        versionName '3.5.8'  //TODO: update this Beiwe version number for new releases
+        versionCode 80       //TODO: update this Beiwe version code for new releases
+        versionName '3.5.9'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
 
