@@ -109,6 +109,7 @@ class MainService : Service() {
 
         // dispatch the ThreadHandler based run_all_app_logic call with a 1/2 duration offset.
         background_handler.postDelayed(periodic_run_app_logic, THREADHANDLER_PERIODICITY / 2)
+        PersistentData.appOnServiceStart = Date(System.currentTimeMillis()).toLocaleString()
     }
 
     // namespace hack, see comment
@@ -511,6 +512,8 @@ class MainService : Service() {
      * and with reasonably widely separated real-time values, */
     @Synchronized
     fun run_all_app_logic(): Long {
+        PersistentData.appOnRunAllLogic = Date(System.currentTimeMillis()).toLocaleString()
+
         val now = System.currentTimeMillis()
         // ALL of these actions wait until the participant is registered
         if (!PersistentData.getIsRegistered())
@@ -769,6 +772,8 @@ class MainService : Service() {
             startForeground(1, notification)
             foregroundServiceLastStarted = now
         }
+        
+        PersistentData.serviceStartCommand = Date(System.currentTimeMillis()).toLocaleString()
 
         // onStartCommand is called every 30 seconds due to repeating high-priority-or-whatever
         // alarms, so we will stick a core logic check here.
@@ -786,12 +791,14 @@ class MainService : Service() {
     override fun onTaskRemoved(rootIntent: Intent) {
         // Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
         TextFileManager.writeDebugLogStatement("onTaskRemoved called with intent: $rootIntent")
+        PersistentData.serviceOnTaskRemoved = Date(System.currentTimeMillis()).toLocaleString()
         restartService()
     }
 
     override fun onUnbind(intent: Intent): Boolean {
         // Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
         TextFileManager.writeDebugLogStatement("onUnbind called with intent: $intent")
+        PersistentData.serviceOnUnbind = Date(System.currentTimeMillis()).toLocaleString()
         restartService()
         return super.onUnbind(intent)
     }
@@ -799,13 +806,22 @@ class MainService : Service() {
     override fun onDestroy() { // Log.w("BackgroundService", "BackgroundService was destroyed.");
         // note: this does not run when the service is killed in a task manager, OR when the stopService() function is called from debugActivity.
         TextFileManager.writeDebugLogStatement("BackgroundService was destroyed.")
+        PersistentData.serviceOnDestroy = Date(System.currentTimeMillis()).toLocaleString()
         restartService()
         super.onDestroy()
     }
 
     override fun onLowMemory() { // Log.w("BackroundService onLowMemory", "Low memory conditions encountered");
         TextFileManager.writeDebugLogStatement("onLowMemory called.")
+        PersistentData.serviceOnLowMemory = Date(System.currentTimeMillis()).toLocaleString()
         restartService()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        // Log.w("BackroundService onTrimMemory", "Trim memory conditions encountered");
+        TextFileManager.writeDebugLogStatement("onTrimMemory called.")
+        PersistentData.serviceOnTrimMemory = Date(System.currentTimeMillis()).toLocaleString()
+        super.onTrimMemory(level)
     }
 
     /** Stops the BackgroundService instance, development tool  */

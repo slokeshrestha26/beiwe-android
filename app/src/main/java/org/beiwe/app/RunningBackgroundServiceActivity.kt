@@ -22,6 +22,7 @@ import org.beiwe.app.PermissionHandler.getNextPermission
 import org.beiwe.app.PermissionHandler.getNormalPermissionMessage
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.ui.user.AboutActivityLoggedOut
+import java.util.Date
 
 /**All Activities in the app extend this Activity.  It ensures that the app's key services (i.e.
  * BackgroundService, LoginManager, PostRequest, DeviceInfo, and WifiListener) are running before
@@ -43,18 +44,25 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
     @JvmField
     protected var mainService: MainService? = null
 
+    // we need access to this inside mainServiceConnection
+    val localClassNameHandle: String get() = this.localClassName
+
     /**The ServiceConnection Class is our trigger for events that rely on the BackgroundService  */
     private var mainServiceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, binder: IBinder) {
 //			Log.w("ServiceConnection", "Main Service Connected")
             val some_binder = binder as BackgroundServiceBinder
             mainService = some_binder.service
+            PersistentData.appOnServiceBoundActivity =
+                localClassNameHandle + " " + (Date(System.currentTimeMillis()).toLocaleString())
             doBackgroundDependentTasks()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
 //	        Log.w("ServiceConnection", "Main Service Disconnected")
             mainService = null
+            PersistentData.appOnServiceUnboundActivity =
+                localClassNameHandle + " " + (Date(System.currentTimeMillis()).toLocaleString())
         }
     }
 
@@ -63,6 +71,11 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
         if (!BuildConfig.APP_IS_DEV)
             Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
         PersistentData.initialize(applicationContext)
+
+        // this.localClassName returns the subclass name.
+        // oncreate timesstamp sent back to the server for debugging purposes.
+        PersistentData.appOnCreateActivity =
+            this.localClassName + " " + (Date(System.currentTimeMillis()).toLocaleString())
     }
 
     /** Override this function to do tasks on creation, but only after the Main Service has been initialized.  */
@@ -77,6 +90,10 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
         // this will only start a new service if it is not already running, and check API version for appropriate version
         ContextCompat.startForegroundService(this.applicationContext, startingIntent)
         bindService(startingIntent, mainServiceConnection, BIND_AUTO_CREATE)
+
+        // oncreate timesstamp sent back to the server for debugging purposes.
+        PersistentData.appOnResumeActivity =
+            this.localClassName + " " + (Date(System.currentTimeMillis()).toLocaleString())
     }
 
     /** disconnect BackgroundServiceConnection when the Activity closes, otherwise we have a
@@ -84,6 +101,8 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         activityNotVisible = true
+        PersistentData.appOnPauseActivity =
+            this.localClassName + " " + (Date(System.currentTimeMillis()).toLocaleString())
         unbindService(mainServiceConnection)
     }
 

@@ -10,6 +10,7 @@ import android.util.Log
 import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Date
 import java.util.Locale
 
 class GyroscopeListener(private val appContext: Context) : SensorEventListener {
@@ -52,6 +53,8 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
 
     @Synchronized
     fun turn_on() {
+        PersistentData.gyroscopeStart = Date(System.currentTimeMillis()).toLocaleString()
+
         if (gyroSensorManager == null)
             return
 
@@ -69,6 +72,7 @@ class GyroscopeListener(private val appContext: Context) : SensorEventListener {
 
     @Synchronized
     fun turn_off() {
+        PersistentData.gyroscopeStop = Date(System.currentTimeMillis()).toLocaleString()
         gyroSensorManager?.unregisterListener(this)
         running = false
     }

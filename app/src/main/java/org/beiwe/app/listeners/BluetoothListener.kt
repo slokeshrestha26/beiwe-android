@@ -9,7 +9,9 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import org.beiwe.app.storage.EncryptionEngine
+import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Date
 
 // import android.content.pm.PackageManager;
 // http://code.tutsplus.com/tutorials/android-quick-look-bluetoothadapter--mobile-7813
@@ -85,6 +87,8 @@ class BluetoothListener : BroadcastReceiver() {
     /** Intelligently and safely disables the Bluetooth adaptor.
      * @return True if bluetooth exists, false if bluetooth does not exist*/
     private fun disableBluetooth(): Boolean {
+        PersistentData.bluetoothStop = Date(System.currentTimeMillis()).toLocaleString()
+
         if (!bluetoothExists!!)
             return false
 
@@ -108,6 +112,8 @@ class BluetoothListener : BroadcastReceiver() {
      * @return True if bluetooth exists, false if bluetooth does not exist.
      */
     private fun enableBluetooth(): Boolean {
+        PersistentData.bluetoothStart = Date(System.currentTimeMillis()).toLocaleString()
+
         if (!bluetoothExists!!) {
             return false
         }

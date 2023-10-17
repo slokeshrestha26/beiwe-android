@@ -323,17 +323,40 @@ object PermissionHandler {
     // it as a json object for serialization, that there isn't really anywhere good to stick it.
 
     @JvmStatic
-    @Throws(JSONException::class)    // its almost impossible to use the IDE when EVERY LINE has a warning
+    @Throws(JSONException::class)    // its almost impossible to use the IDE when EVERY LINE has a warning - these can't fail.
     fun _getDeviceStatusReport(context: Context): String {
         val permissions = JSONObject()
 
         // get the time, convert to calendar object, get local time, insert timezone.
-        val time_int = System.currentTimeMillis()
         val time_locale = Date(System.currentTimeMillis()).toLocaleString()
 
-        // these are well known to work
-        permissions.put("time_int", time_int)
         permissions.put("time_locale", time_locale + " " + DeviceInfo.timeZoneInfo())
+        permissions.put("is_registered", PersistentData.getIsRegistered())
+
+        // a bunch of app state reporting
+        permissions.put("most_recent_activity_OnCreate", PersistentData.appOnCreateActivity)
+        permissions.put("most_recent_activity_OnRessume", PersistentData.appOnResumeActivity)
+        permissions.put("most_recent_activity_OnPause", PersistentData.appOnPauseActivity)
+        permissions.put("most_recent_activity_OnServiceBound", PersistentData.appOnServiceBoundActivity)
+        permissions.put("most_recent_activity_OnServiceUnBound", PersistentData.appOnServiceUnboundActivity)
+        permissions.put("most_recent_service_start", PersistentData.appOnServiceStart)
+        permissions.put("most_recent_run_all_logic", PersistentData.appOnRunAllLogic)
+        permissions.put("most_recent_service_start_command", PersistentData.serviceStartCommand)
+        permissions.put("most_recent_service_on_unbind", PersistentData.serviceOnUnbind)
+        permissions.put("most_recent_service_on_destroy", PersistentData.serviceOnDestroy)
+        permissions.put("most_recent_service_on_low_memory", PersistentData.serviceOnLowMemory)
+        permissions.put("most_recent_service_on_trim_memory", PersistentData.serviceOnTrimMemory)
+        permissions.put("most_recent_service_on_task_removed", PersistentData.serviceOnTaskRemoved)
+        permissions.put("most_recent_accelerometer_start", PersistentData.accelerometerStart)
+        permissions.put("most_recent_accelerometer_stop", PersistentData.accelerometerStop)
+        permissions.put("most_recent_ambient_audio_start", PersistentData.ambientAudioStart)
+        permissions.put("most_recent_ambient_audio_stop", PersistentData.ambientAudioStop)
+        permissions.put("most_recent_bluetooth_start", PersistentData.bluetoothStart)
+        permissions.put("most_recent_bluetooth_stop", PersistentData.bluetoothStop)
+        permissions.put("most_recent_gps_start", PersistentData.gpsStart)
+        permissions.put("most_recent_gps_stop", PersistentData.gpsStop)
+        permissions.put("most_recent_gyroscope_start", PersistentData.gyroscopeStart)
+        permissions.put("most_recent_gyroscope_stop", PersistentData.gyroscopeStop)
 
         // the normal permissions
         permissions.put("permission_access_background_location", checkAccessBackgroundLocation(context))

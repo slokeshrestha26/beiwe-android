@@ -10,6 +10,7 @@ import org.beiwe.app.storage.AudioFileManager.generateAmbientEncryptedAudioFileN
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
 import java.io.IOException
+import java.util.Date
 
 /**
  * AmbientAudioListener is a !Singleton class: it is only instantiated once.
@@ -46,6 +47,7 @@ object AmbientAudioListener {
 
     @Synchronized
     fun startRecording(applicationContext: Context) {
+        PersistentData.ambientAudioStart = Date(System.currentTimeMillis()).toLocaleString()
         TextFileManager.writeDebugLogStatement("AmbientAudioListener.startRecording()")
 
         if (!instantiated) {  // first run
@@ -116,6 +118,7 @@ object AmbientAudioListener {
 
     @Synchronized
     fun encryptAmbientAudioFile() {
+        PersistentData.ambientAudioStop = Date(System.currentTimeMillis()).toLocaleString()
         TextFileManager.writeDebugLogStatement("AmbientAudioListener.encryptAmbientAudioFile()")
         // If the audio recorder exists, stop recording and start encrypting the file
         if (instantiated && mRecorder != null) {

@@ -10,6 +10,7 @@ import android.util.Log
 import org.beiwe.app.DeviceInfo
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Date
 import java.util.Locale
 
 class AccelerometerListener(appContext: Context) : SensorEventListener {
@@ -53,6 +54,7 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
 
     @Synchronized
     fun turn_on() {
+        PersistentData.accelerometerStart = Date(System.currentTimeMillis()).toLocaleString()
         if (accelSensorManager == null)
             return
 
@@ -73,6 +75,7 @@ class AccelerometerListener(appContext: Context) : SensorEventListener {
 
     @Synchronized
     fun turn_off() {
+        PersistentData.accelerometerStop = Date(System.currentTimeMillis()).toLocaleString()
         accelSensorManager?.unregisterListener(this)
         running = false
     }

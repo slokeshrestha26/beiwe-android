@@ -75,6 +75,34 @@ const val LONGITUDE_OFFSET_KEY = "longitude_offset_key"
 const val CALL_CLINICIAN_BUTTON_ENABLED_KEY = "call_clinician_button_enabled"
 const val CALL_RESEARCH_ASSISTANT_BUTTON_ENABLED_KEY = "call_research_assistant_button_enabled"
 
+const val MOST_RECENT_ONCREATE_ACTIVITY_STATE = "most_recent_oncreate_activity_state"
+const val MOST_RECENT_ONRESUME_ACTIVITY_STATE = "most_recent_onresume_activity_state"
+const val MOST_RECENT_ONPAUSE_ACTIVITY_STATE = "most_recent_onresume_activity_state"
+const val MOST_RECENT_ONSERVICEBOUND_ACTIVITY_STATE = "most_recent_onservecbound_activity_state"
+const val MOST_RECENT_ONSERVICEUNBOUND_ACTIVITY_STATE = "most_recent_onservecbound_activity_state"
+
+// todo add on trim memory and on configuration change
+const val MOST_RECENT_SERVICE_START = "most_recent_service_start"
+const val MOST_RECENT_SERVICE_RUN_ALL_LOGIC = "most_recent_run_all_logic"
+const val MOST_RECENT_SERVICE_ON_START_COMMAND = "most_recent_on_start_command"
+const val MOST_RECENT_SERVICE_ON_UNBIND = "most_recent_on_unbind"
+const val MOST_RECENT_SERVICE_ON_DESTROY = "most_recent_on_destroy"
+const val MOST_RECENT_SERVICE_ON_LOW_MEMORY = "most_recent_on_low_memory"
+const val MOST_RECENT_SERVICE_ON_TRIM_MEMORY = "most_recent_on_trim_memory"
+const val MOST_RECENT_SERVICE_ON_TASK_REMOVED = "most_recent_on_task_removed"
+
+const val MOST_RECENT_ACCELEROMETER_START = "most_recent_accelerometer_start"
+const val MOST_RECENT_ACCELEROMETER_STOP = "most_recent_accelerometer_stop"
+const val MOST_RECENT_AMBIENT_AUDIO_START = "most_recent_ambient_audio_start"
+const val MOST_RECENT_AMBIENT_AUDIO_STOP = "most_recent_ambient_audio_stop"
+const val MOST_RECENT_BLUETOOTH_START = "most_recent_bluetooth_start"
+const val MOST_RECENT_BLUETOOTH_STOP = "most_recent_bluetooth_stop"
+const val MOST_RECENT_GPS_START = "most_recent_gps_start"
+const val MOST_RECENT_GPS_STOP = "most_recent_gps_stop"
+const val MOST_RECENT_GYROSCOPE_START = "most_recent_gyroscope_start"
+const val MOST_RECENT_GYROSCOPE_STOP = "most_recent_gyroscope_stop"
+
+
 /*#################################################################################################
 ################################### Initializing and Editing ######################################
 #################################################################################################*/
@@ -99,6 +127,7 @@ object PersistentData {
     /*#################################################################################################
     ################################### Initializing and Editing ######################################
     #################################################################################################*/
+
     // convenience methods for different types but all with the same name, makes everything easier.
     @JvmStatic fun putCommit(name: String, b: Boolean): Boolean {
         var prior_value: Boolean? = null
@@ -125,9 +154,10 @@ object PersistentData {
         editor.commit()
     }
 
-    /*#####################################################################################
-    ##################################### User State ######################################
-    #####################################################################################*/
+    /*##############################################################################################
+    ########################################### User State #########################################
+    ##############################################################################################*/
+
     /** Quick check for login.  */
     @JvmStatic fun isLoggedIn(): Boolean {
         if (pref == null) Log.w("LoginManager", "FAILED AT ISLOGGEDIN")
@@ -153,9 +183,92 @@ object PersistentData {
     @JvmStatic fun setTakingSurvey() { putCommit(IS_TAKING_SURVEY, true) }
     @JvmStatic fun setNotTakingSurvey() { putCommit(IS_TAKING_SURVEY, false) }
 
+
+    /*##############################################################################################
+    ########################################### App State ##########################################
+    ##############################################################################################*/
+
+    // app service recent events
+    @JvmStatic var serviceStartCommand: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_START_COMMAND, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_START_COMMAND, value)
+    @JvmStatic var serviceOnUnbind: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_UNBIND, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_UNBIND, value)
+    @JvmStatic var serviceOnDestroy: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_DESTROY, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_DESTROY, value)
+    @JvmStatic var serviceOnLowMemory: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_LOW_MEMORY, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_LOW_MEMORY, value)
+    @JvmStatic var serviceOnTrimMemory: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_TRIM_MEMORY, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_TRIM_MEMORY, value)
+    @JvmStatic var serviceOnTaskRemoved: String
+        get() =  pref.getString(MOST_RECENT_SERVICE_ON_TASK_REMOVED, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_SERVICE_ON_TASK_REMOVED, value)
+    @JvmStatic var appOnRunAllLogic: String
+        get() = pref.getString(MOST_RECENT_SERVICE_RUN_ALL_LOGIC, "")?: ""
+        set(value) = putCommit(MOST_RECENT_SERVICE_RUN_ALL_LOGIC, value)
+    @JvmStatic var appOnServiceStart: String
+        get() = pref.getString(MOST_RECENT_SERVICE_START, "")?: ""
+        set(value) = putCommit(MOST_RECENT_SERVICE_START, value)
+
+    // app activity recent events
+    @JvmStatic var appOnServiceBoundActivity: String
+        get() = pref.getString(MOST_RECENT_ONSERVICEBOUND_ACTIVITY_STATE, "")?: ""
+        set(value) = putCommit(MOST_RECENT_ONSERVICEBOUND_ACTIVITY_STATE, value)
+    @JvmStatic var appOnServiceUnboundActivity: String
+        get() = pref.getString(MOST_RECENT_ONSERVICEUNBOUND_ACTIVITY_STATE, "")?: ""
+        set(value) = putCommit(MOST_RECENT_ONSERVICEUNBOUND_ACTIVITY_STATE, value)
+    @JvmStatic var appOnCreateActivity: String
+        get() = pref.getString(MOST_RECENT_ONCREATE_ACTIVITY_STATE, "")?: ""
+        set(value) = putCommit(MOST_RECENT_ONCREATE_ACTIVITY_STATE, value)
+    @JvmStatic var appOnResumeActivity: String
+        get() = pref.getString(MOST_RECENT_ONRESUME_ACTIVITY_STATE, "")?: ""
+        set(value) = putCommit(MOST_RECENT_ONRESUME_ACTIVITY_STATE, value)
+    @JvmStatic var appOnPauseActivity: String
+        get() = pref.getString(MOST_RECENT_ONPAUSE_ACTIVITY_STATE, "")?: ""
+        set(value) = putCommit(MOST_RECENT_ONPAUSE_ACTIVITY_STATE, value)
+
+    // app data stream recent events
+    @JvmStatic var accelerometerStart: String
+        get() =  pref.getString(MOST_RECENT_ACCELEROMETER_START, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_ACCELEROMETER_START, value)
+    @JvmStatic var accelerometerStop: String
+        get() =  pref.getString(MOST_RECENT_ACCELEROMETER_STOP, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_ACCELEROMETER_STOP, value)
+    @JvmStatic var ambientAudioStart: String
+        get() =  pref.getString(MOST_RECENT_AMBIENT_AUDIO_START, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_AMBIENT_AUDIO_START, value)
+    @JvmStatic var ambientAudioStop: String
+        get() =  pref.getString(MOST_RECENT_AMBIENT_AUDIO_STOP, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_AMBIENT_AUDIO_STOP, value)
+    @JvmStatic var bluetoothStart: String
+        get() =  pref.getString(MOST_RECENT_BLUETOOTH_START, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_BLUETOOTH_START, value)
+    @JvmStatic var bluetoothStop: String
+        get() =  pref.getString(MOST_RECENT_BLUETOOTH_STOP, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_BLUETOOTH_STOP, value)
+    @JvmStatic var gpsStart: String
+        get() =  pref.getString(MOST_RECENT_GPS_START, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_GPS_START, value)
+    @JvmStatic var gpsStop: String
+        get() =  pref.getString(MOST_RECENT_GPS_STOP, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_GPS_STOP, value)
+    @JvmStatic var gyroscopeStart: String
+        get() =  pref.getString(MOST_RECENT_GYROSCOPE_START, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_GYROSCOPE_START, value)
+    @JvmStatic var gyroscopeStop: String
+        get() =  pref.getString(MOST_RECENT_GYROSCOPE_STOP, "")?: ""
+        set(value) =  putCommit(MOST_RECENT_GYROSCOPE_STOP, value)
+
+
+
     /*######################################################################################
     ##################################### Passwords ########################################
     ######################################################################################*/
+
     /**Checks that an input matches valid password requirements. (this only checks length)
      * Throws up an alert notifying the user if the password is not valid.
      * @param password

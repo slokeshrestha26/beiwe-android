@@ -14,6 +14,7 @@ import org.beiwe.app.printe
 import org.beiwe.app.printi
 import org.beiwe.app.storage.PersistentData
 import org.beiwe.app.storage.TextFileManager
+import java.util.Date
 import java.util.Locale
 
 /* Notes/observation on Location Services:
@@ -50,6 +51,8 @@ class GPSListener(private val appContext: Context) : LocationListener {
     @SuppressLint("MissingPermission")
     @Synchronized
     fun turn_on() {
+        PersistentData.gpsStart = Date(System.currentTimeMillis()).toLocaleString()
+
         val coarsePermissible = checkAccessCoarseLocation(appContext)
         val finePermissible = checkAccessFineLocation(appContext)
 
@@ -132,6 +135,7 @@ class GPSListener(private val appContext: Context) : LocationListener {
     /** Disable all location updates  */
     @Synchronized
     fun turn_off() {
+        PersistentData.gpsStop = Date(System.currentTimeMillis()).toLocaleString()
         // pretty confident this cannot fail.
         locationManager.removeUpdates(this)
         running = false
