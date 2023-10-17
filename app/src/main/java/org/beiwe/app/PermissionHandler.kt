@@ -335,7 +335,7 @@ object PermissionHandler {
 
         // a bunch of app state reporting
         permissions.put("most_recent_activity_OnCreate", PersistentData.appOnCreateActivity)
-        permissions.put("most_recent_activity_OnRessume", PersistentData.appOnResumeActivity)
+        permissions.put("most_recent_activity_OnResume", PersistentData.appOnResumeActivity)
         permissions.put("most_recent_activity_OnPause", PersistentData.appOnPauseActivity)
         permissions.put("most_recent_activity_OnServiceBound", PersistentData.appOnServiceBoundActivity)
         permissions.put("most_recent_activity_OnServiceUnBound", PersistentData.appOnServiceUnboundActivity)

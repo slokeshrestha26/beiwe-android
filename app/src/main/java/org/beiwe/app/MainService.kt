@@ -1,5 +1,3 @@
-@file:Suppress("LocalVariableName")
-
 package org.beiwe.app
 
 import android.app.*
@@ -53,6 +51,10 @@ const val BLLUETOOTH_MESSAGE_1 = "bluetooth Failure, device should not have gott
 const val BLLUETOOTH_MESSAGE_2 = "Device does not support bluetooth LE, bluetooth features disabled."
 const val FCM_ERROR_MESSAGE = "Unable to get FCM token, will not be able to receive push notifications."
 
+// We were getting some weird null intent exceptions with invalid stack traces pointing to line 2 of
+// this file. Line 2 is either an import, a package declaration, an error suppression annotation, or
+// blank. All overridden functions in this file that have non-primitive variables (usually intents)
+// must be declared as optional and handle that null case (usually we ignore it).
 
 class MainService : Service() {
     // the various listeners for sensor data
@@ -327,10 +329,12 @@ class MainService : Service() {
      * Note: every condition has a return statement at the end; this is because the trigger survey
      * notification action requires a fairly expensive dive into PersistantData JSON unpacking. */
     private val timerReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(applicationContext: Context, intent: Intent) {
+        override fun onReceive(applicationContext: Context, intent: Intent?) {
             Log.e("BackgroundService", "Received broadcast: $intent")
-            // Don't change this log to have a "correct" comma.
             TextFileManager.writeDebugLogStatement("Received Broadcast: " + intent.toString())
+
+            if (intent == null)
+                return
 
             val broadcastAction = intent.action
             // printd("run_all_app_logic - timerReceiver")
@@ -728,7 +732,7 @@ class MainService : Service() {
 	############## code related to onStartCommand and binding to an activity ###################
 	##########################################################################################*/
 
-    override fun onBind(arg0: Intent): IBinder? {
+    override fun onBind(arg0: Intent?): IBinder? {
         return BackgroundServiceBinder()
     }
 
@@ -745,7 +749,7 @@ class MainService : Service() {
 	##############################################################################*/
 
     /** The BackgroundService is meant to be all the time, so we return START_STICKY  */
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Log.d("BackgroundService onStartCommand", "started with flag " + flags );
         TextFileManager.writeDebugLogStatement(
                 System.currentTimeMillis().toString() + " started with flag " + flags)
@@ -788,14 +792,14 @@ class MainService : Service() {
     }
 
     // the rest of these are ~identical
-    override fun onTaskRemoved(rootIntent: Intent) {
+    override fun onTaskRemoved(rootIntent: Intent?) {
         // Log.d("BackroundService onTaskRemoved", "onTaskRemoved called with intent: " + rootIntent.toString() );
         TextFileManager.writeDebugLogStatement("onTaskRemoved called with intent: $rootIntent")
         PersistentData.serviceOnTaskRemoved = Date(System.currentTimeMillis()).toLocaleString()
         restartService()
     }
 
-    override fun onUnbind(intent: Intent): Boolean {
+    override fun onUnbind(intent: Intent?): Boolean {
         // Log.d("BackroundService onUnbind", "onUnbind called with intent: " + intent.toString() );
         TextFileManager.writeDebugLogStatement("onUnbind called with intent: $intent")
         PersistentData.serviceOnUnbind = Date(System.currentTimeMillis()).toLocaleString()
