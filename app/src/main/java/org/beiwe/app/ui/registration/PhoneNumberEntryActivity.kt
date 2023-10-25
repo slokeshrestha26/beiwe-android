@@ -67,7 +67,14 @@ class PhoneNumberEntryActivity : RunningBackgroundServiceActivity() {
         }
         PersistentData.setPrimaryCareNumber(primary)
         PersistentData.setPasswordResetNumber(reset)
-        startActivity(Intent(applicationContext, ConsentFormActivity::class.java))
+
+        // if the consent form is empty, skip the consent form activity
+        if (PersistentData.getConsentFormText() == "")
+            ConsentFormActivity.consent(this)
+        else
+            startActivity(Intent(applicationContext, ConsentFormActivity::class.java))
+
+
         finish()
     }
 }

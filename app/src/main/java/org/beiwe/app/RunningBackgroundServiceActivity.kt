@@ -42,7 +42,7 @@ open class RunningBackgroundServiceActivity : AppCompatActivity() {
      * relies on the BackgroundService is always tied to UI elements, reducing the chance of
      * a null backgroundService variable to essentially zero.  */
     @JvmField
-    protected var mainService: MainService? = null
+    var mainService: MainService? = null
 
     // we need access to this inside mainServiceConnection
     val localClassNameHandle: String get() = this.localClassName

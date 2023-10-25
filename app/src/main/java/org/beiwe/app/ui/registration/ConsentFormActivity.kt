@@ -1,5 +1,6 @@
 package org.beiwe.app.ui.registration
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
@@ -37,21 +38,28 @@ class ConsentFormActivity : RunningBackgroundServiceActivity() {
     }
 
     fun consentButton(view: View?) {
-        PersistentData.setIsRegistered(true)
-        PersistentData.loginOrRefreshLogin()
+        consent(this)
+    }
 
-        // Download the survey questions and schedule the surveys
-        SurveyDownloader.downloadSurveys(applicationContext, null)
+    companion object {
+        @JvmStatic
+        fun consent(activity: Activity) {
+            PersistentData.setIsRegistered(true)
+            PersistentData.loginOrRefreshLogin()
 
-        // Create new data files, these will now have a patientID prepended to those files
-        TextFileManager.initialize(applicationContext)
-        TextFileManager.makeNewFilesForEverything()
+            // Download the survey questions and schedule the surveys
+            SurveyDownloader.downloadSurveys(activity.applicationContext, null)
 
-        //This is important.  we need to start timers...
-        mainService!!.doSetup()
+            // Create new data files, these will now have a patientID prepended to those files
+            TextFileManager.initialize(activity.applicationContext)
+            TextFileManager.makeNewFilesForEverything()
 
-        // Start the Main Screen Activity, destroy this activity
-        startActivity(Intent(applicationContext, LoadingActivity::class.java))
-        finish()
+            //This is important.  we need to start timers...
+            (activity as RunningBackgroundServiceActivity).mainService!!.doSetup()
+
+            // Start the Main Screen Activity, destroy this activity
+            activity.startActivity(Intent(activity.applicationContext, LoadingActivity::class.java))
+            activity.finish()
+        }
     }
 }
