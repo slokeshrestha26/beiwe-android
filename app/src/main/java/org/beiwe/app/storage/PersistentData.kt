@@ -102,6 +102,7 @@ const val MOST_RECENT_GPS_STOP = "most_recent_gps_stop"
 const val MOST_RECENT_GYROSCOPE_START = "most_recent_gyroscope_start"
 const val MOST_RECENT_GYROSCOPE_STOP = "most_recent_gyroscope_stop"
 
+const val REGISTRATION_PHONE_NUMBER_EVER_PROMPTED = "registration_phone_number_ever_prompted"
 
 /*#################################################################################################
 ################################### Initializing and Editing ######################################
@@ -136,6 +137,11 @@ object PersistentData {
         editor.commit()
         // return True if it changed
         return if (prior_value == null) true else prior_value != b
+    }
+    // we can't return that boolean in setters, any return value is invalid.
+    @JvmStatic fun _putCommit(name: String, b: Boolean) {
+        editor.putBoolean(name, b)
+        editor.commit()
     }
     @JvmStatic fun putCommit(name: String, l: Long) {
         editor.putLong(name, l)
@@ -263,7 +269,9 @@ object PersistentData {
         get() =  pref.getString(MOST_RECENT_GYROSCOPE_STOP, "")?: ""
         set(value) =  putCommit(MOST_RECENT_GYROSCOPE_STOP, value)
 
-
+    @JvmStatic var registrationPhoneNumberEverPrompted: Boolean
+        get() =  pref.getBoolean(REGISTRATION_PHONE_NUMBER_EVER_PROMPTED, false)
+        set(value) = _putCommit(REGISTRATION_PHONE_NUMBER_EVER_PROMPTED, value)
 
     /*######################################################################################
     ##################################### Passwords ########################################

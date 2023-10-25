@@ -32,6 +32,8 @@ object PermissionHandler {
         permissionMessages[Manifest.permission.READ_CALL_LOG] = R.string.permission_read_call_log
         permissionMessages[Manifest.permission.READ_CONTACTS] = R.string.permission_read_contacts
         permissionMessages[Manifest.permission.READ_PHONE_STATE] = R.string.permission_read_phone_state
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            permissionMessages[Manifest.permission.READ_PHONE_NUMBERS] = R.string.permission_read_phone_state
         permissionMessages[Manifest.permission.RECEIVE_BOOT_COMPLETED] = R.string.permission_receive_boot_completed
         permissionMessages[Manifest.permission.RECORD_AUDIO] = R.string.permission_record_audio
         permissionMessages[Manifest.permission.ACCESS_COARSE_LOCATION] = R.string.permission_access_coarse_location

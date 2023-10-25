@@ -56,7 +56,6 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
     var self: RegisterActivity? = null  // what on earth is this doing
 
     // state flags
-    private var promptIsActive = false
     private var aboutToResetFalseActivityReturn = false
     private var activityNotVisible = false
 
@@ -163,16 +162,25 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         // This used to be in an else block, its idempotent and we appear to have been having
         // problems with it not having been run.
         initialize(applicationContext)
+
+        // edge case where the app resuming multiple times during permission prompting.
         if (aboutToResetFalseActivityReturn) {
             aboutToResetFalseActivityReturn = false
             return
         }
 
+        // if the app has ever promted for this permission, we can check if the user has denied it.
+        // .... unfortunately it can also be wrong at least within the context of uninstalling and
+        // running the app very frequently, i.e. during debugging. Hypothesis is that that the
+        // detail is either not cleared out correctly at un/install time. The prompt still Functions
+        // correctly in the case where we have uninstalled, so the exact functionality of
+        // shouldShowRequestPermissionRationale is not a boolean "will it display if I call it".
+        // So, me manually remember inside showPrePermissionAlert....
+        // val everPrompted = shouldShowRequestPermissionRationale(READ_PHONE_NUMBERS_PERMISSION)
+
         // We ~need access to the phone number, the exact permission is Android version dependant.
-        if (!checkAccessReadPhoneNumbers(applicationContext) &&
-                shouldShowRequestPermissionRationale(Manifest.permission.READ_PHONE_NUMBERS)) {
+        if (!checkAccessReadPhoneNumbers(applicationContext))
             showPrePermissionAlert(this)
-        }
     }
 
     override fun onPause() {
@@ -182,11 +190,10 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
 
     // set up and display our prompt, which then prompts the user for permissions when you dismiss it
     fun showPrePermissionAlert(activity: Activity) {
-        // maybe we had[?] a bug where this gets called multiple times.
-        if (promptIsActive)
+        // In my opinion the Android behavior that causes onResume to be called repeatedly is a bug.
+        if (PersistentData.registrationPhoneNumberEverPrompted)
             return
-
-        promptIsActive = true
+        PersistentData.registrationPhoneNumberEverPrompted = true
 
         // The Prompt - *jarring chord*
         val builder = AlertDialog.Builder(activity)
@@ -194,7 +201,6 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         builder.setMessage(R.string.permission_registration_read_sms_alert)
         builder.setOnDismissListener {
             activity.requestPermissions(arrayOf(READ_PHONE_NUMBERS_PERMISSION), PERMISSION_CALLBACK)
-            promptIsActive = false
         }
         // the okay button - defined because we need to not crash
         builder.setPositiveButton(activity.getString(R.string.alert_ok_button_text)) { arg0, arg1 -> }
@@ -234,7 +240,8 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                             PostRequest.makeParameter("brand", brand) +
                             PostRequest.makeParameter("manufacturer", manufacturer) +
                             PostRequest.makeParameter("model", model) +
-                            PostRequest.makeParameter("product", product) + PostRequest.makeParameter("beiwe_version", beiweVersion)
+                            PostRequest.makeParameter("product", product) +
+                            PostRequest.makeParameter("beiwe_version", beiweVersion)
                     responseCode = PostRequest.httpRegister(parameters, url)
 
                     // If we are not using anonymized hashing, resubmit the phone identifying information
