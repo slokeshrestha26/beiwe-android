@@ -77,12 +77,6 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
         newPasswordInput = findViewById<View>(R.id.registerNewPasswordInput) as EditText
         confirmNewPasswordInput = findViewById<View>(R.id.registerConfirmNewPasswordInput) as EditText
 
-        serverUrlInput!!.setText("staging.beiwe.org")
-        userIdInput!!.setText("yyhwj5oh")
-        tempPasswordInput!!.setText("      ")
-        newPasswordInput!!.setText("      ")
-        confirmNewPasswordInput!!.setText("      ")
-
         val textFieldKeyboard = TextFieldKeyboard(applicationContext)
         textFieldKeyboard.makeKeyboardBehave(serverUrlInput)
         textFieldKeyboard.makeKeyboardBehave(userIdInput)
