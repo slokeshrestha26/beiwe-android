@@ -224,19 +224,16 @@ android {
             dimension "version"
             manifestPlaceholders = [appName: "Beiwe", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "false")
-            buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'true')
         }
         googlePlayStore {
             dimension "version"
             manifestPlaceholders = [appName: "Beiwe2", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", 'true')
-            buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'false')
         }
         commStatsCustomUrl {
             dimension "version"
             manifestPlaceholders = [appName: "Beiwe", appNameSuffix: "-test"]
             buildConfigField("boolean", "CUSTOMIZABLE_SERVER_URL", "true")
-            buildConfigField("boolean", "READ_SMS_AND_PHONE_CALL_STATS", 'true')
         }
     }
     useLibrary "org.apache.http.legacy"

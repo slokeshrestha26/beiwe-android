@@ -278,11 +278,11 @@ object PermissionHandler {
             if (!checkAccessReadPhoneNumbers(context)) return Manifest.permission.READ_PHONE_NUMBERS
         }
 
-        if (PersistentData.getCallsEnabled() && BuildConfig.READ_SMS_AND_PHONE_CALL_STATS) {
+        if (PersistentData.getCallsEnabled()) {
             if (!checkAccessReadPhoneState(context)) return Manifest.permission.READ_PHONE_STATE
             if (!checkAccessReadCallLog(context)) return Manifest.permission.READ_CALL_LOG
         }
-        if (PersistentData.getTextsEnabled() && BuildConfig.READ_SMS_AND_PHONE_CALL_STATS) {
+        if (PersistentData.getTextsEnabled()) {
             if (!checkAccessReadContacts(context)) return Manifest.permission.READ_CONTACTS
             if (!checkAccessReadSms(context)) return Manifest.permission.READ_SMS
             if (!checkAccessReceiveMms(context)) return Manifest.permission.RECEIVE_MMS
