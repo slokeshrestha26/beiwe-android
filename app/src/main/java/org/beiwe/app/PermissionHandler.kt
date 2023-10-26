@@ -294,9 +294,11 @@ object PermissionHandler {
             if (!checkAccessRecordAudio(context)) return Manifest.permission.RECORD_AUDIO
         }
 
-        // The phone call permission is invariant, it is required for all studies in order for the
-        // call clinician functionality to work
-        if (!checkAccessCallPhone(context)) return Manifest.permission.CALL_PHONE
+        // The phone call permission is dependent on the presence of either phone number being present
+        if ((PersistentData.getCallClinicianButtonEnabled() || PersistentData.getCallResearchAssistantButtonEnabled())
+                && !checkAccessCallPhone(context)) {
+            return Manifest.permission.CALL_PHONE
+        }
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {

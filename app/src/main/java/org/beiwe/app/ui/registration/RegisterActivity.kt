@@ -268,10 +268,14 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
                     super.onPostExecute(arg)
                     if (responseCode == 200) {
                         PersistentData.setPassword(newPassword)
-                        if (PersistentData.getCallClinicianButtonEnabled() || PersistentData.getCallResearchAssistantButtonEnabled())
+                        if (PersistentData.getCallClinicianButtonEnabled() || PersistentData.getCallResearchAssistantButtonEnabled()) {
                             activity.startActivity(Intent(activity.applicationContext, PhoneNumberEntryActivity::class.java))
-                        else
-                            activity.startActivity(Intent(activity.applicationContext, ConsentFormActivity::class.java))
+                        } else {
+                            if (PersistentData.getConsentFormText() == "")
+                                ConsentFormActivity.consent(activity)
+                            else
+                                activity.startActivity(Intent(activity.applicationContext, ConsentFormActivity::class.java))
+                        }
                         activity.finish()
                     } else
                         AlertsManager.showAlert(responseCode, currentActivity.getString(R.string.couldnt_register), currentActivity)

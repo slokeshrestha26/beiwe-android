@@ -74,7 +74,6 @@ class PhoneNumberEntryActivity : RunningBackgroundServiceActivity() {
         else
             startActivity(Intent(applicationContext, ConsentFormActivity::class.java))
 
-
         finish()
     }
 }
