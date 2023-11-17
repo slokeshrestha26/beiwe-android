@@ -139,9 +139,9 @@ Version history:
 79: 3.5.8 - Adds a bunch of app state tracking info.
 80: 3.5.9 - Potential bug fix for null intents that may have been causing random, frequent crashes.
     Power state listener ported to kotlin (with a similar fix to a similar potential bug).
-81: 2 ~features - no more enforcement of phone number permission, consent page now accepts empty
+81: 3.5.10 - 2 ~features - no more enforcement of phone number permission, consent page now accepts empty
     string, we no longer require phone permissions as an invariant post-registration permission either.
-
+82: 3.5.11 - Added USE_EXACT_ALARM manifest permission because it crashes without it on Android 14
 
 TODO: we are stalled on the formatting for the hardware information for gps, accel, gyro.
    This probably requires a new data stream.
@@ -169,8 +169,8 @@ android {
         minSdkVersion 23
         multiDexEnabled true
         targetSdkVersion 33
-        versionCode 81       //TODO: update this Beiwe version code for new releases
-        versionName '3.5.10'  //TODO: update this Beiwe version number for new releases
+        versionCode 82       //TODO: update this Beiwe version code for new releases
+        versionName '3.5.11'  //TODO: update this Beiwe version number for new releases
         setProperty("archivesBaseName", "Beiwe-$versionName")
     }
 

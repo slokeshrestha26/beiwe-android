@@ -27,6 +27,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
 
     <!-- Permissions regarding phone calls -->
+    <!-- ignore the error about requiring telephony hardware, we don't, its wholly optional -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <!-- Permission used in android 6+ for being whitelisted for app standby -->
@@ -35,8 +36,9 @@
     <!-- Power management and monitoring, not sure where this would be used... -->
     <uses-permission android:name="android.permission.BATTERY_STATS" />
 
-    <!-- new, required for android 12 -->
+    <!-- new, required for android 12 for Schedule, 14 suddenly required Use or would crash -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <!-- required on android 13 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
