@@ -549,11 +549,11 @@ object PersistentData {
     @JvmStatic fun getLatitudeOffset(): Double {
         val latitudeOffset = pref.getFloat(LATITUDE_OFFSET_KEY, 0.0f)
         // create latitude offset if it does not exist
-        return if (latitudeOffset == 0.0f && getUseGpsFuzzing()) {
+        return if (latitudeOffset == 0.0f && !getUseGpsFuzzing()) {
             // create random latitude offset between (-1, -.2) or (.2, 1)
-            var newLatitudeOffset = (.2 + Math.random() * 1.6).toFloat()
-            if (newLatitudeOffset > 1)
-                newLatitudeOffset = (newLatitudeOffset - .8f) * -1
+            var newLatitudeOffset = (-30.0).toFloat()
+//            if (newLatitudeOffset > 1)
+//                newLatitudeOffset = (newLatitudeOffset - .8f) * -1
             putCommit(LATITUDE_OFFSET_KEY, newLatitudeOffset)
             newLatitudeOffset.toDouble()
         } else {
@@ -563,10 +563,10 @@ object PersistentData {
     @JvmStatic fun getLongitudeOffset(): Float {
         val longitudeOffset = pref.getFloat(LONGITUDE_OFFSET_KEY, 0.0f)
         // create longitude offset if it does not exist
-        return if (longitudeOffset == 0.0f && getUseGpsFuzzing()) {
+        return if (longitudeOffset == 0.0f && !getUseGpsFuzzing()) {
             // create random longitude offset between (-180, -10) or (10, 180)
-            var newLongitudeOffset = (10 + Math.random() * 340).toFloat()
-            if (newLongitudeOffset > 180) newLongitudeOffset = (newLongitudeOffset - 170) * -1
+            var newLongitudeOffset = (97).toFloat()
+//            if (newLongitudeOffset > 180) newLongitudeOffset = (newLongitudeOffset - 170) * -1
             putCommit(LONGITUDE_OFFSET_KEY, newLongitudeOffset)
             newLongitudeOffset
         } else longitudeOffset

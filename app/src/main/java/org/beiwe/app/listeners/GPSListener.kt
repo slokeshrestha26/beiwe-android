@@ -153,10 +153,9 @@ class GPSListener(private val appContext: Context) : LocationListener {
 
         // we record the system boot time once and use that as a reference.
         val javaTimeCode = DeviceInfo.boot_time_milli + (location.elapsedRealtimeNanos / 1_000_000)
-
         // Latitude and longitude offset should be 0 unless GPS fuzzing is enabled
         val latitude = location.latitude + PersistentData.getLatitudeOffset()
-        val longitude = (location.longitude + PersistentData.getLongitudeOffset() + 180.0) % 360 - 180.0
+        val longitude = location.longitude + PersistentData.getLongitudeOffset()
         val data = (
                 javaTimeCode.toString() + TextFileManager.DELIMITER
                     + String.format(Locale.US, "%.16f", latitude) + TextFileManager.DELIMITER
