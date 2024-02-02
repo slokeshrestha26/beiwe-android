@@ -137,16 +137,20 @@ class RegisterActivity : RunningBackgroundServiceActivity() {
 
     /** Provide a valid value for a hashed device phone number. */
     private val phoneNumber: String
-        get() {
-            val phoneNumberValue = try {
-                // If the participant accepts the phone permission checks, then this command will succeed
-                (this.getSystemService(TELEPHONY_SERVICE) as TelephonyManager).line1Number
-            } catch (e: SecurityException) {
-                printe("RegisterActivity", "SecurityException in phoneNumber getter")
-                ""  //  <--  that's the return value
-            }
-            return EncryptionEngine.hashPhoneNumber(phoneNumberValue)
-        }
+        get(){
+        return "1234567890"
+    }
+    // revert this once you
+//        get() {
+//            val phoneNumberValue = try {
+//                // If the participant accepts the phone permission checks, then this command will succeed
+//                (this.getSystemService(TELEPHONY_SERVICE) as TelephonyManager).line1Number
+//            } catch (e: SecurityException) {
+//                printe("RegisterActivity", "SecurityException in phoneNumber getter")
+//                ""  //  <--  that's the return value
+//            }
+//            return EncryptionEngine.hashPhoneNumber(phoneNumberValue)
+//        }
 
     override fun onResume() {
         // Log.i("reg", "onResume");
